@@ -10,15 +10,17 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            //Картинки
-            int pictures;
-            int rowPictures = 3;
+            string enterName;
+            string enterSurname;
 
-            Console.Write("Сколько картинок должно быть в вашем альбоме: ");
-            pictures = Convert.ToInt32(Console.ReadLine());
-            
-            Console.Write($"Картинок всего: {pictures / rowPictures}\n");
-            Console.Write($"Картинок сверх нормы: {pictures % rowPictures} ");
+            string userName = "Wick";
+            string userSurname = "John";
+
+            Console.Write($"{enterName = userName} ");
+            Console.Write($"{enterSurname = userSurname}\n");
+
+            Console.Write($"{enterName = userSurname} ");
+            Console.Write($"{enterSurname = userName}");
             Console.ReadLine();
         }
     }
