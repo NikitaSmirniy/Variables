@@ -10,24 +10,15 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            string name;
-            string age;
-            string weight;
-            string work;
+            //Картинки
+            int pictures;
+            int rowPictures = 3;
 
-            Console.Write("Как вас зовут: ");
-            name = Console.ReadLine();
-
-            Console.Write("Сколько вам лет: ");
-            age = Console.ReadLine();
-
-            Console.Write("Ваш вес: ");
-            weight = Console.ReadLine();
-
-            Console.Write("Кем вы работаете: ");
-            work = Console.ReadLine();
-
-            Console.WriteLine($"Вас зовут {name}, вам {age} года, вы весите {weight} килограммов и работаете {work}");
+            Console.Write("Сколько картинок должно быть в вашем альбоме: ");
+            pictures = Convert.ToInt32(Console.ReadLine());
+            
+            Console.Write($"Картинок всего: {pictures / rowPictures}\n");
+            Console.Write($"Картинок сверх нормы: {pictures % rowPictures} ");
             Console.ReadLine();
         }
     }
