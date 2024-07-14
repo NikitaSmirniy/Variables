@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,25 +10,25 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            int appleAmount, applePrice;
-            float radius, speed;
-            bool isOpen, haveApple;
-            string appleAmountText, applePriceText;
-            double weight = 0.25;
-            char firstLetterAlphabet = 'A';
+            string name;
+            string age;
+            string weight;
+            string work;
 
-            appleAmount = 3;
-            applePrice = Convert.ToInt32(weight) * appleAmount;
+            Console.Write("Как вас зовут: ");
+            name = Console.ReadLine();
 
-            radius = 2;
-            speed = 13.125f;
+            Console.Write("Сколько вам лет: ");
+            age = Console.ReadLine();
 
-            isOpen = true;
-            haveApple = appleAmount > 0;
+            Console.Write("Ваш вес: ");
+            weight = Console.ReadLine();
 
-            appleAmountText = "Apple: " + appleAmount;
-            applePriceText = applePrice.ToString();
+            Console.Write("Кем вы работаете: ");
+            work = Console.ReadLine();
 
+            Console.WriteLine($"Вас зовут {name}, вам {age} года, вы весите {weight} килограммов и работаете {work}");
+            Console.ReadLine();
         }
     }
 }
