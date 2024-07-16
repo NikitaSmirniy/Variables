@@ -10,34 +10,15 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            string userName = "Wick";
-            string userSurname = "John";
-            string temp;
+            int humanAmount;
+            int receptionTime = 10;
+            int waitingTime;
 
-            string redCup = "tea";
-            string whiteCup = "capuchino";
+            Console.Write("Сколько людей в очереди? ");
+            humanAmount = Convert.ToInt32(Console.ReadLine());
 
-            Console.Write($"{userName} ");
-            Console.Write($"{userSurname}\n");
-
-            temp = userName;
-            userName = userSurname;
-            userSurname = temp;
-
-            Console.Write($"{userName} ");
-            Console.Write($"{userSurname} ");
-            Console.ReadLine();
-
-            Console.Clear();
-            Console.Write($"{redCup} ");
-            Console.Write($"{whiteCup}\n");
-
-            temp = redCup;
-            redCup = whiteCup;
-            whiteCup = temp;
-
-            Console.Write($"{redCup} ");
-            Console.Write($"{whiteCup} ");
+            waitingTime = humanAmount * receptionTime;
+            Console.Write($"Вы должны отстоять в очереди {waitingTime} минут!");
             Console.ReadLine();
         }
     }
