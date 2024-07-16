@@ -10,17 +10,23 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            string enterName;
-            string enterSurname;
+            int gold;
+            int diamond;
+            int diamondUnitPrice = 15;
+            bool isAbleToPay;
 
-            string userName = "Wick";
-            string userSurname = "John";
+            Console.WriteLine("Добрый день, сегодня кристалы стоят: " + diamondUnitPrice + " единиц золота");
+            Console.Write("Сколько единиц золота у вас имеется: ");
+            gold = Convert.ToInt32(Console.ReadLine());
 
-            Console.Write($"{enterName = userName} ");
-            Console.Write($"{enterSurname = userSurname}\n");
+            Console.WriteLine("сколько кристалов вы хотите приобрести: ");
+            diamond = Convert.ToInt32(Console.ReadLine());
+            isAbleToPay = gold >= diamond * diamondUnitPrice;
+            diamond *= Convert.ToInt32(isAbleToPay);
+            gold -= diamond * diamondUnitPrice;
 
-            Console.Write($"{enterName = userSurname} ");
-            Console.Write($"{enterSurname = userName}");
+            Console.Clear();
+            Console.Write($"Покупка прошла успешно, сейчас в вашей сумке {diamond} крисатлов и {gold} золота");
             Console.ReadLine();
         }
     }
