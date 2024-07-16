@@ -12,13 +12,19 @@ namespace ConsoleApp1
         {
             int humanAmount;
             int receptionTime = 10;
-            int waitingTime;
+            int minutes;
+            int houres;
+            int totalMinutes;
+            int minutesInHour = 60;
 
             Console.Write("Сколько людей в очереди? ");
             humanAmount = Convert.ToInt32(Console.ReadLine());
+            
+            totalMinutes = humanAmount * receptionTime;
+            houres = totalMinutes / minutesInHour;
+            minutes = totalMinutes % minutesInHour;
 
-            waitingTime = humanAmount * receptionTime;
-            Console.Write($"Вы должны отстоять в очереди {waitingTime} минут!");
+            Console.Write($"Вы должны отстоять в очереди {houres} часов и {minutes} минут!");
             Console.ReadLine();
         }
     }
