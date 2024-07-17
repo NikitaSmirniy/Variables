@@ -11,13 +11,14 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
             string userInput = "";
-            string checkExit = "exit";
+            string commandString = "exit";
             
-            while(userInput != checkExit)
+            while(userInput != commandString)
             {
-                Console.Write("Messag\nВведите exit, что-бы выйти\n");
+                Console.Write($"Messag\nВведите {commandString}, что-бы выйти\n");
                 userInput = Console.ReadLine();
             }
+
             Console.ReadLine();
         }
     }
