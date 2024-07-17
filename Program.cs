@@ -10,18 +10,13 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            string message;
-            int numberOfRepiting;
-
-            Console.Write("Какое сообщение вы хотите вывести ? ");
-            message = Console.ReadLine();
-
-            Console.Write("Сколько раз должно вывестись сообщение? ");
-            numberOfRepiting = Convert.ToInt32(Console.ReadLine());
-
-            for (int i = 0; i < numberOfRepiting; i++)
+            string userInput = "";
+            string checkExit = "exit";
+            
+            while(userInput != checkExit)
             {
-                Console.Write(message + "\n");
+                Console.Write("Messag\nВведите exit, что-бы выйти\n");
+                userInput = Console.ReadLine();
             }
             Console.ReadLine();
         }
