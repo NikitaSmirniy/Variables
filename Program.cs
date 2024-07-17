@@ -10,21 +10,19 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            int humanAmount;
-            int receptionTime = 10;
-            int minutes;
-            int houres;
-            int totalMinutes;
-            int minutesInHour = 60;
+            string message;
+            int numberOfRepiting;
 
-            Console.Write("Сколько людей в очереди? ");
-            humanAmount = Convert.ToInt32(Console.ReadLine());
-            
-            totalMinutes = humanAmount * receptionTime;
-            houres = totalMinutes / minutesInHour;
-            minutes = totalMinutes % minutesInHour;
+            Console.Write("Какое сообщение вы хотите вывести ? ");
+            message = Console.ReadLine();
 
-            Console.Write($"Вы должны отстоять в очереди {houres} часов и {minutes} минут!");
+            Console.Write("Сколько раз должно вывестись сообщение? ");
+            numberOfRepiting = Convert.ToInt32(Console.ReadLine());
+
+            for (int i = 0; i < numberOfRepiting; i++)
+            {
+                Console.Write(message + "\n");
+            }
             Console.ReadLine();
         }
     }
