@@ -10,15 +10,24 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            string userInput = "";
-            string commandString = "exit";
-            
-            while(userInput != commandString)
+            Random random = new Random();
+            int number;
+            int fractions1 = 3;
+            int fractions2 = 5;
+            int sum = 0;
+
+            number = random.Next(3, 101);
+            Console.WriteLine(number);
+
+            for (int i = 0; i <= number; i++)
             {
-                Console.Write($"Messag\nВведите {commandString}, что-бы выйти\n");
-                userInput = Console.ReadLine();
+                if(i % fractions1 == 0 || i % fractions2 == 0)
+                {
+                    sum += i;
+                }
             }
 
+            Console.WriteLine("Сумма чисел = " + sum);
             Console.ReadLine();
         }
     }
