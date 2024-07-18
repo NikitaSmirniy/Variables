@@ -10,24 +10,16 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            Random random = new Random();
-            int number;
-            int fractions1 = 3;
-            int fractions2 = 5;
-            int sum = 0;
+            int addNumber = 7;
+            int maximumNumber = 103;
 
-            number = random.Next(3, 101);
-            Console.WriteLine(number);
-
-            for (int i = 0; i <= number; i++)
+            // Используется цикл for потому-что так код выглядит более компактным, удобным в чтении и не нужно создавать ещё какие либо поля
+            // с переменными, как например пришлось бы это делать для работы с циклом while
+            for (int i = 5; i <= maximumNumber; i += addNumber)
             {
-                if(i % fractions1 == 0 || i % fractions2 == 0)
-                {
-                    sum += i;
-                }
+                Console.Write(i + "\n");
             }
 
-            Console.WriteLine("Сумма чисел = " + sum);
             Console.ReadLine();
         }
     }
