@@ -10,12 +10,12 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            int addNumber = 7;
+            int startNumber = 5;
+            int stepNumber = 7;
             int maximumNumber = 103;
 
-            // Используется цикл for потому-что так код выглядит более компактным, удобным в чтении и не нужно создавать ещё какие либо поля
-            // с переменными, как например пришлось бы это делать для работы с циклом while
-            for (int i = 5; i <= maximumNumber; i += addNumber)
+            // Используется цикл for потому-что так код выглядит более компактным и удобным в чтении
+            for (int i = startNumber; i <= maximumNumber; i += stepNumber)
             {
                 Console.Write(i + "\n");
             }
