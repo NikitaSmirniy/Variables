@@ -10,18 +10,6 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            float rublesInWallent;
-            float dollarsInWallent;
-            float euroInWallent;
-
-            float rubToUsd = 85, rubToEur = 92, usdToEur = 1.5f;
-            float exchangeCurrencyCount;
-
-            bool isOpen = true;
-            string userInput;
-
-            ConsoleColor color;
-
             const string CommandRubToUsd = "1";
             const string CommandRubToEur = "2";
             const string CommandUsdToRub = "3";
@@ -33,6 +21,21 @@ namespace ConsoleApp1
             const string CurrencyUsd = "Usd";
             const string CurrencyRub = "Rub";
             const string CurrencyEur = "Eur";
+
+            float rublesInWallent;
+            float dollarsInWallent;
+            float euroInWallent;
+
+            float rubToUsd = 85;
+            float rubToEur = 92;
+            float usdToEur = 1.5f;
+            float usdToRub = 85;
+            float eurToRub = 92;
+            float eurToUsd = 1.5f;
+            float exchangeCurrencyCount;
+
+            bool isOpen = true;
+            string userInput;
 
             Console.Write("Введите ваш балланс рублей: ");
             rublesInWallent = Convert.ToSingle(Console.ReadLine());
@@ -53,7 +56,7 @@ namespace ConsoleApp1
                 Console.Write($"Команда {CommandEurToUsd} сконвертировать валюту {CurrencyEur} в валюту {CurrencyUsd}\n");
                 Console.Write($"Команда {CommandExit} выйти из программы!\n\n");
 
-                Console.Write("Введите команду: ");
+                Console.Write("Введина команда: ");
                 userInput = Console.ReadLine();
 
                 switch (userInput)
@@ -100,7 +103,7 @@ namespace ConsoleApp1
                         if (dollarsInWallent >= exchangeCurrencyCount)
                         {
                             dollarsInWallent -= exchangeCurrencyCount;
-                            rublesInWallent += exchangeCurrencyCount * rubToUsd;
+                            rublesInWallent += exchangeCurrencyCount * usdToRub;
                         }
                         else
                         {
@@ -134,7 +137,7 @@ namespace ConsoleApp1
                         if (euroInWallent >= exchangeCurrencyCount)
                         {
                             euroInWallent -= exchangeCurrencyCount;
-                            rublesInWallent += exchangeCurrencyCount * rubToEur;
+                            rublesInWallent += exchangeCurrencyCount * eurToRub;
                         }
                         else
                         {
@@ -151,7 +154,7 @@ namespace ConsoleApp1
                         if (euroInWallent >= exchangeCurrencyCount)
                         {
                             euroInWallent -= exchangeCurrencyCount;
-                            dollarsInWallent += exchangeCurrencyCount * usdToEur;
+                            dollarsInWallent += exchangeCurrencyCount * eurToUsd;
                         }
                         else
                         {
@@ -172,10 +175,8 @@ namespace ConsoleApp1
 
                 Console.WriteLine($"\nВаш балланс рублей: {rublesInWallent}");
                 Console.WriteLine($"Ваш балланс долларов: {dollarsInWallent}");
-                Console.WriteLine($"Ваш балланс евро: {euroInWallent}\n");
+                Console.WriteLine($"Ваш балланс евро: {euroInWallent}");
             }
-
-            Console.ReadLine();
 
             Console.ReadLine();
         }
