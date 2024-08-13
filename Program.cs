@@ -10,6 +10,8 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
+            static void Main(string[] args)
+        {
             const string CommandRubToUsd = "1";
             const string CommandRubToEur = "2";
             const string CommandUsdToRub = "3";
@@ -26,11 +28,11 @@ namespace ConsoleApp1
             float dollarsInWallent;
             float euroInWallent;
 
-            float rubToUsd = 85;
-            float rubToEur = 92;
-            float usdToEur = 1.5f;
             float usdToRub = 85;
+            float rubToUsd = 1 / usdToRub;
             float eurToRub = 92;
+            float rubToEur = 1 / eurToRub;
+            float usdToEur = 1.5f;
             float eurToUsd = 1.5f;
             float exchangeCurrencyCount;
 
@@ -66,10 +68,10 @@ namespace ConsoleApp1
                         Console.Write("Сколько вы хотите обменять? ");
                         exchangeCurrencyCount = Convert.ToSingle(Console.ReadLine());
 
-                        if(rublesInWallent >= exchangeCurrencyCount)
+                        if (rublesInWallent >= exchangeCurrencyCount)
                         {
                             rublesInWallent -= exchangeCurrencyCount;
-                            dollarsInWallent += exchangeCurrencyCount / rubToUsd;
+                            dollarsInWallent += exchangeCurrencyCount * rubToUsd;
                         }
                         else
                         {
@@ -86,7 +88,7 @@ namespace ConsoleApp1
                         if (rublesInWallent >= exchangeCurrencyCount)
                         {
                             rublesInWallent -= exchangeCurrencyCount;
-                            euroInWallent += exchangeCurrencyCount / rubToEur;
+                            euroInWallent += exchangeCurrencyCount * rubToEur;
                         }
                         else
                         {
@@ -120,7 +122,7 @@ namespace ConsoleApp1
                         if (dollarsInWallent >= exchangeCurrencyCount)
                         {
                             dollarsInWallent -= exchangeCurrencyCount;
-                            euroInWallent += exchangeCurrencyCount / usdToEur;
+                            euroInWallent += exchangeCurrencyCount * usdToEur;
                         }
                         else
                         {
