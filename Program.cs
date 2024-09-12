@@ -16,9 +16,10 @@ namespace ConsoleApp1
             string userName;
 
             Console.Write("Введите ваш символ: ");
-            userSymbol = Convert.ToChar(Console.ReadLine());
+            userSymbol = Console.ReadKey(true).KeyChar;
+            Console.Write(userSymbol);
 
-            Console.Write("Введите ваше имя: ");
+            Console.Write("\nВведите ваше имя: ");
             userName = Console.ReadLine();
 
             for (int i = 0; i < userName.Length; i++)
