@@ -22,10 +22,28 @@ namespace ConsoleApp1
             Console.Write("\nВведите ваше имя: ");
             userName = Console.ReadLine();
 
+            Console.Write(userSymbol);
+
             for (int i = 0; i < userName.Length; i++)
             {
                 Console.Write(userSymbol);
             }
+
+            Console.Write(userSymbol);
+
+            Console.WriteLine();
+            Console.Write(userSymbol);
+            Console.Write(userName);
+            Console.WriteLine(userSymbol);
+
+            Console.Write(userSymbol);
+
+            for (int i = 0; i < userName.Length; i++)
+            {
+                Console.Write(userSymbol);
+            }
+
+            Console.Write(userSymbol);
 
             Console.ReadLine();
         }
