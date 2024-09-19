@@ -29,9 +29,8 @@ namespace ConsoleApp1
                 Console.Write(userSymbol);
             }
 
-            Console.Write(userSymbol);
+            Console.WriteLine(userSymbol);
 
-            Console.WriteLine();
             Console.Write(userSymbol);
             Console.Write(userName);
             Console.WriteLine(userSymbol);
