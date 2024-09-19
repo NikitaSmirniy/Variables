@@ -19,6 +19,7 @@ namespace ConsoleApp1
             while (isOpen)
             {
                 string userInput;
+                
                 Console.Write("Введите пароль: ");
                 userInput = Console.ReadLine();
 
