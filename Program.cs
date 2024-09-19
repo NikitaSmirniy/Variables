@@ -10,27 +10,36 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            static void Main(string[] args)
-        {
-            char userSymbol;
-            string userName;
-            string frame = "";
+            const string password = "T31Gg228";
+            const string secretMessage = "Top Secret";
 
-            Console.Write("Введите ваш символ: ");
-            userSymbol = Console.ReadKey(true).KeyChar;
-            Console.Write(userSymbol);
+            int numberAttempts = 3;
+            bool isOpen = true;
 
-            Console.Write("\nВведите ваше имя: ");
-            userName = Console.ReadLine();
-
-            for (int i = 0; i < userName.Length; i++)
+            while (isOpen)
             {
-                frame += userSymbol;
-            }
+                string userInput;
+                Console.Write("Введите пароль: ");
+                userInput = Console.ReadLine();
 
-            Console.WriteLine($"{userSymbol}{frame}{userSymbol}");
-            Console.WriteLine($"{userSymbol}{userName}{userSymbol}");
-            Console.WriteLine($"{userSymbol}{frame}{userSymbol}");
+                if (userInput == password)
+                {
+                    Console.WriteLine(secretMessage);
+                    isOpen = false;
+                }
+                else
+                {
+                    Console.WriteLine("Введён неверный пароль");
+                    numberAttempts--;
+                    Console.WriteLine($"осталось: {numberAttempts} попыток");
+
+                    if (numberAttempts <= 0)
+                    {
+                        isOpen = false;
+                        Console.WriteLine("Попытки закончились");
+                    }
+                }
+            }
 
             Console.ReadLine();
         }
