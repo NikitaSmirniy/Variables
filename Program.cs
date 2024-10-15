@@ -14,11 +14,11 @@ namespace ConsoleApp1
             const int MaximumNumber = 151;
 
             int randomNumber = new Random().Next(MinimumNumber, MaximumNumber);
-            int multiple = randomNumber;
+            int multiple = 0;
 
             Console.WriteLine($"кратные числа {randomNumber} от {MinimumNumber} до {MaximumNumber - 1}");
 
-            for (int i = 1; multiple < MaximumNumber; i++)
+            for (int i = 0; multiple < MaximumNumber; i++)
             {
                 multiple += randomNumber;
 
