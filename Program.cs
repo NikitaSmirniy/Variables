@@ -10,36 +10,16 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            const string password = "T31Gg228";
-            const string secretMessage = "Top Secret";
+            const int MinimumNumber = 50;
+            const int MaximumNumber = 151;
 
-            int numberAttempts = 3;
-            bool isOpen = true;
+            int number = new Random().Next(MinimumNumber, MaximumNumber);
 
-            while (isOpen)
+            Console.WriteLine($"кратные числа {number} от {MinimumNumber} до {MaximumNumber - 1}");
+
+            for (int i = number; i < MaximumNumber; i += number)
             {
-                string userInput;
-                
-                Console.Write("Введите пароль: ");
-                userInput = Console.ReadLine();
-
-                if (userInput == password)
-                {
-                    Console.WriteLine(secretMessage);
-                    isOpen = false;
-                }
-                else
-                {
-                    Console.WriteLine("Введён неверный пароль");
-                    numberAttempts--;
-                    Console.WriteLine($"осталось: {numberAttempts} попыток");
-
-                    if (numberAttempts <= 0)
-                    {
-                        isOpen = false;
-                        Console.WriteLine("Попытки закончились");
-                    }
-                }
+                Console.WriteLine(i);
             }
 
             Console.ReadLine();
