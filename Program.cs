@@ -13,13 +13,19 @@ namespace ConsoleApp1
             const int MinimumNumber = 50;
             const int MaximumNumber = 151;
 
-            int number = new Random().Next(MinimumNumber, MaximumNumber);
+            int randomNumber = new Random().Next(MinimumNumber, MaximumNumber);
+            int multiple = randomNumber;
 
-            Console.WriteLine($"кратные числа {number} от {MinimumNumber} до {MaximumNumber - 1}");
+            Console.WriteLine($"кратные числа {randomNumber} от {MinimumNumber} до {MaximumNumber - 1}");
 
-            for (int i = number; i < MaximumNumber; i += number)
+            for (int i = 1; multiple < MaximumNumber; i++)
             {
-                Console.WriteLine(i);
+                multiple += randomNumber;
+
+                if (multiple > MaximumNumber)
+                {
+                    Console.WriteLine(i);
+                }
             }
 
             Console.ReadLine();
