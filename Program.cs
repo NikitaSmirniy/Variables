@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleApp1
 {
@@ -19,15 +15,15 @@ namespace ConsoleApp1
 
             Console.WriteLine($"кратные числа {randomNumber} от {MinimumNumber} до {MaximumNumber}");
 
-            for (int i = 0; multiple < MaximumNumber; i++)
+            for (int i = 0; i <= MaximumNumber; i += randomNumber)
             {
-                multiple += randomNumber;
-
-                if (multiple > MaximumNumber)
+                if (i + randomNumber <= MaximumNumber)
                 {
-                    Console.WriteLine(i);
+                    multiple++;
                 }
             }
+
+            Console.WriteLine(multiple);
 
             Console.ReadLine();
         }
