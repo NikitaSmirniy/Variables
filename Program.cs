@@ -6,26 +6,23 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            int minRandomNumber = 10;
-            int maxRandomNumber = 25;
-            int minNumber = 50;
-            int maxNumber = 150;
+            int maximumDiapasonNumber = 100;
+            int randomNumber = new Random().Next(0, maximumDiapasonNumber + 1);
 
-            Random random = new Random();
-            int randomNumber = random.Next(minRandomNumber, maxRandomNumber + 1);
-            int mumberOfMultiples = 0;
+            int multipliedNumber = 2;
+            int degree = 2;
 
-            Console.WriteLine($"кратные числа {randomNumber} от {minNumber} до {maxNumber}");
+            Console.WriteLine(randomNumber);
 
-            for (int i = 0; i <= maxNumber; i += randomNumber)
+            for (int i = degree; multipliedNumber <= randomNumber; i++)
             {
-                if (i >= minNumber)
+                multipliedNumber *= degree;
+
+                if (multipliedNumber > randomNumber)
                 {
-                    mumberOfMultiples++;
+                    Console.WriteLine(i);
                 }
             }
-
-            Console.WriteLine(mumberOfMultiples);
 
             Console.ReadLine();
         }
