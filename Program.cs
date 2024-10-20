@@ -10,22 +10,21 @@ namespace ConsoleApp1
             int minDiapasonNumber = 2;
             int randomNumber = new Random().Next(minDiapasonNumber, maxDiapasonNumber + 1);
 
-            int multipliedNumber = 2;
-            int degree = 2;
+            int degree = 1;
+            int numberMultiplied = 2;
+            int multipliedNumber = minDiapasonNumber;
 
-            Console.WriteLine("Случайоне число: " + randomNumber);
+            Console.WriteLine("Случайное число: " + randomNumber);
 
-            for (int i = degree; multipliedNumber <= randomNumber; i++)
+            while (multipliedNumber <= randomNumber)
             {
-                multipliedNumber *= degree;
-                Console.WriteLine($"{multipliedNumber} = {degree}^{i}");
+                degree++;
+                multipliedNumber *= numberMultiplied;
 
-                if (multipliedNumber > randomNumber)
-                {
-                    Console.WriteLine($"Минимальная степень двойки превосходящая число {randomNumber} = {i}");
-                    break;
-                }
+                Console.WriteLine($"{multipliedNumber} = {numberMultiplied}^{degree}");
             }
+
+            Console.WriteLine($"Минимальная степень двойки превосходящая число {randomNumber} = {degree}");
 
             Console.ReadLine();
         }
