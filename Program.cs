@@ -6,21 +6,24 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            int maximumDiapasonNumber = 100;
-            int randomNumber = new Random().Next(0, maximumDiapasonNumber + 1);
+            int maxDiapasonNumber = 100;
+            int minDiapasonNumber = 2;
+            int randomNumber = new Random().Next(minDiapasonNumber, maxDiapasonNumber + 1);
 
             int multipliedNumber = 2;
             int degree = 2;
 
-            Console.WriteLine(randomNumber);
+            Console.WriteLine("Случайоне число: " + randomNumber);
 
             for (int i = degree; multipliedNumber <= randomNumber; i++)
             {
                 multipliedNumber *= degree;
+                Console.WriteLine($"{multipliedNumber} = {degree}^{i}");
 
                 if (multipliedNumber > randomNumber)
                 {
-                    Console.WriteLine(i);
+                    Console.WriteLine($"Минимальная степень двойки превосходящая число {randomNumber} = {i}");
+                    break;
                 }
             }
 
