@@ -6,12 +6,11 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            const string DamageAttack = "1";
-            const string FireBallReload = "2";
-            const string FireBallActive = "3";
-            const string Healing = "4";
+            const string CommandDamageAttack = "1";
+            const string CommandFireBallReload = "2";
+            const string CommandFireBallActive = "3";
+            const string CommandHealing = "4";
 
-            //Player Health & Mana & Damage Characteristics
             int playerMaxHealth = 100;
             int playerHealth = playerMaxHealth;
             int playerMaxMana = 100;
@@ -25,14 +24,12 @@ namespace ConsoleApp1
             int fireBallDamage = 300;
             bool isHaveFireBall = false;
 
-            //Enemy Health & Damage Characteristics
             int enemyMaxHealth = 1000;
             int enemyHealth = enemyMaxHealth;
             int enemyDamage;
             int enemyMinDamage = 20;
             int enemyMaxDamage = 40;
 
-            //Others
             Random random = new Random();
 
             while (playerHealth > 0 && enemyHealth > 0)
@@ -41,44 +38,48 @@ namespace ConsoleApp1
 
                 Console.WriteLine($"Здоровье героя {playerHealth} / {playerMaxHealth}\nМана героя {playerMana} / {playerMaxMana}\n");
 
+
+                Console.WriteLine($"Здоровье Босса: {enemyHealth} / {enemyMaxHealth}\n");
+
                 Console.WriteLine("Ваш ход, выберите способность:");
 
-                Console.WriteLine($"Способность {DamageAttack} - наносит урон врагу от {playerMinDamage} до {playerMaxDamage}");
+                Console.WriteLine($"Способность {CommandDamageAttack} - наносит урон врагу от {playerMinDamage} до {playerMaxDamage}");
 
                 if (isHaveFireBall == false)
                 {
-                    Console.WriteLine($"Способность {FireBallReload} - создает огненный шар");
+                    Console.WriteLine($"Способность {CommandFireBallReload} - создает огненный шар");
                 }
                 else
                 {
-                    Console.WriteLine($"Способность {FireBallReload} - Вы уже создали огненный шар, осталось только взорвать его способностью - {FireBallActive}");
+                    Console.WriteLine($"Способность {CommandFireBallReload} - Вы уже создали огненный шар, осталось только взорвать его способностью - {CommandFireBallActive}");
                 }
 
                 if (isHaveFireBall)
                 {
-                    Console.WriteLine($"Способность {FireBallActive} - взрывает огненный шар и наносит {fireBallDamage} урона врагу");
+                    Console.WriteLine($"Способность {CommandFireBallActive} - взрывает огненный шар и наносит {fireBallDamage} урона врагу");
                 }
                 else
                 {
-                    Console.WriteLine($"Способность {FireBallActive} - взрывает огненный шар(!сначала воспользуйтесь способностью {FireBallReload}) и наносит {fireBallDamage} урона врагу");
+                    Console.WriteLine($"Способность {CommandFireBallActive} - взрывает огненный шар(!сначала воспользуйтесь способностью {CommandFireBallReload}) и наносит {fireBallDamage} урона врагу");
                 }
-                
-                Console.WriteLine($"Способность {Healing} - полность восстанавливает здоровье и ману герою(у вас осталось {healingAmount} применений)");
+                Console.WriteLine($"Способность {CommandHealing} - полность восстанавливает здоровье и ману герою(у вас осталось {healingAmount} применений)");
 
                 string userInput = Console.ReadLine();
 
                 switch (userInput)
                 {
-                    case DamageAttack:
+                    case CommandDamageAttack:
                         playerDamage = random.Next(playerMinDamage, playerMaxDamage + 1);
-                        Console.WriteLine($"Вы нанесли - {playerDamage} урона\nЗдоровье врага: {enemyHealth -= playerDamage} / {enemyMaxHealth}");
+                        enemyHealth -= playerDamage;
+                        Console.WriteLine($"Вы нанесли - {playerDamage} урона\nЗдоровье врага: {enemyHealth} / {enemyMaxHealth}");
                         break;
 
-                    case FireBallReload:
+                    case CommandFireBallReload:
                         if (playerMana >= fireBallCost)
                         {
                             isHaveFireBall = true;
-                            Console.WriteLine($"Вы создали огненный шар и потратили ману!\nМана {playerMana -= fireBallCost} / {playerMaxMana}");
+                            playerMana -= fireBallCost;
+                            Console.WriteLine($"Вы создали огненный шар и потратили ману!\nМана {playerMana} / {playerMaxMana}");
                         }
                         else
                         {
@@ -86,11 +87,12 @@ namespace ConsoleApp1
                         }
                         break;
 
-                    case FireBallActive:
+                    case CommandFireBallActive:
                         if (isHaveFireBall)
                         {
-                            Console.WriteLine($"Вы взорвали огненный шар и нанесли - {fireBallDamage} урона\nЗдоровье врага: {enemyHealth -= fireBallDamage} / {enemyMaxHealth}");
                             isHaveFireBall = false;
+                            enemyHealth -= fireBallDamage;
+                            Console.WriteLine($"Вы взорвали огненный шар и нанесли - {fireBallDamage} урона\nЗдоровье врага: {enemyHealth} / {enemyMaxHealth}");
                         }
                         else
                         {
@@ -98,11 +100,13 @@ namespace ConsoleApp1
                         }
                         break;
 
-                    case Healing:
+                    case CommandHealing:
                         if (healingAmount > 0)
                         {
                             healingAmount--;
-                            Console.WriteLine($"Вы восстановили себе ману и здоровье, а так же потратили одно восстановление\nЗдоровье {playerHealth = playerMaxHealth} / {playerMaxHealth}\nМана { playerMana = playerMaxMana} / {playerMaxMana}");
+                            playerHealth = playerMaxHealth;
+                            playerMana = playerMaxMana;
+                            Console.WriteLine($"Вы восстановили себе ману и здоровье, а так же потратили одно восстановление\nЗдоровье {playerHealth} / {playerMaxHealth}\nМана {playerMana} / {playerMaxMana}");
                         }
                         else
                         {
@@ -120,7 +124,8 @@ namespace ConsoleApp1
                 Console.WriteLine("Теперь ход врага");
 
                 enemyDamage = random.Next(enemyMinDamage, enemyMaxDamage + 1);
-                Console.Write($"Враг использовал атаку наносящую урон от {enemyMinDamage} до {enemyMaxDamage}\nВраг нанес вам {enemyDamage} урона\nЗдоровье героя {playerHealth -= enemyDamage} / {playerMaxHealth}");
+                playerHealth -= enemyDamage;
+                Console.Write($"Враг использовал атаку наносящую урон от {enemyMinDamage} до {enemyMaxDamage}\nВраг нанес вам {enemyDamage} урона\nЗдоровье героя {playerHealth} / {playerMaxHealth}");
 
                 Console.ReadLine();
             }
