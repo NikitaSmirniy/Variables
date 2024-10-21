@@ -34,42 +34,18 @@ namespace ConsoleApp1
 
             //Others
             Random random = new Random();
-            bool isOpen = true;
 
-            while (isOpen)
+            while (playerHealth > 0 && enemyHealth > 0)
             {
                 Console.Clear();
 
                 Console.WriteLine($"Здоровье героя {playerHealth} / {playerMaxHealth}\nМана героя {playerMana} / {playerMaxMana}\n");
-                Console.WriteLine($"Здоровье врага {enemyHealth} / {enemyMaxHealth}\n");
-
-                if (playerHealth <= 0 && enemyHealth <= 0)
-                {
-                    Console.WriteLine("Ничья!!!");
-                    isOpen = !isOpen;
-                    Console.ReadLine();
-                    return;
-                }
-                else if (playerHealth <= 0)
-                {
-                    Console.WriteLine("Вы проиграли!!!");
-                    isOpen = !isOpen;
-                    Console.ReadLine();
-                    return;
-                }
-                else if (enemyHealth <= 0)
-                {
-                    Console.WriteLine("Вы одержали победу над боссом!!!");
-                    isOpen = !isOpen;
-                    Console.ReadLine();
-                    return;
-                }
 
                 Console.WriteLine("Ваш ход, выберите способность:");
 
                 Console.WriteLine($"Способность {DamageAttack} - наносит урон врагу от {playerMinDamage} до {playerMaxDamage}");
 
-                if (!isHaveFireBall)
+                if (isHaveFireBall == false)
                 {
                     Console.WriteLine($"Способность {FireBallReload} - создает огненный шар");
                 }
@@ -86,6 +62,7 @@ namespace ConsoleApp1
                 {
                     Console.WriteLine($"Способность {FireBallActive} - взрывает огненный шар(!сначала воспользуйтесь способностью {FireBallReload}) и наносит {fireBallDamage} урона врагу");
                 }
+                
                 Console.WriteLine($"Способность {Healing} - полность восстанавливает здоровье и ману герою(у вас осталось {healingAmount} применений)");
 
                 string userInput = Console.ReadLine();
@@ -98,7 +75,7 @@ namespace ConsoleApp1
                         break;
 
                     case FireBallReload:
-                        if (playerMana == playerMaxMana)
+                        if (playerMana >= fireBallCost)
                         {
                             isHaveFireBall = true;
                             Console.WriteLine($"Вы создали огненный шар и потратили ману!\nМана {playerMana -= fireBallCost} / {playerMaxMana}");
@@ -146,6 +123,22 @@ namespace ConsoleApp1
                 Console.Write($"Враг использовал атаку наносящую урон от {enemyMinDamage} до {enemyMaxDamage}\nВраг нанес вам {enemyDamage} урона\nЗдоровье героя {playerHealth -= enemyDamage} / {playerMaxHealth}");
 
                 Console.ReadLine();
+            }
+
+            if (playerHealth <= 0 && enemyHealth <= 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Ничья!!!");
+            }
+            else if (playerHealth <= 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Вы проиграли!!!");
+            }
+            else if (enemyHealth <= 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Вы одержали победу над боссом!!!");
             }
 
             Console.ReadLine();
