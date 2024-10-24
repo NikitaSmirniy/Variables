@@ -18,27 +18,23 @@ namespace ConsoleApp1
 
             int sum = 0;
             int productOfNumber = 1;
+            int arrayString = 1;
+            int arrayColumn = 0;
+
+            for (int j = 0; j < array.GetLength(1); j++)
+            {
+                sum += array[arrayString, j];
+            }
+
+            for (int i = 0; i < array.GetLength(0); i++)
+            {
+                productOfNumber *= array[i, arrayColumn];
+            }
 
             for (int i = 0; i < array.GetLength(0); i++)
             {
                 for (int j = 0; j < array.GetLength(1); j++)
                 {
-                    if (i == 1)
-                    {
-                        sum += array[i, j];
-                    }
-                }
-            }
-
-            for(int i = 0; i < array.GetLength(0); i++)
-            {
-                for (int j = 0; j < array.GetLength(1); j++)
-                {
-                    if (j == 0)
-                    {
-                        productOfNumber *= array[i, j];
-                    }
-
                     Console.Write(array[i, j] + " ");
                 }
 
