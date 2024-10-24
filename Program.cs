@@ -7,47 +7,37 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
             Random random = new Random();
+            int minRandomNumber = 0;
+            int maxRandomNumber = 30;
 
-            int minNumber = 10;
-            int maxNumber = 100;
-            int[,] array = new int[10, 10];
+            int[] array = new int[30];
+            int firstElementIndex = 0;
+            int lastElementIndex = array.Length - 1;
 
-            int lineIndex = 0;
-            int lastLargeNumber = 0;
-
-            for (int i = 0; i < array.GetLength(0); i++)
+            for (int i = 0; i < array.Length; i++)
             {
-                for (int j = 0; j < array.GetLength(1); j++)
-                {
-                    array[i, j] = random.Next(minNumber + 1, maxNumber);
-
-                    if (array[i, j] > lastLargeNumber)
-                    {
-                        lastLargeNumber = array[i, j];
-                        lineIndex = i;
-                    }
-
-                    Console.Write(array[i, j] + " ");
-                }
-
-                Console.WriteLine();
+                array[i] = random.Next(minRandomNumber, maxRandomNumber);
+                Console.Write($"{array[i]} ");
             }
 
             Console.WriteLine();
 
-            for (int i = 0; i < array.GetLength(0); i++)
+            if (array[firstElementIndex] > array[firstElementIndex + 1])
             {
-                for (int j = 0; j < array.GetLength(1); j++)
+                Console.WriteLine(array[firstElementIndex]);
+            }
+
+            for (int i = 1; i < lastElementIndex; i++)
+            {
+                if (array[i] > array[i - 1] && array[i] > array[i + 1])
                 {
-                    if (i == lineIndex)
-                    {
-                        array[i, j] = 0;
-                    }
-
-                    Console.Write(array[i, j] + " ");
+                    Console.WriteLine(array[i]);
                 }
+            }
 
-                Console.WriteLine();
+            if (array[lastElementIndex] > array[lastElementIndex - 1])
+            {
+                Console.WriteLine(array[lastElementIndex]);
             }
 
             Console.ReadLine();
