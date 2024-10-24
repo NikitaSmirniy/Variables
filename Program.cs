@@ -6,43 +6,49 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            int[,] array = new int[6, 4]
-                {
-                    { 1,2,3,4},
-                    { 1,2,3,4},
-                    { 1,2,3,4},
-                    { 2,2,3,4},
-                    { 3,2,3,4},
-                    { 1,2,3,4}
-                };
+            Random random = new Random();
 
-            int sum = 0;
-            int productOfNumber = 1;
-            int arrayString = 1;
-            int arrayColumn = 0;
+            int minNumber = 10;
+            int maxNumber = 100;
+            int[,] array = new int[10, 10];
 
-            for (int j = 0; j < array.GetLength(1); j++)
-            {
-                sum += array[arrayString, j];
-            }
-
-            for (int i = 0; i < array.GetLength(0); i++)
-            {
-                productOfNumber *= array[i, arrayColumn];
-            }
+            int lineIndex = 0;
+            int lastLargeNumber = 0;
 
             for (int i = 0; i < array.GetLength(0); i++)
             {
                 for (int j = 0; j < array.GetLength(1); j++)
                 {
+                    array[i, j] = random.Next(minNumber + 1, maxNumber);
+
+                    if (array[i, j] > lastLargeNumber)
+                    {
+                        lastLargeNumber = array[i, j];
+                        lineIndex = i;
+                    }
+
                     Console.Write(array[i, j] + " ");
                 }
 
                 Console.WriteLine();
             }
 
-            Console.WriteLine($"\n{sum}");
-            Console.WriteLine(productOfNumber);
+            Console.WriteLine();
+
+            for (int i = 0; i < array.GetLength(0); i++)
+            {
+                for (int j = 0; j < array.GetLength(1); j++)
+                {
+                    if (i == lineIndex)
+                    {
+                        array[i, j] = 0;
+                    }
+
+                    Console.Write(array[i, j] + " ");
+                }
+
+                Console.WriteLine();
+            }
 
             Console.ReadLine();
         }
