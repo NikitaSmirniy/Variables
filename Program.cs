@@ -9,20 +9,23 @@ namespace ConsoleApp1
             const string CommandSum = "sum";
             const string CommandExit = "exit";
 
-            int[] arrayNumber = new int[1];
-            int[] array;
+            int[] arrayNumber = new int[0];
             bool isOpen = true;
-            int sum = 0;
-            string userInput;
 
             while (isOpen)
             {
+                string userInput;
+
                 Console.Clear();
+
+                Console.Write("Все элемнты массива: ");
 
                 for (int i = 0; i < arrayNumber.Length; i++)
                 {
                     Console.Write($"{arrayNumber[i]} ");
                 }
+
+                Console.WriteLine("\n");
 
                 Console.WriteLine($"Команда: {CommandSum} - находит сумму всего массива");
                 Console.WriteLine($"Команда: {CommandExit} - выходит из программы");
@@ -30,12 +33,13 @@ namespace ConsoleApp1
 
                 Console.Write("Введите комманду: ");
 
-                sum = 0;
                 userInput = Console.ReadLine();
 
                 switch (userInput)
                 {
                     case CommandSum:
+                        int sum = 0;
+
                         for (int i = 0; i < arrayNumber.Length; i++)
                         {
                             sum += arrayNumber[i];
@@ -48,7 +52,10 @@ namespace ConsoleApp1
                         isOpen = false;
                         Console.WriteLine("Программа завершена");
                         break;
+
                     default:
+                        int[] array;
+
                         array = arrayNumber;
                         arrayNumber = new int[arrayNumber.Length + 1];
 
@@ -58,12 +65,11 @@ namespace ConsoleApp1
                         }
 
                         arrayNumber[arrayNumber.Length - 1] = Convert.ToInt32(userInput);
-                        //Console.WriteLine("Введина неверная комманда");
                         break;
                 }
 
                 Console.ReadLine();
-            
+            }
         }
     }
 }
