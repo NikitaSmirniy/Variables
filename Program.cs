@@ -9,7 +9,7 @@ namespace ConsoleApp1
             const string CommandSum = "sum";
             const string CommandExit = "exit";
 
-            int[] arrayNumber = new int[0];
+            int[] numbers = new int[0];
             bool isOpen = true;
 
             while (isOpen)
@@ -20,9 +20,9 @@ namespace ConsoleApp1
 
                 Console.Write("Все элемнты массива: ");
 
-                for (int i = 0; i < arrayNumber.Length; i++)
+                for (int i = 0; i < numbers.Length; i++)
                 {
-                    Console.Write($"{arrayNumber[i]} ");
+                    Console.Write($"{numbers[i]} ");
                 }
 
                 Console.WriteLine("\n");
@@ -40,9 +40,9 @@ namespace ConsoleApp1
                     case CommandSum:
                         int sum = 0;
 
-                        for (int i = 0; i < arrayNumber.Length; i++)
+                        for (int i = 0; i < numbers.Length; i++)
                         {
-                            sum += arrayNumber[i];
+                            sum += numbers[i];
                         }
 
                         Console.WriteLine($"Сумма чисел всех элементов массива: {sum}");
@@ -54,21 +54,23 @@ namespace ConsoleApp1
                         break;
 
                     default:
-                        int[] array;
+                        int[] tempArray;
 
-                        array = arrayNumber;
-                        arrayNumber = new int[arrayNumber.Length + 1];
+                        tempArray = numbers;
+                        numbers = new int[numbers.Length + 1];
 
-                        for (int i = 0; i < array.Length; i++)
+                        for (int i = 0; i < tempArray.Length; i++)
                         {
-                            arrayNumber[i] = array[i];
+                            numbers[i] = tempArray[i];
                         }
 
-                        arrayNumber[arrayNumber.Length - 1] = Convert.ToInt32(userInput);
+                        Console.Write($"Вы добавили элемент массива: {userInput}");
+                        numbers[numbers.Length - 1] = Convert.ToInt32(userInput);
                         break;
                 }
 
                 Console.ReadLine();
+            }
             }
         }
     }
