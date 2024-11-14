@@ -6,70 +6,43 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            const string CommandSum = "sum";
-            const string CommandExit = "exit";
+            int[] array = new int[30];
 
-            int[] numbers = new int[0];
-            bool isOpen = true;
+            Random random = new Random();
 
-            while (isOpen)
+            int maxRandomNumber = 9;
+
+            int reapitingNumber = 0;
+            int reapitingAmount = 0;
+
+            for (int i = 0; i < array.Length; i++)
             {
-                string userInput;
+                int reapitingCheck = 0;
 
-                Console.Clear();
+                array[i] = random.Next(0, maxRandomNumber + 1);
 
-                Console.Write("Все элемнты массива: ");
-
-                for (int i = 0; i < numbers.Length; i++)
+                if (reapitingNumber == array[i])
                 {
-                    Console.Write($"{numbers[i]} ");
+                    reapitingAmount++;
+                }
+                else
+                {
+                    if (reapitingCheck > reapitingAmount)
+                    {
+                        reapitingNumber = array[i];
+                    }
+
+                    reapitingCheck = 0;
                 }
 
-                Console.WriteLine("\n");
+                reapitingCheck++;
 
-                Console.WriteLine($"Команда: {CommandSum} - находит сумму всего массива");
-                Console.WriteLine($"Команда: {CommandExit} - выходит из программы");
-                Console.WriteLine($"Команда: {CommandSum} - находит сумму всего массива");
+                Console.Write(array[i] + " ");
+            }
 
-                Console.Write("Введите комманду: ");
+            Console.WriteLine($"\nЧисло с большим количеством повторений: {reapitingNumber}\nОно повторилось {reapitingAmount} раз");
 
-                userInput = Console.ReadLine();
-
-                switch (userInput)
-                {
-                    case CommandSum:
-                        int sum = 0;
-
-                        for (int i = 0; i < numbers.Length; i++)
-                        {
-                            sum += numbers[i];
-                        }
-
-                        Console.WriteLine($"Сумма чисел всех элементов массива: {sum}");
-                        break;
-
-                    case CommandExit:
-                        isOpen = false;
-                        Console.WriteLine("Программа завершена");
-                        break;
-
-                    default:
-                        int[] tempArray;
-
-                        tempArray = numbers;
-                        numbers = new int[numbers.Length + 1];
-
-                        for (int i = 0; i < tempArray.Length; i++)
-                        {
-                            numbers[i] = tempArray[i];
-                        }
-
-                        Console.Write($"Вы добавили элемент массива: {userInput}");
-                        numbers[numbers.Length - 1] = Convert.ToInt32(userInput);
-                        break;
-                }
-
-                Console.ReadLine();
+            Console.ReadLine();
             }
         }
     }
