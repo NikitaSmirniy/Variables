@@ -14,36 +14,36 @@ namespace ConsoleApp1
 
             int repeatedNumber = 0;
             int repeatedAmount = 0;
+            int repeatedCheck = 0;
 
             for (int i = 0; i < array.Length; i++)
             {
-                int repeatedCheck = 0;
-
                 array[i] = random.Next(0, maxRandomNumber + 1);
-
-                if (repeatedNumber == array[i])
-                {
-                    repeatedAmount++;
-                }
-                else
-                {
-                    if (repeatedCheck > repeatedAmount)
-                    {
-                        repeatedNumber = array[i];
-                    }
-
-                    repeatedCheck = 0;
-                }
-
-                repeatedCheck++;
 
                 Console.Write(array[i] + " ");
             }
 
-            Console.WriteLine($"\nЧисло с большим количеством повторений: {repeatedNumber}\nОно повторилось {repeatedAmount} раз");
+            for (int i = 0; i < array.Length - 1; i++)
+            {
+                if (array[i] == array[i + 1])
+                {
+                    repeatedCheck++;
+
+                    if (repeatedCheck > repeatedAmount)
+                    {
+                        repeatedAmount++;
+                        repeatedNumber = array[i];
+                    }
+                }
+                else
+                {
+                    repeatedCheck = 0;
+                }
+            }
+
+            Console.WriteLine($"\nЦифра с большим повторением подряд: {repeatedNumber}\nОно повторилось {repeatedAmount + 1} раз");
 
             Console.ReadLine();
-            }
         }
     }
 }
