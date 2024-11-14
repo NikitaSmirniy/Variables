@@ -12,35 +12,35 @@ namespace ConsoleApp1
 
             int maxRandomNumber = 9;
 
-            int reapitingNumber = 0;
-            int reapitingAmount = 0;
+            int repeatedNumber = 0;
+            int repeatedAmount = 0;
 
             for (int i = 0; i < array.Length; i++)
             {
-                int reapitingCheck = 0;
+                int repeatedCheck = 0;
 
                 array[i] = random.Next(0, maxRandomNumber + 1);
 
-                if (reapitingNumber == array[i])
+                if (repeatedNumber == array[i])
                 {
-                    reapitingAmount++;
+                    repeatedAmount++;
                 }
                 else
                 {
-                    if (reapitingCheck > reapitingAmount)
+                    if (repeatedCheck > repeatedAmount)
                     {
-                        reapitingNumber = array[i];
+                        repeatedNumber = array[i];
                     }
 
-                    reapitingCheck = 0;
+                    repeatedCheck = 0;
                 }
 
-                reapitingCheck++;
+                repeatedCheck++;
 
                 Console.Write(array[i] + " ");
             }
 
-            Console.WriteLine($"\nЧисло с большим количеством повторений: {reapitingNumber}\nОно повторилось {reapitingAmount} раз");
+            Console.WriteLine($"\nЧисло с большим количеством повторений: {repeatedNumber}\nОно повторилось {repeatedAmount} раз");
 
             Console.ReadLine();
             }
