@@ -6,42 +6,43 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            int[] array = new int[30];
+            int[] numbers = new int[30];
 
             Random random = new Random();
 
-            int maxRandomNumber = 9;
+            int maxRandomNumber = 100;
 
-            int repeatedNumber = 0;
-            int repeatedAmount = 0;
-            int repeatedCheck = 0;
+            Console.Write("Не отсортированный массив: ");
 
-            for (int i = 0; i < array.Length; i++)
+            for (int i = 0; i < numbers.Length; i++)
             {
-                array[i] = random.Next(0, maxRandomNumber + 1);
+                numbers[i] = random.Next(0, maxRandomNumber + 1);
 
-                Console.Write(array[i] + " ");
+                Console.Write(numbers[i] + " ");
             }
 
-            for (int i = 0; i < array.Length - 1; i++)
+            for (int i = 0; i < numbers.Length; i++)
             {
-                if (array[i] == array[i + 1])
+                for (int j = 0; j < numbers.Length - 1 - i; j++)
                 {
-                    repeatedCheck++;
+                    int temp;
 
-                    if (repeatedCheck > repeatedAmount)
+                    if (numbers[j] > numbers[j + 1])
                     {
-                        repeatedAmount++;
-                        repeatedNumber = array[i];
+                        temp = numbers[j];
+                        numbers[j] = numbers[j + 1];
+                        numbers[j + 1] = temp;
                     }
                 }
-                else
-                {
-                    repeatedCheck = 0;
-                }
             }
 
-            Console.WriteLine($"\nЦифра с большим повторением подряд: {repeatedNumber}\nОно повторилось {repeatedAmount + 1} раз");
+            Console.WriteLine("\n");
+            Console.Write("Отсортированный массив: ");
+
+            for (int i = 0; i < numbers.Length; i++)
+            {
+                Console.Write(numbers[i] + " ");
+            }
 
             Console.ReadLine();
         }
