@@ -6,14 +6,66 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            string text = "You  will die. You good  bro  ";
-            char[] separators = new char[] { ' ', '.' };
+            const string CommandExit = "exit";
 
-            string[] words = text.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+            int[] numbers = new int[10];
+            int firstElement = 0;
+            int lastElement = numbers.Length - 1;
 
-            foreach (var word in words)
+            Random random = new Random();
+            int maxRandomNumber = 100;
+
+            bool isOpen = true;
+
+            for (int i = 0; i < numbers.Length; i++)
             {
-                Console.WriteLine(word);
+                numbers[i] = random.Next(0, maxRandomNumber + 1);
+
+                Console.Write($"{numbers[i]}, ");
+            }
+
+            while (isOpen)
+            {
+                Console.WriteLine($"\n\nКоманда {CommandExit} закрыть программу");
+
+                Console.WriteLine("\nНа сколько элеметов хотите произвести сдвиг: ");
+
+                string userInput = Console.ReadLine();
+
+                int shift;
+                bool isSuccess = int.TryParse(userInput, out shift);
+
+                if (userInput == CommandExit)
+                {
+                    break;
+                }
+                else if (isSuccess == false)
+                {
+                    Console.WriteLine("Неверная комманда!");
+                    Console.ReadLine();
+                    continue;
+                }
+
+                int shiftResult = shift % numbers.Length;
+
+                for (int i = 0; i < shiftResult; i++)
+                {
+                    int temp = numbers[numbers.Length - 1];
+
+                    numbers[numbers.Length - 1] = numbers[firstElement];
+
+                    for (int j = 0; j < lastElement - 1; j++)
+                    {
+                        numbers[j] = numbers[j + 1];
+                    }
+
+                    numbers[lastElement - 1] = temp;
+                }
+
+                for (int i = 0; i < numbers.Length; i++)
+                {
+                    Console.Write($"{numbers[i]}, ");
+                }
             }
 
             Console.ReadLine();
