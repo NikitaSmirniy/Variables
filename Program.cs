@@ -13,28 +13,23 @@ namespace ConsoleApp1
 
         static int ReadInt()
         {
-            bool isOpen = true;
+            int result = 0;
+            bool isSuccess = false;
+            string userInput;
 
-            while (isOpen)
+            while (isSuccess == false)
             {
-                string userInput;
-                int result;
-
                 Console.Write("Введите число: ");
                 userInput = Console.ReadLine();
+                isSuccess = int.TryParse(userInput, out result);
 
-                bool isSuccess = int.TryParse(userInput, out result);
-
-                if (isSuccess)
+                if (isSuccess == false)
                 {
-                    isOpen = false;
-                    return result;
-                }
-                else
                     Console.WriteLine("Неверный ввод");
+                }
             }
 
-            return 0;
+            return result;
         }
     }
 }
