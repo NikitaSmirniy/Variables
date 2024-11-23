@@ -8,15 +8,15 @@ namespace ConsoleApp1
         {
             while (true)
             {
-                int shift;
+                int result;
 
                 Console.Write("Введите число: ");
                 userInput = Console.ReadLine();
 
-                bool isSuccess = int.TryParse(userInput, out shift);
+                bool isSuccess = int.TryParse(userInput, out result);
 
                 if (isSuccess)
-                    return shift;
+                    return result;
                 else
                 {
                     Console.WriteLine("Неверный ввод");
