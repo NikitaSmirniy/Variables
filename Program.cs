@@ -4,41 +4,33 @@ namespace ConsoleApp1
 {
     class Program
     {
-        static void Main(string[] args)
+        static int ReadInt(string userInput)
         {
-            string userInput = "(()(()))";
-            int maxDepth = 0;
-            int depth = 0;
-            char rightStaple = '(';
-            char leftStaple = ')';
-
-            Console.WriteLine("Введите скобочное выражение");
-            userInput = Console.ReadLine();
-
-            foreach (var symbol in userInput)
+            while (true)
             {
-                if (symbol == rightStaple)
-                {
-                    depth++;
+                int shift;
 
-                    if (depth > maxDepth)
-                        maxDepth = depth;
-                }
-                else if (symbol == leftStaple)
-                {
-                    depth--;
+                Console.Write("Введите число: ");
+                userInput = Console.ReadLine();
 
-                    if(depth < 0)
-                    {
-                        break;
-                    }
+                bool isSuccess = int.TryParse(userInput, out shift);
+
+                if (isSuccess)
+                    return shift;
+                else
+                {
+                    Console.WriteLine("Неверный ввод");
+
+                    continue;
                 }
             }
+        }
+        
+        static void Main(string[] args)
+        {
+             string userInput = "";
 
-            if(depth != 0)
-                Console.WriteLine("Выражение некорректно");
-            else
-                Console.WriteLine($"Корректно \nМаксимальная глубина {maxDepth}");
+            ReadInt(userInput);
 
             Console.ReadLine();
         }
