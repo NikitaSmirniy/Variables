@@ -6,30 +6,48 @@ namespace ConsoleApp1
     {   
         static void Main(string[] args)
         {
-             Console.WriteLine(ReadInt());
+            const string HealthText = "Здоровье: ";
+            const string ManaText = "Мана: ";
+
+            int health = 5;
+            int maxHealth = 10;
+            int mana = 5;
+            int maxMana = 8;
+
+            Console.Write(HealthText);
+            DrawBar(health, maxHealth, ConsoleColor.Green, '$', HealthText.Length);
+
+            Console.Write($"\n{ManaText}");
+            DrawBar(mana, maxMana, ConsoleColor.Blue, '#', ManaText.Length, 1);
 
             Console.ReadLine();
         }
 
-        static int ReadInt()
+        static void DrawBar(float value, float maxValue, ConsoleColor color, char symbolBar = ' ', int cursorPositionX = 0, int cursorPositionY = 0)
         {
-            int result = 0;
-            bool isSuccess = false;
+            ConsoleColor defaulteColor = Console.BackgroundColor;
 
-            while (isSuccess == false)
+            string bar = "";
+
+            for (int i = 0; i < value; i++)
             {
-                Console.Write("Введите число: ");
-                string userInput = Console.ReadLine();
-
-                isSuccess = int.TryParse(userInput, out result);
-
-                if (isSuccess == false)
-                {
-                    Console.WriteLine("Неверный ввод");
-                }
+                bar += symbolBar;
             }
 
-            return result;
+            Console.SetCursorPosition(cursorPositionX, cursorPositionY);
+            Console.Write('[');
+            Console.BackgroundColor = color;
+            Console.Write(bar);
+            Console.BackgroundColor = defaulteColor;
+
+            bar = "";
+
+            for (float i = value; i < maxValue; i++)
+            {
+                bar += '_';
+            }
+
+            Console.Write(bar + ']');
         }
     }
 }
