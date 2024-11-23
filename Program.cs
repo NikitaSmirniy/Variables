@@ -3,11 +3,21 @@ using System;
 namespace ConsoleApp1
 {
     class Program
-    {
-        static int ReadInt(string userInput)
+    {   
+        static void Main(string[] args)
         {
-            while (true)
+             Console.WriteLine(ReadInt());
+
+            Console.ReadLine();
+        }
+
+        static int ReadInt()
+        {
+            bool isOpen = true;
+
+            while (isOpen)
             {
+                string userInput;
                 int result;
 
                 Console.Write("Введите число: ");
@@ -16,23 +26,15 @@ namespace ConsoleApp1
                 bool isSuccess = int.TryParse(userInput, out result);
 
                 if (isSuccess)
-                    return result;
-                else
                 {
-                    Console.WriteLine("Неверный ввод");
-
-                    continue;
+                    isOpen = false;
+                    return result;
                 }
+                else
+                    Console.WriteLine("Неверный ввод");
             }
-        }
-        
-        static void Main(string[] args)
-        {
-             string userInput = "";
 
-            ReadInt(userInput);
-
-            Console.ReadLine();
+            return 0;
         }
     }
 }
