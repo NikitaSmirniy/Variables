@@ -15,12 +15,12 @@ namespace ConsoleApp1
         {
             int result = 0;
             bool isSuccess = false;
-            string userInput;
 
             while (isSuccess == false)
             {
                 Console.Write("Введите число: ");
-                userInput = Console.ReadLine();
+                string userInput = Console.ReadLine();
+
                 isSuccess = int.TryParse(userInput, out result);
 
                 if (isSuccess == false)
