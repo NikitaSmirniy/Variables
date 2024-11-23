@@ -6,67 +6,39 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            const string CommandExit = "exit";
+            string userInput = "(()(()))";
+            int maxDepth = 0;
+            int depth = 0;
+            char rightStaple = '(';
+            char leftStaple = ')';
 
-            int[] numbers = new int[10];
-            int firstElement = 0;
-            int lastElement = numbers.Length - 1;
+            Console.WriteLine("Введите скобочное выражение");
+            userInput = Console.ReadLine();
 
-            Random random = new Random();
-            int maxRandomNumber = 100;
-
-            bool isOpen = true;
-
-            for (int i = 0; i < numbers.Length; i++)
+            foreach (var symbol in userInput)
             {
-                numbers[i] = random.Next(0, maxRandomNumber + 1);
-
-                Console.Write($"{numbers[i]}, ");
-            }
-
-            while (isOpen)
-            {
-                Console.WriteLine($"\n\nКоманда {CommandExit} закрыть программу");
-
-                Console.WriteLine("\nНа сколько элеметов хотите произвести сдвиг: ");
-
-                string userInput = Console.ReadLine();
-
-                int shift;
-                bool isSuccess = int.TryParse(userInput, out shift);
-
-                if (userInput == CommandExit)
+                if (symbol == rightStaple)
                 {
-                    break;
+                    depth++;
+
+                    if (depth > maxDepth)
+                        maxDepth = depth;
                 }
-                else if (isSuccess == false)
+                else if (symbol == leftStaple)
                 {
-                    Console.WriteLine("Неверная комманда!");
-                    Console.ReadLine();
-                    continue;
-                }
+                    depth--;
 
-                int shiftResult = shift % numbers.Length;
-
-                for (int i = 0; i < shiftResult; i++)
-                {
-                    int temp = numbers[numbers.Length - 1];
-
-                    numbers[numbers.Length - 1] = numbers[firstElement];
-
-                    for (int j = 0; j < lastElement - 1; j++)
+                    if(depth < 0)
                     {
-                        numbers[j] = numbers[j + 1];
+                        break;
                     }
-
-                    numbers[lastElement - 1] = temp;
-                }
-
-                for (int i = 0; i < numbers.Length; i++)
-                {
-                    Console.Write($"{numbers[i]}, ");
                 }
             }
+
+            if(depth != 0)
+                Console.WriteLine("Выражение некорректно");
+            else
+                Console.WriteLine($"Корректно \nМаксимальная глубина {maxDepth}");
 
             Console.ReadLine();
         }
