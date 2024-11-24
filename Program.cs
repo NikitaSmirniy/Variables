@@ -29,10 +29,10 @@ namespace ConsoleApp1
 
             string bar = "";
 
-            for (int i = 0; i < value; i++)
-            {
-                bar += symbolBar;
-            }
+            value /= maxValue;
+            maxValue /= maxValue;
+
+            FillingBar(0, value, ref bar, symbolBar);
 
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
             Console.Write('[');
@@ -42,12 +42,17 @@ namespace ConsoleApp1
 
             bar = "";
 
-            for (float i = value; i < maxValue; i++)
-            {
-                bar += '_';
-            }
+            FillingBar(value, maxValue, ref bar);
 
             Console.Write(bar + ']');
+        }
+
+        static void FillingBar(float value, float maxValue, ref string bar, char symbol = '_', float fillMultiplier = 0.1f)
+        {
+            for (float i = value; i < maxValue; i += fillMultiplier)
+            {
+                bar += symbol;
+            }
         }
     }
 }
