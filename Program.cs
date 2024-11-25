@@ -32,10 +32,12 @@ namespace ConsoleApp1
 
             if (value > percentage)
                 value = maxValue;
+            else if (value <= 0)
+                value = 0;
             else
                 value = (float)maxValue / percentage * value;
 
-            FillBar(0, (int)value, ref bar, symbolBar);
+            bar = FillBar(0, (int)value, bar, symbolBar);
 
             Console.SetCursorPosition(cursorPositionX, cursorPositionY);
             Console.Write('[');
@@ -45,17 +47,19 @@ namespace ConsoleApp1
 
             bar = "";
 
-            FillBar((int)value, maxValue, ref bar);
+            bar = FillBar((int)value, maxValue, bar);
 
             Console.Write(bar + ']');
         }
 
-        static void FillBar(int value, int maxValue, ref string bar, char symbol = '_')
+        static string FillBar(int value, int maxValue, string bar, char symbol = '_')
         {
             for (int i = value; i < maxValue; i++)
             {
                 bar += symbol;
             }
+
+            return bar;
         }
     }
 }
