@@ -6,60 +6,62 @@ namespace ConsoleApp1
     {   
         static void Main(string[] args)
         {
-            const string HealthText = "Здоровье: ";
-            const string ManaText = "Мана: ";
+            int[] array = new int[36];
 
-            int health = 1000;
-            int maxHealth = 20;
-            int mana = 85;
-            int maxMana = 10;
+            Random random = new Random();
+            int maxRandomNumber = 9;
 
-            Console.Write(HealthText);
-            DrawBar(health, maxHealth, ConsoleColor.Green, '$', HealthText.Length);
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = (random.Next(0, maxRandomNumber + 1));
 
-            Console.Write($"\n{ManaText}");
-            DrawBar(mana, maxMana, ConsoleColor.Blue, '#', ManaText.Length, 1);
+                ShowArray(array, i);
+            }
+
+            Console.WriteLine();
+
+            Shuffle(array);
 
             Console.ReadLine();
         }
 
-        static void DrawBar(float value, int maxValue, ConsoleColor color, char symbolBar = ' ', int cursorPositionX = 0, int cursorPositionY = 0)
+        static void Shuffle(int[] array)
         {
-            ConsoleColor defaulteColor = Console.BackgroundColor;
+            int[] tempArray = new int[array.Length];
+            Random random = new Random();
 
-            int percentage = 100;
-            string bar = "";
-
-            if (value > percentage)
-                value = maxValue;
-            else if (value <= 0)
-                value = 0;
-            else
-                value = (float)maxValue / percentage * value;
-
-            bar = FillBar(0, (int)value, bar, symbolBar);
-
-            Console.SetCursorPosition(cursorPositionX, cursorPositionY);
-            Console.Write('[');
-            Console.BackgroundColor = color;
-            Console.Write(bar);
-            Console.BackgroundColor = defaulteColor;
-
-            bar = "";
-
-            bar = FillBar((int)value, maxValue, bar);
-
-            Console.Write(bar + ']');
-        }
-
-        static string FillBar(int value, int maxValue, string bar, char symbol = '_')
-        {
-            for (int i = value; i < maxValue; i++)
+            for (int i = 0; i < tempArray.Length; i++)
             {
-                bar += symbol;
+                int randomIndex = random.Next(0, array.Length);
+
+                tempArray[i] = array[randomIndex];
+                RemoveAt(ref array, randomIndex);
+
+                ShowArray(tempArray, i);
             }
 
-            return bar;
+            array = tempArray;
+        }
+
+        static void ShowArray(int[] array, int indexArray)
+        {
+            if (indexArray < array.Length - 1)
+                Console.Write($"{array[indexArray]}, ");
+            else
+                Console.Write($"{array[indexArray]}");
+        }
+
+        static void RemoveAt(ref int[] array, int index)
+        {
+            int[] newArray = new int[array.Length - 1];
+
+            for (int i = 0; i < index; i++)
+                newArray[i] = array[i];
+
+            for (int i = index + 1; i < array.Length; i++)
+                newArray[i - 1] = array[i];
+
+            array = newArray;
         }
     }
 }
