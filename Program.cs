@@ -12,26 +12,26 @@ namespace ConsoleApp1
             int maxRandomNumber = 9;
 
             for (int i = 0; i < numbers.Length; i++)
-                numbers[i] = (random.Next(0, maxRandomNumber + 1));
+                numbers[i] = (random.Next(maxRandomNumber + 1));
 
             ShowArray(numbers);
 
             Console.WriteLine();
 
-            Shuffle(numbers);
+            Shuffle(numbers, random);
 
             ShowArray(numbers);
 
             Console.ReadLine();
         }
 
-        static void Shuffle(int[] array)
+        static void Shuffle(int[] array, Random random)
         {
-            var random = new Random();
+            int secondElementOfArray = 1;
 
-            for (int i = array.Length - 1; i > 0; i--)
+            for (int i = array.Length - 1; i > secondElementOfArray; i--)
             {
-                int randomNumber = random.Next(i + 1);
+                int randomNumber = random.Next(array.Length);
                 int temp = array[randomNumber];
 
                 array[randomNumber] = array[i];
