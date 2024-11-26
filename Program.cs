@@ -12,15 +12,15 @@ namespace ConsoleApp1
             int maxRandomNumber = 9;
 
             for (int i = 0; i < numbers.Length; i++)
-            {
                 numbers[i] = (random.Next(0, maxRandomNumber + 1));
 
-                ShowArray(numbers, i);
-            }
+            ShowArray(numbers);
 
             Console.WriteLine();
 
             Shuffle(numbers);
+
+            ShowArray(numbers);
 
             Console.ReadLine();
         }
@@ -37,17 +37,17 @@ namespace ConsoleApp1
                 array[randomNumber] = array[i];
                 array[i] = temp;
             }
-
-            for (int i = 0; i < array.Length; i++)
-                ShowArray(array, i);
         }
 
-        static void ShowArray(int[] array, int indexArray)
+        static void ShowArray(int[] array)
         {
-            if (indexArray < array.Length - 1)
-                Console.Write($"{array[indexArray]}, ");
-            else
-                Console.Write($"{array[indexArray]}");
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (i < array.Length - 1)
+                    Console.Write($"{array[i]}, ");
+                else
+                    Console.Write($"{array[i]}");
+            }
         }
     }
 }
