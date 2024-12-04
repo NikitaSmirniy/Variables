@@ -26,59 +26,85 @@ namespace ConsoleApp1
             };
 
             ShowMap(map);
+            TryMovePlayer(map);
 
             Console.ReadLine();
         }
 
-        static void ShowMap(char[,] map)
+        static void TryMovePlayer(char[,] map)
         {
-            int userX = 5;
-            int userY = 1;
-            char obstacle = '#';
+            int playerX = 5;
+            int playerY = 1;
             char player = '@';
 
             Console.CursorVisible = false;
+            ConsoleKeyInfo pressedKey = new ConsoleKeyInfo('w', ConsoleKey.W, false, false, false);
 
             while (true)
-            {
-                Console.SetCursorPosition(0, 0);
+            {        
+                ShowMap(map);
 
-                for (int i = 0; i < map.GetLength(0); i++)
-                {
-                    for (int j = 0; j < map.GetLength(1); j++)
-                    {
-                        Console.Write(map[i, j]);
-                    }
-
-                    Console.WriteLine();
-                }
-
-                Console.SetCursorPosition(userY, userX);
+                Console.SetCursorPosition(playerY, playerX);
                 Console.Write(player);
-                ConsoleKeyInfo charKey = Console.ReadKey();
+                pressedKey = Console.ReadKey();
 
-                switch (charKey.Key)
+                HandlInput(pressedKey, ref playerX, ref playerY, map);
+            }
+        }
+
+        static int[] GetDirection(ConsoleKeyInfo pressedKey)
+        {
+            int[] direction = { 0, 0 };
+
+            switch (pressedKey.Key)
+            {
+                case ConsoleKey.UpArrow:
+                    direction[0] = -1;
+                    break;
+
+                case ConsoleKey.DownArrow:
+                    direction[0] = 1;
+                    break;
+
+                case ConsoleKey.LeftArrow:
+                    direction[1] = -1;
+                    break;
+
+                case ConsoleKey.RightArrow:
+                    direction[1] = 1;
+                    break;
+            }
+
+            return direction;
+        }
+
+        static void HandlInput(ConsoleKeyInfo pressedKey, ref int playerX, ref int playerY, char[,] map)
+        {
+            int[] direction = GetDirection(pressedKey);
+
+            int nextPlayerPositionX = playerX + direction[0];
+            int nextPlayerPositionY = playerY + direction[1];
+
+            if(map[nextPlayerPositionX,nextPlayerPositionY] == ' ')
+            {
+                playerX = nextPlayerPositionX;
+                playerY = nextPlayerPositionY;
+            }
+        }
+
+        static void ShowMap(char[,] map)
+        {
+            Console.CursorVisible = false;
+            Console.SetCursorPosition(0, 0);
+
+            for (int x = 0; x < map.GetLength(0); x++)
+            {
+                for (int y = 0; y < map.GetLength(1); y++)
                 {
-                    case ConsoleKey.UpArrow:
-                        if (map[userX - 1, userY] != obstacle)
-                            userX--;
-                        break;
-
-                    case ConsoleKey.DownArrow:
-                        if (map[userX + 1, userY] != obstacle)
-                            userX++;
-                        break;
-
-                    case ConsoleKey.LeftArrow:
-                        if (map[userX, userY - 1] != obstacle)
-                            userY--;
-                        break;
-
-                    case ConsoleKey.RightArrow:
-                        if (map[userX, userY + 1] != obstacle)
-                            userY++;
-                        break;
+                    Console.Write(map[x, y]);
                 }
+
+                Console.WriteLine();
             }
         }
     }
