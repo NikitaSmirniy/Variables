@@ -26,51 +26,57 @@ namespace ConsoleApp1
             };
 
             ShowMap(map);
-            TryMovePlayer(map);
+            MovePlayer(map);
 
             Console.ReadLine();
         }
 
-        static void TryMovePlayer(char[,] map)
+        static void MovePlayer(char[,] map)
         {
-            int playerX = 5;
-            int playerY = 1;
-            char player = '@';
+            int playerPositionX = 5;
+            int playerPositionY = 1;
+            char playerSymbol = '@';
+            bool isOpen = true;
 
             Console.CursorVisible = false;
-            ConsoleKeyInfo pressedKey = new ConsoleKeyInfo('w', ConsoleKey.W, false, false, false);
+            ConsoleKeyInfo pressedKey;
 
-            while (true)
+            while (isOpen)
             {        
                 ShowMap(map);
 
-                Console.SetCursorPosition(playerY, playerX);
-                Console.Write(player);
+                Console.SetCursorPosition(playerPositionY, playerPositionX);
+                Console.Write(playerSymbol);
                 pressedKey = Console.ReadKey();
 
-                HandlInput(pressedKey, ref playerX, ref playerY, map);
+                HandlInput(pressedKey, ref playerPositionX, ref playerPositionY, map);
             }
         }
 
         static int[] GetDirection(ConsoleKeyInfo pressedKey)
         {
+            const ConsoleKey UpKey = ConsoleKey.UpArrow;
+            const ConsoleKey DownKey = ConsoleKey.DownArrow;
+            const ConsoleKey LeftKey = ConsoleKey.LeftArrow;
+            const ConsoleKey RightKey = ConsoleKey.RightArrow;
+
             int[] direction = { 0, 0 };
 
             switch (pressedKey.Key)
             {
-                case ConsoleKey.UpArrow:
+                case UpKey:
                     direction[0] = -1;
                     break;
 
-                case ConsoleKey.DownArrow:
+                case DownKey:
                     direction[0] = 1;
                     break;
 
-                case ConsoleKey.LeftArrow:
+                case LeftKey:
                     direction[1] = -1;
                     break;
 
-                case ConsoleKey.RightArrow:
+                case RightKey:
                     direction[1] = 1;
                     break;
             }
@@ -78,17 +84,17 @@ namespace ConsoleApp1
             return direction;
         }
 
-        static void HandlInput(ConsoleKeyInfo pressedKey, ref int playerX, ref int playerY, char[,] map)
+        static void HandlInput(ConsoleKeyInfo pressedKey, ref int playerPositionX, ref int playerPositionY, char[,] map)
         {
             int[] direction = GetDirection(pressedKey);
 
-            int nextPlayerPositionX = playerX + direction[0];
-            int nextPlayerPositionY = playerY + direction[1];
+            int nextPlayerPositionX = playerPositionX + direction[0];
+            int nextPlayerPositionY = playerPositionY + direction[1];
 
             if(map[nextPlayerPositionX,nextPlayerPositionY] == ' ')
             {
-                playerX = nextPlayerPositionX;
-                playerY = nextPlayerPositionY;
+                playerPositionX = nextPlayerPositionX;
+                playerPositionY = nextPlayerPositionY;
             }
         }
 
