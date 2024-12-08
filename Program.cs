@@ -47,10 +47,9 @@ namespace ConsoleApp1
 
                 int[] direction = GetDirection(pressedKey);
 
-                if (TryGameOver(ref playerPositionX, ref playerPositionY, map, ref direction, exitPoint))
-                    isOpen = false;
-                else
-                    TryMovePlayer(pressedKey, ref playerPositionX, ref playerPositionY, map, ref direction, space);
+                isOpen = TryGameOver(ref playerPositionX, ref playerPositionY, map, ref direction, exitPoint);
+
+                TryMovePlayer(ref playerPositionX, ref playerPositionY, map, ref direction, space);
             }
         }
 
@@ -85,7 +84,7 @@ namespace ConsoleApp1
             return direction;
         }
 
-        static void TryMovePlayer(ConsoleKeyInfo pressedKey, ref int playerPositionX, ref int playerPositionY, char[,] map, ref int[] direction, char space)
+        static void TryMovePlayer(ref int playerPositionX, ref int playerPositionY, char[,] map, ref int[] direction, char space)
         {
             int nextPlayerPositionX = playerPositionX + direction[0];
             int nextPlayerPositionY = playerPositionY + direction[1];
@@ -102,10 +101,7 @@ namespace ConsoleApp1
             int nextPlayerPositionX = playerPositionX + direction[0];
             int nextPlayerPositionY = playerPositionY + direction[1];
 
-            if (map[nextPlayerPositionX, nextPlayerPositionY] == exitPoint)
-                return true;
-            else
-                return false;
+            return map[nextPlayerPositionX, nextPlayerPositionY] != exitPoint;
         }
 
         static void ShowMap(char[,] map)
