@@ -6,6 +6,15 @@ namespace ConsoleApp1
     {   
         static void Main(string[] args)
         {
+            int playerPositionX = 5;
+            int playerPositionY = 1;
+            char playerSymbol = '@';
+
+            char space = ' ';
+            char exitPoint = '%';
+
+            bool isOpen = true;
+
             char[,] map =
             {
                 {'#', '#', '#','#','#','#','#','#','#','#','#','#','#','#','#'},
@@ -19,64 +28,56 @@ namespace ConsoleApp1
                 {'#', '#', '#',' ','#','#','#','#',' ','#','#',' ','#','#','#'},
                 {'#', '#', '#',' ','#','#','#','#',' ','#','#',' ','#',' ','#'},
                 {'#', '#', '#',' ','#','#','#',' ',' ',' ','#',' ','#',' ','#'},
-                {'#', '#', '#',' ','#','#','#',' ',' ',' ','#',' ',' ',' ','#'},
+                {'#', '#', '#',' ','#','#','#',' ',' ',' ','#',' ',' ',' ','%'},
                 {'#', '#', '#',' ','#','#','#',' ',' ',' ','#','#','#',' ','#'},
                 {'#', '#', '#',' ',' ',' ',' ',' ',' ','#','#','#','#',' ','#'},
                 {'#', '#', '#','#','#','#','#','#','#','#','#','#','#','#','#'}
             };
 
-            ShowMap(map);
-            MovePlayer(map);
-
-            Console.ReadLine();
-        }
-
-        static void MovePlayer(char[,] map)
-        {
-            int playerPositionX = 5;
-            int playerPositionY = 1;
-            char playerSymbol = '@';
-            bool isOpen = true;
-
             Console.CursorVisible = false;
-            ConsoleKeyInfo pressedKey;
 
             while (isOpen)
-            {        
+            {
                 ShowMap(map);
 
+                ConsoleKeyInfo pressedKey;
                 Console.SetCursorPosition(playerPositionY, playerPositionX);
                 Console.Write(playerSymbol);
                 pressedKey = Console.ReadKey();
 
-                HandlInput(pressedKey, ref playerPositionX, ref playerPositionY, map);
+                int[] direction = GetDirection(pressedKey);
+
+                if (TryGameOver(ref playerPositionX, ref playerPositionY, map, ref direction, exitPoint))
+                    isOpen = false;
+                else
+                    TryMovePlayer(pressedKey, ref playerPositionX, ref playerPositionY, map, ref direction, space);
             }
         }
 
         static int[] GetDirection(ConsoleKeyInfo pressedKey)
         {
-            const ConsoleKey UpKey = ConsoleKey.UpArrow;
-            const ConsoleKey DownKey = ConsoleKey.DownArrow;
-            const ConsoleKey LeftKey = ConsoleKey.LeftArrow;
-            const ConsoleKey RightKey = ConsoleKey.RightArrow;
+            const ConsoleKey MoveUpCommand = ConsoleKey.UpArrow;
+            const ConsoleKey MoveDownCommand = ConsoleKey.DownArrow;
+            const ConsoleKey MoveLeftCommand = ConsoleKey.LeftArrow;
+            const ConsoleKey MoveRightCommand = ConsoleKey.RightArrow;
 
             int[] direction = { 0, 0 };
 
             switch (pressedKey.Key)
             {
-                case UpKey:
+                case MoveUpCommand:
                     direction[0] = -1;
                     break;
 
-                case DownKey:
+                case MoveDownCommand:
                     direction[0] = 1;
                     break;
 
-                case LeftKey:
+                case MoveLeftCommand:
                     direction[1] = -1;
                     break;
 
-                case RightKey:
+                case MoveRightCommand:
                     direction[1] = 1;
                     break;
             }
@@ -84,23 +85,31 @@ namespace ConsoleApp1
             return direction;
         }
 
-        static void HandlInput(ConsoleKeyInfo pressedKey, ref int playerPositionX, ref int playerPositionY, char[,] map)
+        static void TryMovePlayer(ConsoleKeyInfo pressedKey, ref int playerPositionX, ref int playerPositionY, char[,] map, ref int[] direction, char space)
         {
-            int[] direction = GetDirection(pressedKey);
-
             int nextPlayerPositionX = playerPositionX + direction[0];
             int nextPlayerPositionY = playerPositionY + direction[1];
 
-            if(map[nextPlayerPositionX,nextPlayerPositionY] == ' ')
+            if (map[nextPlayerPositionX, nextPlayerPositionY] == space)
             {
                 playerPositionX = nextPlayerPositionX;
                 playerPositionY = nextPlayerPositionY;
             }
         }
 
+        static bool TryGameOver(ref int playerPositionX, ref int playerPositionY, char[,] map, ref int[] direction, char exitPoint)
+        {
+            int nextPlayerPositionX = playerPositionX + direction[0];
+            int nextPlayerPositionY = playerPositionY + direction[1];
+
+            if (map[nextPlayerPositionX, nextPlayerPositionY] == exitPoint)
+                return true;
+            else
+                return false;
+        }
+
         static void ShowMap(char[,] map)
         {
-            Console.CursorVisible = false;
             Console.SetCursorPosition(0, 0);
 
             for (int x = 0; x < map.GetLength(0); x++)
