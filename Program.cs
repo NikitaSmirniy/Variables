@@ -6,116 +6,54 @@ namespace ConsoleApp1
     {   
         static void Main(string[] args)
         {
-            int playerPositionX = 5;
-            int playerPositionY = 1;
-            char playerSymbol = '@';
+            const string RussiaWordCommand = "Россия";
+            const string CanadaWordCommand = "Канада";
+            const string ChinaWordCommand = "Китай";
+            const string USAWordCommand = "США";
+            const string BrazilWordCommand = "Бразилия";
 
-            char space = ' ';
-            char exitPoint = '%';
+            const string ExitCommand = "выход";
+
+            Dictionary<string, int> explanatoryDictionary = new Dictionary<string, int>();
 
             bool isOpen = true;
 
-            char[,] map =
-            {
-                {'#', '#', '#','#','#','#','#','#','#','#','#','#','#','#','#'},
-                {'#', '#', '#','#','#','#','#','#','#','#','#','#','#','#','#'},
-                {'#', '#', '#','#','#','#','#','#','#','#','#','#','#','#','#'},
-                {'#', '#', '#','#','#','#','#','#','#','#','#','#','#','#','#'},
-                {'#', ' ', '#','#','#','#','#','#','#','#','#','#','#','#','#'},
-                {'#', ' ', ' ',' ',' ',' ',' ','#','#','#','#','#','#','#','#'},
-                {'#', '#', ' ',' ','#','#','#','#','#','#','#','#','#','#','#'},
-                {'#', '#', '#',' ','#','#','#','#',' ',' ',' ',' ','#','#','#'},
-                {'#', '#', '#',' ','#','#','#','#',' ','#','#',' ','#','#','#'},
-                {'#', '#', '#',' ','#','#','#','#',' ','#','#',' ','#',' ','#'},
-                {'#', '#', '#',' ','#','#','#',' ',' ',' ','#',' ','#',' ','#'},
-                {'#', '#', '#',' ','#','#','#',' ',' ',' ','#',' ',' ',' ','%'},
-                {'#', '#', '#',' ','#','#','#',' ',' ',' ','#','#','#',' ','#'},
-                {'#', '#', '#',' ',' ',' ',' ',' ',' ','#','#','#','#',' ','#'},
-                {'#', '#', '#','#','#','#','#','#','#','#','#','#','#','#','#'}
-            };
-
-            Console.CursorVisible = false;
+            explanatoryDictionary.Add(RussiaWordCommand, 1);
+            explanatoryDictionary.Add(CanadaWordCommand, 2);
+            explanatoryDictionary.Add(ChinaWordCommand, 3);
+            explanatoryDictionary.Add(USAWordCommand, 4);
+            explanatoryDictionary.Add(BrazilWordCommand, 5);
 
             while (isOpen)
             {
-                ShowMap(map);
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.White;
 
-                ConsoleKeyInfo pressedKey;
-                Console.SetCursorPosition(playerPositionY, playerPositionX);
-                Console.Write(playerSymbol);
-                pressedKey = Console.ReadKey();
+                Console.WriteLine("Введите любую из этих стран, что-бы узнать на каком месте она по площади в мире");
 
-                int[] direction = GetDirection(pressedKey);
-
-                isOpen = TryGameOver(ref playerPositionX, ref playerPositionY, map, ref direction, exitPoint);
-
-                TryMovePlayer(ref playerPositionX, ref playerPositionY, map, ref direction, space);
-            }
-        }
-
-        static int[] GetDirection(ConsoleKeyInfo pressedKey)
-        {
-            const ConsoleKey MoveUpCommand = ConsoleKey.UpArrow;
-            const ConsoleKey MoveDownCommand = ConsoleKey.DownArrow;
-            const ConsoleKey MoveLeftCommand = ConsoleKey.LeftArrow;
-            const ConsoleKey MoveRightCommand = ConsoleKey.RightArrow;
-
-            int[] direction = { 0, 0 };
-
-            switch (pressedKey.Key)
-            {
-                case MoveUpCommand:
-                    direction[0] = -1;
-                    break;
-
-                case MoveDownCommand:
-                    direction[0] = 1;
-                    break;
-
-                case MoveLeftCommand:
-                    direction[1] = -1;
-                    break;
-
-                case MoveRightCommand:
-                    direction[1] = 1;
-                    break;
-            }
-
-            return direction;
-        }
-
-        static void TryMovePlayer(ref int playerPositionX, ref int playerPositionY, char[,] map, ref int[] direction, char space)
-        {
-            int nextPlayerPositionX = playerPositionX + direction[0];
-            int nextPlayerPositionY = playerPositionY + direction[1];
-
-            if (map[nextPlayerPositionX, nextPlayerPositionY] == space)
-            {
-                playerPositionX = nextPlayerPositionX;
-                playerPositionY = nextPlayerPositionY;
-            }
-        }
-
-        static bool TryGameOver(ref int playerPositionX, ref int playerPositionY, char[,] map, ref int[] direction, char exitPoint)
-        {
-            int nextPlayerPositionX = playerPositionX + direction[0];
-            int nextPlayerPositionY = playerPositionY + direction[1];
-
-            return map[nextPlayerPositionX, nextPlayerPositionY] != exitPoint;
-        }
-
-        static void ShowMap(char[,] map)
-        {
-            Console.SetCursorPosition(0, 0);
-
-            for (int x = 0; x < map.GetLength(0); x++)
-            {
-                for (int y = 0; y < map.GetLength(1); y++)
+                foreach (var item in explanatoryDictionary.Keys)
                 {
-                    Console.Write(map[x, y]);
+                    Console.WriteLine(item);
                 }
 
-                Console.WriteLine();
+                string userInput = Console.ReadLine();
+
+                if (explanatoryDictionary.ContainsKey(userInput))
+                    Console.WriteLine($"{userInput} находится на {explanatoryDictionary[userInput]} месте по площади в мире");
+                else
+                    Console.WriteLine("Такой страны нет в списке");
+                ShowMessage(ConsoleColor.Red, $"Напишите комманду {ExitCommand}, что-бы выйти");
+                
+                userInput = Console.ReadLine();
+
+                if (userInput == ExitCommand)
+                    isOpen = false;
+            }
+
+            void ShowMessage(ConsoleColor color, string message)
+            {
+                Console.ForegroundColor = color;
+                Console.Write(message);
             }
         }
     }
