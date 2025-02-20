@@ -4,30 +4,46 @@ namespace ConsoleApp1
 {
     class Program
     {   
-        static void Main(string[] args)
+        static void FillQueue(List<int> cashSumsClients, int clientsAmount)
         {
-            List<int> cashSumsClients = new List<int>();
-            int clientsAmount = 10;
-            int cashAccount = 0;
-
             Random random = new Random();
             int minNumber = 5;
             int maxNumber = 100;
 
             for (int i = 0; i < clientsAmount; i++)
                 cashSumsClients.Add(random.Next(minNumber, maxNumber + 1));
+        }
 
+        static void ServiceQueue(List<int> cashSumsClients, ref int cashAccount)
+        {
             for (int i = 0; i < cashSumsClients.Count; i++)
             {
                 Console.Clear();
 
-                Console.WriteLine($"Клиент №{i + 1} Cумма покупкт клиента: {cashSumsClients[i]}");
-                Console.WriteLine($"Ваш счёт: {cashAccount}");
-                cashAccount += cashSumsClients[i];
-                cashSumsClients.Remove(i);
+                OutputResult(cashSumsClients, i, ref cashAccount);
 
                 Console.ReadLine();
             }
+        }
+
+        static void OutputResult(List<int> cashSumsClients, int clientIndex, ref int cashAccount)
+        {
+            Console.WriteLine($"Клиент №{clientIndex + 1} Cумма покупкт клиента: {cashSumsClients[clientIndex]}");
+            Console.WriteLine($"Ваш счёт: {cashAccount}");
+            cashAccount += cashSumsClients[clientIndex];
+            cashSumsClients.Remove(clientIndex);
+        }
+
+        static void Main(string[] args)
+        {
+            List<int> cashSumsClients = new List<int>();
+            int clientsAmount = 10;
+
+            int cashAccount = 0;
+
+            FillQueue(cashSumsClients, clientsAmount);
+
+            ServiceQueue(cashSumsClients, ref cashAccount);
         }
     }
 }
