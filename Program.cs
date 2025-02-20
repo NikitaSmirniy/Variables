@@ -4,7 +4,7 @@ namespace ConsoleApp1
 {
     class Program
     {   
-        static void FillQueue(List<int> cashSumsClients, int clientsAmount)
+        static void FillQueue(List<int> cashSumsClients, int clientsAmount, int minNumber, int maxNumber)
         {
             Random random = new Random();
             int minNumber = 5;
@@ -37,11 +37,13 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
             List<int> cashSumsClients = new List<int>();
+            int minNumber = 5;
+            int maxNumber = 100;
             int clientsAmount = 10;
 
             int cashAccount = 0;
 
-            FillQueue(cashSumsClients, clientsAmount);
+            FillQueue(cashSumsClients, clientsAmount, minNumber, maxNumber);
 
             ServiceQueue(cashSumsClients, ref cashAccount);
         }
