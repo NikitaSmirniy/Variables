@@ -6,6 +6,20 @@ namespace ConsoleApp1
     class Program
     {   
         {
+        static void Main(string[] args)
+        {
+            List<int> cashSumsClients = new List<int>();
+            int minNumber = 5;
+            int maxNumber = 100;
+            int clientsAmount = 10;
+
+            int cashAccount = 0;
+
+            FillQueue(cashSumsClients, clientsAmount, minNumber, maxNumber);
+
+            ServiceQueue(cashSumsClients, cashAccount);
+        }
+            
             static void FillQueue(List<int> cashSumsClients, int clientsAmount, int minNumber, int maxNumber)
         {
             Random random = new Random();
@@ -21,6 +35,8 @@ namespace ConsoleApp1
                 Console.Clear();
 
                 OutputResult(cashSumsClients, i, ref cashAccount);
+                cashAccount += cashSumsClients[i];
+                cashSumsClients.Remove(i);
 
                 Console.ReadLine();
             }
@@ -30,22 +46,6 @@ namespace ConsoleApp1
         {
             Console.WriteLine($"Клиент №{clientIndex + 1} Cумма покупкт клиента: {cashSumsClients[clientIndex]}");
             Console.WriteLine($"Ваш счёт: {cashAccount}");
-            cashAccount += cashSumsClients[clientIndex];
-            cashSumsClients.Remove(clientIndex);
-        }
-
-        static void Main(string[] args)
-        {
-            List<int> cashSumsClients = new List<int>();
-            int minNumber = 5;
-            int maxNumber = 100;
-            int clientsAmount = 10;
-
-            int cashAccount = 0;
-
-            FillQueue(cashSumsClients, clientsAmount, minNumber, maxNumber);
-
-            ServiceQueue(cashSumsClients, cashAccount);
         }
         }
     }
