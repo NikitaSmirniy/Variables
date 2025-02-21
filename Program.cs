@@ -1,20 +1,20 @@
 using System;
+using System.Collections.Generic;
 
 namespace ConsoleApp1
 {
     class Program
     {   
-        static void FillQueue(List<int> cashSumsClients, int clientsAmount, int minNumber, int maxNumber)
+        {
+            static void FillQueue(List<int> cashSumsClients, int clientsAmount, int minNumber, int maxNumber)
         {
             Random random = new Random();
-            int minNumber = 5;
-            int maxNumber = 100;
 
             for (int i = 0; i < clientsAmount; i++)
                 cashSumsClients.Add(random.Next(minNumber, maxNumber + 1));
         }
 
-        static void ServiceQueue(List<int> cashSumsClients, ref int cashAccount)
+        static void ServiceQueue(List<int> cashSumsClients, int cashAccount)
         {
             for (int i = 0; i < cashSumsClients.Count; i++)
             {
@@ -45,7 +45,8 @@ namespace ConsoleApp1
 
             FillQueue(cashSumsClients, clientsAmount, minNumber, maxNumber);
 
-            ServiceQueue(cashSumsClients, ref cashAccount);
+            ServiceQueue(cashSumsClients, cashAccount);
+        }
         }
     }
 }
