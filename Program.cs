@@ -4,23 +4,14 @@ using System.Collections.Generic;
 namespace ConsoleApp1
 {
     class Program
-    {   
+    {
+        void ShowMessage(ConsoleColor color, string message)
         {
-        static void Main(string[] args)
-        {
-            List<int> cashSumsClients = new List<int>();
-            int minNumber = 5;
-            int maxNumber = 100;
-            int clientsAmount = 10;
-
-            int cashAccount = 0;
-
-            FillQueue(cashSumsClients, clientsAmount, minNumber, maxNumber);
-
-            ServiceQueue(cashSumsClients, cashAccount);
+            Console.ForegroundColor = color;
+            Console.Write(message);
         }
-            
-            static void FillQueue(List<int> cashSumsClients, int clientsAmount, int minNumber, int maxNumber)
+
+        static void FillQueue(List<int> cashSumsClients, int clientsAmount, int minNumber, int maxNumber)
         {
             Random random = new Random();
 
@@ -28,25 +19,47 @@ namespace ConsoleApp1
                 cashSumsClients.Add(random.Next(minNumber, maxNumber + 1));
         }
 
-        static void ServiceQueue(List<int> cashSumsClients, int cashAccount)
+        static int ServiceQueue(List<int> cashSumsClients)
         {
+            int sumResult = 0;
+
             for (int i = 0; i < cashSumsClients.Count; i++)
             {
                 Console.Clear();
 
-                OutputResult(cashSumsClients, i, ref cashAccount);
-                cashAccount += cashSumsClients[i];
+                OutputClient(cashSumsClients, i);
+                sumResult += cashSumsClients[i];
+                ShowCash(sumResult);
                 cashSumsClients.Remove(i);
 
                 Console.ReadLine();
             }
-        }
 
-        static void OutputResult(List<int> cashSumsClients, int clientIndex, ref int cashAccount)
+            return sumResult;
+        }
+  
+        static void OutputClient(List<int> cashSumsClients, int clientIndex)
         {
             Console.WriteLine($"Клиент №{clientIndex + 1} Cумма покупкт клиента: {cashSumsClients[clientIndex]}");
+        }
+
+        static void ShowCash(int cashAccount)
+        {
             Console.WriteLine($"Ваш счёт: {cashAccount}");
         }
+
+        static void Main(string[] args)
+        {
+            List<int> cashSumsClients = new List<int>();
+            int minNumber = 5;
+            int maxNumber = 100;
+            int clientsAmount = 10;
+
+            int cashAccount;
+
+            FillQueue(cashSumsClients, clientsAmount, minNumber, maxNumber);
+
+            cashAccount = ServiceQueue(cashSumsClients);
         }
     }
 }
