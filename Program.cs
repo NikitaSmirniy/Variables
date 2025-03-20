@@ -34,7 +34,7 @@ namespace ConsoleApp1
 
             if (isSuccess)
             {
-                numbers.Add(int.Parse(userInput));
+                numbers.Add(shift);
                 Console.WriteLine("Число успешно добавлено");
             }
             else
@@ -90,6 +90,5 @@ namespace ConsoleApp1
                         break;
                 }
             }
-        }
     }
 }
