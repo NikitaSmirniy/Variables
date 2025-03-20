@@ -7,54 +7,6 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            InputUser();
-        }
-
-        static void ShowCommand(string textCommand, string textDiscription)
-        {
-            Console.WriteLine(textDiscription + textCommand);
-        }
-
-        static void ShowSum(List<int> numbers)
-        {
-            int sum = 0;
-
-            foreach (var number in numbers)
-            {
-                sum += number;
-            }
-
-            Console.WriteLine(sum);
-            Console.ReadLine();
-        }
-
-        static void AddNumber(string userInput, List<int> numbers)
-        {
-            bool isSuccess = int.TryParse(userInput, out int shift);
-
-            if (isSuccess)
-            {
-                numbers.Add(shift);
-                Console.WriteLine("Число успешно добавлено");
-            }
-            else
-            {
-                Console.WriteLine("Введена неверная команда");
-            }
-
-            Console.ReadLine();
-        }
-
-        static void ShowNumbers(List<int> numbers)
-        {
-            foreach (var number in numbers)
-            {
-                Console.WriteLine(number);
-            }
-        }
-
-        static void InputUser()
-        {
             const string CommandExit = "exit";
             const string CommandSum = "sum";
 
@@ -66,8 +18,8 @@ namespace ConsoleApp1
             {
                 Console.Clear();
 
-                ShowCommand(CommandSum, "Что-бы получить сумму всех чисел введите: ");
-                ShowCommand(CommandExit, "Что-бы выйти из программы введите: ");
+                Console.WriteLine($"Что-бы получить сумму всех чисел введите: {CommandSum}");
+                Console.WriteLine($"Что-бы выйти из программы введите: {CommandExit}");
 
                 ShowNumbers(numbers);
 
@@ -90,5 +42,44 @@ namespace ConsoleApp1
                         break;
                 }
             }
+        }
+
+        static void ShowSum(List<int> numbers)
+        {
+            int sum = 0;
+
+            foreach (var number in numbers)
+            {
+                sum += number;
+            }
+
+            Console.WriteLine(sum);
+            Console.ReadLine();
+        }
+
+        static void AddNumber(string userInput, List<int> numbers)
+        {
+            bool isNumber = int.TryParse(userInput, out int result);
+
+            if (isNumber)
+            {
+                numbers.Add(result);
+                Console.WriteLine("Число успешно добавлено");
+            }
+            else
+            {
+                Console.WriteLine("Введена неверная команда");
+            }
+
+            Console.ReadLine();
+        }
+
+        static void ShowNumbers(List<int> numbers)
+        {
+            foreach (var number in numbers)
+            {
+                Console.WriteLine(number);
+            }
+        }
     }
 }
