@@ -7,58 +7,89 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            Queue<int> cashSumsClients = new Queue<int>();
-            int minNumber = 5;
-            int maxNumber = 100;
-            int clientsAmount = 10;
+            InputUser();
+        }
 
-            int cashAccount;
+        static void ShowCommand(string textCommand, string textDiscription)
+        {
+            Console.WriteLine(textDiscription + textCommand);
+        }
 
-            FillQueue(cashSumsClients, clientsAmount, minNumber, maxNumber);
+        static void ShowSum(List<int> numbers)
+        {
+            int sum = 0;
 
-            cashAccount = ServiceQueue(cashSumsClients);
+            foreach (var number in numbers)
+            {
+                sum += number;
+            }
 
-            ShowCash(cashAccount);
+            Console.WriteLine(sum);
+            Console.ReadLine();
+        }
+
+        static void AddNumber(string userInput, List<int> numbers)
+        {
+            bool isSuccess = int.TryParse(userInput, out int shift);
+
+            if (isSuccess)
+            {
+                numbers.Add(int.Parse(userInput));
+                Console.WriteLine("Число успешно добавлено");
+            }
+            else
+            {
+                Console.WriteLine("Введена неверная команда");
+            }
 
             Console.ReadLine();
         }
 
-        static void FillQueue(Queue<int> cashSumsClients, int clientsAmount, int minNumber, int maxNumber)
+        static void ShowNumbers(List<int> numbers)
         {
-            Random random = new Random();
-
-            for (int i = 0; i < clientsAmount; i++)
-                cashSumsClients.Enqueue(random.Next(minNumber, maxNumber + 1));
+            foreach (var number in numbers)
+            {
+                Console.WriteLine(number);
+            }
         }
 
-        static int ServiceQueue(Queue<int> cashSumsClients)
+        static void InputUser()
         {
-            int sumResult = 0;
-            int clientCount = cashSumsClients.Count;
+            const string CommandExit = "exit";
+            const string CommandSum = "sum";
 
-            for (int i = 0; i < clientCount; i++)
+            bool isOpen = true;
+
+            List<int> numbers = new List<int>();
+
+            while (isOpen)
             {
                 Console.Clear();
 
-                OutputClient(cashSumsClients, i);
-                sumResult += cashSumsClients.Peek();
-                ShowCash(sumResult);
-                cashSumsClients.Dequeue();
+                ShowCommand(CommandSum, "Что-бы получить сумму всех чисел введите: ");
+                ShowCommand(CommandExit, "Что-бы выйти из программы введите: ");
 
-                Console.ReadLine();
+                ShowNumbers(numbers);
+
+                Console.Write("Введите команду:");
+
+                string userInput = Console.ReadLine();
+
+                switch (userInput.ToLower())
+                {
+                    case CommandSum:
+                        ShowSum(numbers);
+                        break;
+
+                    case CommandExit:
+                        isOpen = false;
+                        break;
+
+                    default:
+                        AddNumber(userInput, numbers);
+                        break;
+                }
             }
-
-            return sumResult;
-        }
-  
-        static void OutputClient(Queue<int> cashSumsClients, int clientIndex)
-        {
-            Console.WriteLine($"Клиент №{clientIndex + 1} Cумма покупкт клиента: {cashSumsClients.Peek()}");
-        }
-
-        static void ShowCash(int cashAccount)
-        {
-            Console.WriteLine($"Ваш счёт: {cashAccount}");
         }
     }
 }
