@@ -7,30 +7,38 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
+            const string CommandAddEmployee = "add";
+            const string CommandDeleteEmployee = "delete";
+            const string CommandShowAllEmployee = "show";
             const string CommandExit = "exit";
-            const string CommandSum = "sum";
+
+            Dictionary<string, List<string>> employees = new Dictionary<string, List<string>>();
 
             bool isOpen = true;
-
-            List<int> numbers = new List<int>();
 
             while (isOpen)
             {
                 Console.Clear();
 
-                Console.WriteLine($"Что-бы получить сумму всех чисел введите: {CommandSum}");
-                Console.WriteLine($"Что-бы выйти из программы введите: {CommandExit}");
+                Console.WriteLine($"Комманда {CommandAddEmployee} - добавить сотрудника");
+                Console.WriteLine($"Комманда {CommandDeleteEmployee} - удалить сотрудника");
+                Console.WriteLine($"Комманда {CommandShowAllEmployee} - показать всех сотрудников");
+                Console.WriteLine($"Комманда {CommandExit} - выйти из программы");
 
-                ShowNumbers(numbers);
+                string userIput = Console.ReadLine();
 
-                Console.Write("Введите команду:");
-
-                string userInput = Console.ReadLine();
-
-                switch (userInput.ToLower())
+                switch (userIput.ToLower())
                 {
-                    case CommandSum:
-                        ShowSum(numbers);
+                    case CommandAddEmployee:
+                        AddEmpoyee(employees);
+                        break;
+
+                    case CommandDeleteEmployee:
+                        DeleteEmployee(employees);
+                        break;
+
+                    case CommandShowAllEmployee:
+                        ShowEmployee(employees);
                         break;
 
                     case CommandExit:
@@ -38,48 +46,76 @@ namespace ConsoleApp1
                         break;
 
                     default:
-                        AddNumber(userInput, numbers);
+                        Console.WriteLine("Не верная команада");
                         break;
+                }
+
+                Console.ReadKey();
+            }
+
+            foreach (var manager in employees)
+            {
+                Console.Write($"{manager.Key} {manager.Value}");
+            }
+
+            employees.Remove("gg");
+        }
+
+        static void AddEmpoyee(Dictionary<string, List<string>> employees)
+        {
+            Console.Clear();
+
+            Console.Write("Введите фио сотрудника: ");
+            string name = Console.ReadLine();
+            Console.Write("Введите должность сотрудника: ");
+            string workplace = Console.ReadLine();
+
+            employees.Add(name, new List<string> { workplace });
+        }
+
+        static void DeleteEmployee(Dictionary<string, List<string>> employees)
+        {
+            Console.Clear();
+
+            ShowEmployee(employees);
+
+            Console.Write("Введите имя сотрудника которого нужно удалить - ");
+            string userInput = Console.ReadLine();
+
+            foreach (var employee in employees)
+            {
+                if (employee.Key == userInput)
+                {
+                    employees.Remove(employee.Key);
+                    Console.WriteLine("Сотрудник удалён из базы");
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Данный сотрудник не числится  в базе");
+                    break;
                 }
             }
         }
 
-        static void ShowSum(List<int> numbers)
+        static void ShowEmployee(Dictionary<string, List<string>> employees)
         {
-            int sum = 0;
+            int emploueeNumber = 0;
 
-            foreach (var number in numbers)
+            Console.Clear();
+
+            foreach (var employee in employees)
             {
-                sum += number;
-            }
+                emploueeNumber++;
 
-            Console.WriteLine(sum);
-            Console.ReadLine();
+                Console.Write($"{emploueeNumber}. {employee.Key} ");
+
+                foreach (var value in employee.Value)
+                {
+                    Console.WriteLine(value);
+                }
+            }
         }
-
-        static void AddNumber(string userInput, List<int> numbers)
-        {
-            bool isNumber = int.TryParse(userInput, out int result);
-
-            if (isNumber)
-            {
-                numbers.Add(result);
-                Console.WriteLine("Число успешно добавлено");
-            }
-            else
-            {
-                Console.WriteLine("Введена неверная команда");
-            }
-
-            Console.ReadLine();
-        }
-
-        static void ShowNumbers(List<int> numbers)
-        {
-            foreach (var number in numbers)
-            {
-                Console.WriteLine(number);
-            }
         }
     }
 }
