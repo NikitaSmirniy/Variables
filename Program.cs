@@ -7,14 +7,17 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            const string CommandAddEmployee = "add";
-            const string CommandDeleteEmployee = "delete";
-            const string CommandShowAllEmployee = "show";
+            const string CommandAddEmployee = "1";
+            const string CommandDeleteEmployee = "2";
+            const string CommandShowAllEmployee = "3";
             const string CommandExit = "exit";
 
             Dictionary<string, List<string>> employees = new Dictionary<string, List<string>>();
 
             bool isOpen = true;
+
+            employees["Cleaner"] = new List<string>() { "Slav", "Foker" };
+            employees["Slesar"] = new List<string>() { "Slav", "Rooter" };
 
             while (isOpen)
             {
@@ -30,7 +33,7 @@ namespace ConsoleApp1
                 switch (userIput.ToLower())
                 {
                     case CommandAddEmployee:
-                        AddEmpoyee(employees);
+                        AddEmployee(employees);
                         break;
 
                     case CommandDeleteEmployee:
@@ -38,7 +41,7 @@ namespace ConsoleApp1
                         break;
 
                     case CommandShowAllEmployee:
-                        ShowEmployee(employees);
+                        ShowEmployees(employees);
                         break;
 
                     case CommandExit:
@@ -51,71 +54,79 @@ namespace ConsoleApp1
                 }
 
                 Console.ReadKey();
+                Console.Clear();
             }
-
-            foreach (var manager in employees)
-            {
-                Console.Write($"{manager.Key} {manager.Value}");
-            }
-
-            employees.Remove("gg");
         }
 
-        static void AddEmpoyee(Dictionary<string, List<string>> employees)
+        static void AddEmployee(Dictionary<string, List<string>> employees)
         {
-            Console.Clear();
-
-            Console.Write("Введите фио сотрудника: ");
-            string name = Console.ReadLine();
             Console.Write("Введите должность сотрудника: ");
             string workplace = Console.ReadLine();
+            Console.Write("Введите фио сотрудника: ");
+            string name = Console.ReadLine();
 
-            employees.Add(name, new List<string> { workplace });
+            if (employees.ContainsKey(workplace) == false)
+                employees.Add(workplace, new List<string>());
+
+            employees[workplace].Add(name);
         }
 
         static void DeleteEmployee(Dictionary<string, List<string>> employees)
         {
-            Console.Clear();
+            ShowWorkPlace(employees);
 
-            ShowEmployee(employees);
+            Console.Write("Введите должность сотрудника: ");
+            string workplace = Console.ReadLine();
 
-            Console.Write("Введите имя сотрудника которого нужно удалить - ");
-            string userInput = Console.ReadLine();
-
-            foreach (var employee in employees)
+            if (employees.ContainsKey(workplace))
             {
-                if (employee.Key == userInput)
+                List<string> fullNames = employees[workplace];
+
+                for (int i = 0; i < fullNames.Count; i++)
                 {
-                    employees.Remove(employee.Key);
+                    Console.WriteLine($"{i + 1}. {fullNames[i]}");
+                }
+
+                Console.WriteLine("Введите порядковый номер сотрудника: ");
+                int.TryParse(Console.ReadLine(), out int result);
+
+                if (result > 0 && result <= fullNames.Count)
+                {
+                    fullNames.RemoveAt(result - 1);
                     Console.WriteLine("Сотрудник удалён из базы");
-                    break;
                 }
                 else
                 {
-                    Console.WriteLine("Данный сотрудник не числится  в базе");
-                    break;
+                    Console.WriteLine("Cотрудник под этим индексом не числится в базе");
                 }
             }
         }
 
-        static void ShowEmployee(Dictionary<string, List<string>> employees)
+        static void ShowWorkPlace(Dictionary<string, List<string>> employees)
         {
-            int emploueeNumber = 0;
-
-            Console.Clear();
-
             foreach (var employee in employees)
             {
-                emploueeNumber++;
+                Console.WriteLine(employee.Key);
+            }
+        }
 
-                Console.Write($"{emploueeNumber}. {employee.Key} ");
+        static void ShowEmployees(Dictionary<string, List<string>> employees)
+        {
+            foreach (var employee in employees)
+            {
+                int emploueeNumber = 0;
+
+                Console.WriteLine("Должности:");
+                Console.Write($"{employee.Key}\n");
 
                 foreach (var value in employee.Value)
                 {
-                    Console.WriteLine(value);
+                    emploueeNumber++;
+                    Console.WriteLine($"{emploueeNumber}. {value}");
                 }
+
+                emploueeNumber = 0;
             }
-        }
         }
     }
 }
