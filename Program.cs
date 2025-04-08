@@ -88,11 +88,15 @@ namespace ConsoleApp1
                 }
 
                 Console.WriteLine("Введите порядковый номер сотрудника: ");
-                int.TryParse(Console.ReadLine(), out int result);
+                int.TryParse(Console.ReadLine(), out int userInput);
 
-                if (result > 0 && result <= fullNames.Count)
+                if (userInput > 0 && userInput <= fullNames.Count)
                 {
-                    fullNames.RemoveAt(result - 1);
+                    fullNames.RemoveAt(userInput - 1);
+
+                    if (fullNames.Count == 0)
+                        employees.Remove(workplace);
+
                     Console.WriteLine("Сотрудник удалён из базы");
                 }
                 else
