@@ -7,29 +7,37 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            string[] array1 = { "1", "2", "3" };
-            string[] array2 = { "2", "4", "5" };
+            Player player = new Player("Agent-47", 28.0f, 50.0f, 120);
 
-            List<string> numbers = new List<string>();
-
-            AddUniqueValues(array1, numbers);
-            AddUniqueValues(array2, numbers);
-
-            foreach (var number in numbers)
-            {
-                Console.WriteLine(number);
-            }
+            player.ShowCharacterParameters();
 
             Console.ReadKey();
         }
+    }
 
-        static void AddUniqueValues(string[] array, List<string> numbers)
+    class Player
+    {
+        public string Name;
+        public float Speed;
+        public float Damage;
+        public float MaxHealth;
+        public float Health;
+
+        public Player(string name, float speed, float damage, float health = 100)
         {
-            for (int i = 0; i < array.Length; i++)
-            {
-                if (numbers.Contains(array[i]) == false)
-                    numbers.Add(array[i]);
-            }
+            Name = name;
+            Speed = speed;
+            Damage = damage;
+            MaxHealth = health;
+            Health = MaxHealth;
+        }
+
+        public void ShowCharacterParameters()
+        {
+            Console.WriteLine($"Имя: {Name}");
+            Console.WriteLine($"Cкорость перемещения: {Speed} км/ч");
+            Console.WriteLine($"Урон: {Damage} км/ч");
+            Console.WriteLine($"Макс. здоровье: {MaxHealth}");
         }
     }
 }
