@@ -17,27 +17,27 @@ namespace ConsoleApp1
 
     class Player
     {
-        public string Name;
-        public float Speed;
-        public float Damage;
-        public float MaxHealth;
-        public float Health;
+        private string _name;
+        private float _speed;
+        private float _damage;
+        private float _maxHealth;
+        private float _health;
 
         public Player(string name, float speed, float damage, float health = 100)
         {
-            Name = name;
-            Speed = speed;
-            Damage = damage;
-            MaxHealth = health;
-            Health = MaxHealth;
+            _name = name;
+            _speed = speed;
+            _damage = damage;
+            _maxHealth = health;
+            _health = _maxHealth;
         }
 
         public void ShowCharacterParameters()
         {
-            Console.WriteLine($"Имя: {Name}");
-            Console.WriteLine($"Cкорость перемещения: {Speed} км/ч");
-            Console.WriteLine($"Урон: {Damage} км/ч");
-            Console.WriteLine($"Макс. здоровье: {MaxHealth}");
+            Console.WriteLine($"Имя: {_name}");
+            Console.WriteLine($"Cкорость перемещения: {_speed} км/ч");
+            Console.WriteLine($"Урон: {_damage} км/ч");
+            Console.WriteLine($"Макс. здоровье: {_maxHealth}");
         }
     }
 }
