@@ -7,37 +7,36 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            Player player = new Player("Agent-47", 28.0f, 50.0f, 120);
+            Render render = new Render();
+            Player player = new Player(20, 20);
 
-            player.ShowCharacterParameters();
+            render.ShowPlayerPosition(player.X, player.Y, player.PlayerSymbol);
 
             Console.ReadKey();
         }
     }
 
+    class Render
+    {
+        public void ShowPlayerPosition(int x, int y, char playerSymbol)
+        {
+            Console.CursorVisible = false;
+            Console.SetCursorPosition(x, y);
+            Console.Write(playerSymbol);
+        }
+    }
+
     class Player
     {
-        private string _name;
-        private float _speed;
-        private float _damage;
-        private float _maxHealth;
-        private float _health;
+        public int X { get; private set; }
+        public int Y { get; private set; }
+        public char PlayerSymbol { get; private set; }
 
-        public Player(string name, float speed, float damage, float health = 100)
+        public Player(int x, int y, char playerSymbol = '#')
         {
-            _name = name;
-            _speed = speed;
-            _damage = damage;
-            _maxHealth = health;
-            _health = _maxHealth;
-        }
-
-        public void ShowCharacterParameters()
-        {
-            Console.WriteLine($"Имя: {_name}");
-            Console.WriteLine($"Cкорость перемещения: {_speed} км/ч");
-            Console.WriteLine($"Урон: {_damage} км/ч");
-            Console.WriteLine($"Макс. здоровье: {_maxHealth}");
+            X = x;
+            Y = y;
+            PlayerSymbol = playerSymbol;
         }
     }
 }
