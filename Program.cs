@@ -28,15 +28,15 @@ namespace ConsoleApp1
 
     class Player
     {
-        public int X { get; private set; }
-        public int Y { get; private set; }
-        public char PlayerSymbol { get; private set; }
-
         public Player(int x, int y, char playerSymbol = '#')
         {
             X = x;
             Y = y;
             PlayerSymbol = playerSymbol;
         }
+
+        public int X { get; private set; }
+        public int Y { get; private set; }
+        public char PlayerSymbol { get; private set; }
     }
 }
