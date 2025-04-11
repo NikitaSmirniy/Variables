@@ -9,11 +9,11 @@ namespace ConsoleApp1
         {
             const string CommandAdd = "1";
             const string CommandDelete = "2";
-            const string CommandBaned = "3";
+            const string CommandBanned = "3";
             const string CommandExit = "4";
 
             List<Player> players = new List<Player>();
-            DataBase dataBaze = new DataBase(ref players);
+            Database databaze = new Database(players);
 
             bool isOpen = true;
 
@@ -21,23 +21,23 @@ namespace ConsoleApp1
             {
                 Console.WriteLine($"Команда {CommandAdd} - добавить игрока");
                 Console.WriteLine($"Команда {CommandDelete} - удалить игрока");
-                Console.WriteLine($"Команда {CommandBaned} - бан/разбан игрока");
+                Console.WriteLine($"Команда {CommandBanned} - бан/разбан игрока");
                 Console.WriteLine($"Команда {CommandExit} - выйти");
 
-                dataBaze.ShowAllPlayers();
+                databaze.ShowAllPlayers();
 
                 string userInput = Console.ReadLine();
 
                 switch (userInput)
                 {
                     case CommandAdd:
-                        dataBaze.AddPlayer();
+                        databaze.AddPlayer();
                         break;
                     case CommandDelete:
-                        dataBaze.DeletePlayer();
+                        databaze.DeletePlayer();
                         break;
-                    case CommandBaned:
-                        dataBaze.Baned();
+                    case CommandBanned:
+                        databaze.Baned();
                         break;
                     case CommandExit:
                         isOpen = false;
@@ -55,56 +55,82 @@ namespace ConsoleApp1
 
     class Player
     {
-        public Player(int number, string name)
+        public Player(int id, string name)
         {
-            Number = number;
+            Id = id;
             Name = name;
         }
 
-        public int Number { get; private set; }
+        public int Id { get; private set; }
         public string Name { get; private set; }
         public int Level { get; private set; } = 1;
-        public bool IsBaned { get; set; }
+        public bool IsBanned { get; private set; }
+
+        public void Ban()
+        {
+            IsBanned = true;
+        }
+
+        public void Unban()
+        {
+            IsBanned = false;
+        }
     }
 
-    class DataBase
+    class Database
     {
         private List<Player> _players;
+        private int lastId;
 
-        public DataBase(ref List<Player> players)
+        public Database(List<Player> players)
         {
             _players = players;
         }
 
         public void AddPlayer()
         {
-            Console.Write("Введите имя игрока:");
+            Console.Write("Введите имя игрока: ");
             string playerName = Console.ReadLine();
 
-            _players.Add(new Player(_players.Count + 1, playerName));
+            lastId++;
+            _players.Add(new Player(lastId, playerName));
         }
 
         public void DeletePlayer()
         {
-            Console.Write("Введите номер игрока: ");
-            int.TryParse(Console.ReadLine(), out int userInput);
-
-            if (userInput > 0 && userInput <= _players.Count)
-                _players.RemoveAt(userInput - 1);
+            if (TryGetPlayer(out Player player))
+                _players.Remove(player);
         }
 
         public void Baned()
         {
+            if (TryGetPlayer(out Player player))
+            {
+                if (player.IsBanned)
+                    player.Unban();
+                else
+                    player.Ban();
+            }
+        }
+
+        private bool TryGetPlayer(out Player foundPlayer)
+        {
             Console.Write("Введите номер игрока: ");
             int.TryParse(Console.ReadLine(), out int userInput);
 
-            if (userInput <= _players.Count && userInput > 0)
+            foreach (var player in _players)
             {
-                if (_players[userInput - 1].IsBaned)
-                    _players[userInput - 1].IsBaned = false;
-                else
-                    _players[userInput - 1].IsBaned = true;
+                if (player.Id == userInput)
+                {
+                    foundPlayer = player;
+
+                    return true;
+                }
             }
+
+            foundPlayer = null;
+
+            return false;
         }
 
         public void ShowAllPlayers()
@@ -112,14 +138,14 @@ namespace ConsoleApp1
             for (int i = 0; i < _players.Count; i++)
             {
                 Console.WriteLine(new string('_', 20));
-                Console.WriteLine($"{_players[i].Number}. игрок\nИмя: {_players[i].Name}\n" +
-                    $"Уровень: {_players[i].Level}\n{CheckBanedPlayer(_players[i].Number)}");
+                Console.WriteLine($"{i}. игрок\nИмя: {_players[i].Name}\n" +
+                    $"Уровень: {_players[i].Level}\n{GetBanedPlayer(i)}");
             }
         }
 
-        public string CheckBanedPlayer(int index)
+        private string GetBanedPlayer(int index)
         {
-            if (_players[index - 1].IsBaned)
+            if (_players[index].IsBanned)
                 return "Находится в бане";
             else
                 return "Не находится в бане";
