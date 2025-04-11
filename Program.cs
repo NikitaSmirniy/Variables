@@ -9,8 +9,9 @@ namespace ConsoleApp1
         {
             const string CommandAdd = "1";
             const string CommandDelete = "2";
-            const string CommandBanned = "3";
-            const string CommandExit = "4";
+            const string CommandBan = "3";
+            const string CommandUnban = "4";
+            const string CommandExit = "5";
 
             List<Player> players = new List<Player>();
             Database databaze = new Database(players);
@@ -21,7 +22,8 @@ namespace ConsoleApp1
             {
                 Console.WriteLine($"Команда {CommandAdd} - добавить игрока");
                 Console.WriteLine($"Команда {CommandDelete} - удалить игрока");
-                Console.WriteLine($"Команда {CommandBanned} - бан/разбан игрока");
+                Console.WriteLine($"Команда {CommandBan} - бан игрока");
+                Console.WriteLine($"Команда {CommandUnban} - разбан игрока");
                 Console.WriteLine($"Команда {CommandExit} - выйти");
 
                 databaze.ShowAllPlayers();
@@ -36,8 +38,11 @@ namespace ConsoleApp1
                     case CommandDelete:
                         databaze.DeletePlayer();
                         break;
-                    case CommandBanned:
-                        databaze.Baned();
+                    case CommandBan:
+                        databaze.Ban();
+                        break;
+                    case CommandUnban:
+                        databaze.Unban();
                         break;
                     case CommandExit:
                         isOpen = false;
@@ -80,7 +85,7 @@ namespace ConsoleApp1
     class Database
     {
         private List<Player> _players;
-        private int lastId;
+        private int _lastId;
 
         public Database(List<Player> players)
         {
@@ -92,8 +97,8 @@ namespace ConsoleApp1
             Console.Write("Введите имя игрока: ");
             string playerName = Console.ReadLine();
 
-            lastId++;
-            _players.Add(new Player(lastId, playerName));
+            _lastId++;
+            _players.Add(new Player(_lastId, playerName));
         }
 
         public void DeletePlayer()
@@ -102,13 +107,20 @@ namespace ConsoleApp1
                 _players.Remove(player);
         }
 
-        public void Baned()
+        public void Ban()
         {
             if (TryGetPlayer(out Player player))
             {
                 if (player.IsBanned)
                     player.Unban();
-                else
+            }
+        }
+
+        public void Unban()
+        {
+            if (TryGetPlayer(out Player player))
+            {
+                if (player.IsBanned == false)
                     player.Ban();
             }
         }
@@ -138,7 +150,7 @@ namespace ConsoleApp1
             for (int i = 0; i < _players.Count; i++)
             {
                 Console.WriteLine(new string('_', 20));
-                Console.WriteLine($"{i}. игрок\nИмя: {_players[i].Name}\n" +
+                Console.WriteLine($"{i + 1}. игрок\nИмя: {_players[i].Name}\n" +
                     $"Уровень: {_players[i].Level}\n{GetBanedPlayer(i)}");
             }
         }
