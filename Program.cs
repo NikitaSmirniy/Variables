@@ -14,6 +14,8 @@ namespace ConsoleApp1
 
             Croupier croupier = new Croupier(userInpt, deckCards, player);
 
+            croupier.Shuffl();
+
             Console.ReadKey();
         }
     }
@@ -29,7 +31,10 @@ namespace ConsoleApp1
             _deckCards = deckCards;
             _player = player;
             NumberOfCards = numberOfCards;
+        }
 
+        public void Shuffl()
+        {
             _deckCards.AddCards(NumberOfCards);
             _player.ShowAllCards();
         }
