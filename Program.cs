@@ -7,160 +7,72 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            const string CommandAdd = "1";
-            const string CommandDelete = "2";
-            const string CommandBan = "3";
-            const string CommandUnban = "4";
-            const string CommandExit = "5";
+            DeckCards deckCards = new DeckCards();
+            Player player = new Player(deckCards);
 
-            List<Player> players = new List<Player>();
-            Database databaze = new Database(players);
+            int.TryParse(Console.ReadLine(), out int userInpt);
 
-            bool isOpen = true;
+            Croupier croupier = new Croupier(userInpt, deckCards, player);
+            player.ShowAllCards();
 
-            while (isOpen)
-            {
-                Console.WriteLine($"Команда {CommandAdd} - добавить игрока");
-                Console.WriteLine($"Команда {CommandDelete} - удалить игрока");
-                Console.WriteLine($"Команда {CommandBan} - бан игрока");
-                Console.WriteLine($"Команда {CommandUnban} - разбан игрока");
-                Console.WriteLine($"Команда {CommandExit} - выйти");
+            Console.ReadKey();
+        }
+    }
 
-                databaze.ShowAllPlayers();
+    class Croupier
+    {
+        private Player _player;
+        private DeckCards _deckCards;
+        public int NumberOfCards { get; private set; }
 
-                string userInput = Console.ReadLine();
+        public Croupier(int numberOfCards, DeckCards deckCards, Player player)
+        {
+            _deckCards = deckCards;
+            _player = player;
+            NumberOfCards = numberOfCards;
 
-                switch (userInput)
-                {
-                    case CommandAdd:
-                        databaze.AddPlayer();
-                        break;
-                    case CommandDelete:
-                        databaze.DeletePlayer();
-                        break;
-                    case CommandBan:
-                        databaze.Ban();
-                        break;
-                    case CommandUnban:
-                        databaze.Unban();
-                        break;
-                    case CommandExit:
-                        isOpen = false;
-                        break;
-                    default:
-                        Console.WriteLine("Введена неверная команда");
-                        break;
-                }
-
-                Console.ReadKey();
-                Console.Clear();
-            }
+            deckCards.AddCards(NumberOfCards);
         }
     }
 
     class Player
     {
-        public Player(int id, string name)
+        private DeckCards _deckCards;
+
+        public Player(DeckCards deckCards)
         {
-            Id = id;
-            Name = name;
+            _deckCards = deckCards;
         }
 
-        public int Id { get; private set; }
-        public string Name { get; private set; }
-        public int Level { get; private set; } = 1;
-        public bool IsBanned { get; private set; }
-
-        public void Ban()
+        public void ShowAllCards()
         {
-            IsBanned = true;
-        }
-
-        public void Unban()
-        {
-            IsBanned = false;
+            foreach (var card in _deckCards._cards)
+            {
+                Console.WriteLine($"Номер карты: {card.Number}");
+            }
         }
     }
 
-    class Database
+    class DeckCards
     {
-        private List<Player> _players;
-        private int _lastId;
+        public List<Card> _cards { get; } = new List<Card>();
 
-        public Database(List<Player> players)
+        public void AddCards(int numberOfCards)
         {
-            _players = players;
-        }
-
-        public void AddPlayer()
-        {
-            Console.Write("Введите имя игрока: ");
-            string playerName = Console.ReadLine();
-
-            _lastId++;
-            _players.Add(new Player(_lastId, playerName));
-        }
-
-        public void DeletePlayer()
-        {
-            if (TryGetPlayer(out Player player))
-                _players.Remove(player);
-        }
-
-        public void Ban()
-        {
-            if (TryGetPlayer(out Player player))
+            for (int i = 0; i < numberOfCards; i++)
             {
-                if (player.IsBanned)
-                    player.Unban();
+                _cards.Add(new Card(i + 1));
             }
         }
+    }
 
-        public void Unban()
+    class Card
+    {
+        public Card(int number)
         {
-            if (TryGetPlayer(out Player player))
-            {
-                if (player.IsBanned == false)
-                    player.Ban();
-            }
+            Number = number;
         }
 
-        private bool TryGetPlayer(out Player foundPlayer)
-        {
-            Console.Write("Введите номер игрока: ");
-            int.TryParse(Console.ReadLine(), out int userInput);
-
-            foreach (var player in _players)
-            {
-                if (player.Id == userInput)
-                {
-                    foundPlayer = player;
-
-                    return true;
-                }
-            }
-
-            foundPlayer = null;
-
-            return false;
-        }
-
-        public void ShowAllPlayers()
-        {
-            for (int i = 0; i < _players.Count; i++)
-            {
-                Console.WriteLine(new string('_', 20));
-                Console.WriteLine($"{i + 1}. игрок\nИмя: {_players[i].Name}\n" +
-                    $"Уровень: {_players[i].Level}\n{GetBanedPlayer(i)}");
-            }
-        }
-
-        private string GetBanedPlayer(int index)
-        {
-            if (_players[index].IsBanned)
-                return "Находится в бане";
-            else
-                return "Не находится в бане";
-        }
+        public int Number { get; private set; }
     }
 }
