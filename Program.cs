@@ -13,7 +13,6 @@ namespace ConsoleApp1
             int.TryParse(Console.ReadLine(), out int userInpt);
 
             Croupier croupier = new Croupier(userInpt, deckCards, player);
-            player.ShowAllCards();
 
             Console.ReadKey();
         }
@@ -31,7 +30,8 @@ namespace ConsoleApp1
             _player = player;
             NumberOfCards = numberOfCards;
 
-            deckCards.AddCards(NumberOfCards);
+            _deckCards.AddCards(NumberOfCards);
+            _player.ShowAllCards();
         }
     }
 
