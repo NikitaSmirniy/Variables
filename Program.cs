@@ -60,7 +60,7 @@ namespace ConsoleApp1
 
     class DeckCards
     {
-        public List<Card> _cards { get; } = new List<Card>();
+        public List<Card> _cards { get; private set;} = new List<Card>();
 
         public void AddCards(int numberOfCards)
         {
