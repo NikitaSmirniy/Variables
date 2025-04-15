@@ -115,7 +115,7 @@ namespace ConsoleApp1
 
     class Deck
     {
-        Random random = new Random();
+        private Random _random = new Random();
 
         private List<Card> _cards = new List<Card>();
 
@@ -129,7 +129,7 @@ namespace ConsoleApp1
 
         public Card GetLastCard()
         {
-            var lastCard = _cards[_cards.Count - 1];
+            Card lastCard = _cards[_cards.Count - 1];
 
             return lastCard;
         }
@@ -139,7 +139,7 @@ namespace ConsoleApp1
             _cards.Remove(GetLastCard());
         }
 
-        public void Fill()
+        private void Fill()
         {
             foreach (Suit suit in Enum.GetValues(typeof(Suit)))
             {
@@ -157,7 +157,7 @@ namespace ConsoleApp1
             for (int i = _cards.Count - 1; i > secondElementOfArray; i--)
             {
                 Card tempCard = _cards[i];
-                int randomNumber = random.Next(_cards.Count);
+                int randomNumber = _random.Next(_cards.Count);
 
                 _cards[i] = _cards[randomNumber];
                 _cards[randomNumber] = tempCard;
