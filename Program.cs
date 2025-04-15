@@ -166,4 +166,16 @@ namespace ConsoleApp1
             Console.WriteLine("Карты перемешаны");
         }
     }
+
+    class Card
+    {
+        public Card(Suit suit, Rank rank)
+        {
+            Suit = suit;
+            Rank = rank;
+        }
+
+        public Suit Suit { get; private set; }
+        public Rank Rank { get; private set; }
+    }
 }
