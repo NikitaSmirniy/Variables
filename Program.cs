@@ -8,13 +8,13 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
             DeckCards deckCards = new DeckCards();
-            Player player = new Player(deckCards);
+            Player player = new Player();
 
-            int.TryParse(Console.ReadLine(), out int userInpt);
+            Croupier croupier = new Croupier(deckCards, player);
 
-            Croupier croupier = new Croupier(userInpt, deckCards, player);
+            croupier.SetCardsToPlayer();
 
-            croupier.Shuffl();
+            player.ShowAllCards();
 
             Console.ReadKey();
         }
@@ -24,45 +24,91 @@ namespace ConsoleApp1
     {
         private Player _player;
         private DeckCards _deckCards;
-        public int NumberOfCards { get; private set; }
 
-        public Croupier(int numberOfCards, DeckCards deckCards, Player player)
+        public Croupier(DeckCards deckCards, Player player)
         {
             _deckCards = deckCards;
             _player = player;
-            NumberOfCards = numberOfCards;
         }
 
-        public void Shuffl()
+        public void SetCardsToPlayer()
         {
-            _deckCards.AddCards(NumberOfCards);
-            _player.ShowAllCards();
+            bool isOpen = true;
+
+            while (isOpen)
+            {
+                Console.Write("Введите сколько карт должен получить игрок: ");
+
+                if (int.TryParse(Console.ReadLine(), out int userInpt))
+                {
+                    if (userInpt > 0 && userInpt <= _deckCards.NumberOfCards)
+                    {
+                        PassCardsToPlayer(userInpt);
+                        isOpen = false;
+
+                        Console.WriteLine("Карты были добавлены в колоду игрока");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Введено неверное кол-во карт! Попробуйте снова");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Введено нечисловое значение! Попробуйте снова");
+                }
+
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+
+        private void PassCardsToPlayer(int numberOfCards)
+        {
+            for (int i = 0; i < numberOfCards; i++)
+            {
+                _player.AddCardToDeck(_deckCards.GetCardFromDeck(i));
+            }
         }
     }
 
     class Player
     {
-        private DeckCards _deckCards;
-
-        public Player(DeckCards deckCards)
-        {
-            _deckCards = deckCards;
-        }
+        private List<Card> _playerCards = new List<Card>();
 
         public void ShowAllCards()
         {
-            foreach (var card in _deckCards._cards)
+            Console.WriteLine("Карты игрока");
+
+            foreach (var card in _playerCards)
             {
                 Console.WriteLine($"Номер карты: {card.Number}");
             }
+        }
+
+        public void AddCardToDeck(Card card)
+        {
+            _playerCards.Add(card);
         }
     }
 
     class DeckCards
     {
-        public List<Card> _cards { get; private set;} = new List<Card>();
+        private List<Card> _cards = new List<Card>();
 
-        public void AddCards(int numberOfCards)
+        public DeckCards()
+        {
+            FillDeck(NumberOfCards);
+        }
+
+        public int NumberOfCards { get; private set; } = 36;
+
+        public Card GetCardFromDeck(int index)
+        {
+            return _cards[index];
+        }
+
+        private void FillDeck(int numberOfCards)
         {
             for (int i = 0; i < numberOfCards; i++)
             {
