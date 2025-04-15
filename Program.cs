@@ -7,175 +7,278 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            Deck deckCards = new Deck();
-            Player player = new Player();
+            const string CommandAdd = "1";
+            const string CommandDelete = "2";
+            const string CommandSearch = "3";
+            const string CommandShowAll = "4";
+            const string CommandExit = "5";
 
-            Croupier croupier = new Croupier(deckCards, player);
-
-            croupier.SetCardsToPlayer();
-
-            player.ShowAllCards();
-
-            Console.ReadKey();
-        }
-    }
-
-    public enum Suit
-    {
-        Spades,
-        Clubs,
-        Diamonds,
-        Hearts
-    }
-
-    public enum Rank
-    {
-        Six = 6,
-        Seven,
-        Eight,
-        Nine,
-        Ten,
-        Jack,
-        Queen,
-        King
-    }
-
-    class Croupier
-    {
-        private Player _player;
-        private Deck _deck;
-
-        public Croupier(Deck deckCards, Player player)
-        {
-            _deck = deckCards;
-            _player = player;
-        }
-
-        public void SetCardsToPlayer()
-        {
             bool isOpen = true;
+
+            BookDepository bookDepository = new BookDepository();
 
             while (isOpen)
             {
-                Console.Write("Введите сколько карт должен получить игрок: ");
+                Console.WriteLine($"Команда добавить - {CommandAdd}");
+                Console.WriteLine($"Команда удалить - {CommandDelete}");
+                Console.WriteLine($"Команда поиск - {CommandSearch}");
+                Console.WriteLine($"Команда показать всю библиотеку - {CommandShowAll}");
+                Console.WriteLine($"Команда выйти - {CommandExit}");
 
-                if (int.TryParse(Console.ReadLine(), out int userInpt))
+                Console.Write("Введите команду: ");
+                string userInput = Console.ReadLine();
+
+                switch (userInput)
                 {
-                    if (userInpt > 0 && userInpt <= _deck.NumberOfCards)
-                    {
-                        PassCardsToPlayer(userInpt);
+                    case CommandAdd:
+                        bookDepository.Add();
+                        break;
+
+                    case CommandDelete:
+                        bookDepository.Delete();
+                        break;
+
+                    case CommandSearch:
+                        bookDepository.SearchBook();
+                        break;
+
+                    case CommandShowAll:
+                        bookDepository.ShowAllBooks();
+                        break;
+
+                    case CommandExit:
                         isOpen = false;
+                        break;
 
-                        Console.WriteLine("Карты были добавлены в колоду игрока");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Введено неверное кол-во карт! Попробуйте снова");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Введено нечисловое значение! Попробуйте снова");
+                    default:
+                        Console.WriteLine("Введина неверная команда");
+                        break;
                 }
 
                 Console.ReadKey();
                 Console.Clear();
             }
-        }
 
-        private void PassCardsToPlayer(int numberOfCards)
-        {
-            for (int i = 0; i < numberOfCards; i++)
-            {
-                _player.AddCardToDeck(_deck.GetLastCard());
-                _deck.DeleteCard();
-            }
+            Console.ReadKey();
         }
     }
 
-    class Player
+    class BookDepository
     {
-        private List<Card> _cards = new List<Card>();
+        private const string CommandName = "1";
+        private const string CommandAuthor = "2";
+        private const string CommandYearOfRelease = "3";
+        private const string CommandExit = "4";
 
-        public void ShowAllCards()
+        private List<Book> _books = new List<Book>();
+
+        public void Add()
         {
-            Console.WriteLine("Карты игрока");
+            IndentLine();
+            Console.WriteLine("Заполнение данных книги");
 
-            foreach (var card in _cards)
+            _books.Add(new Book(SetText("\nНазвание: "), SetText("\nАвтор: "), SetText("\nГод выпуска: ")));
+        }
+
+        public void Delete()
+        {
+            IndentLine();
+            Console.WriteLine("Удаление книги");
+
+            ShowCommand();
+
+            Console.Write("Введите команду: ");
+            string userInput = Console.ReadLine();
+
+            switch (userInput)
             {
-                Console.WriteLine($"Значение: {(int)card.Rank} Масть: {card.Suit}");
+                case CommandName:
+                    _books.Remove(GetBookByName());
+                    break;
+
+                case CommandAuthor:
+                    _books.Remove(GetBookByAuthor());
+                    break;
+
+                case CommandYearOfRelease:
+                    _books.Remove(GetBookByDate());
+                    break;
+
+                default:
+                    Console.WriteLine("Неверная команда");
+                    break;
+            }
+
+            Console.WriteLine("Вы удалили книгу");
+            Console.ReadKey();
+        }
+
+        public void SearchBook()
+        {
+            IndentLine();
+            Console.WriteLine("Поиск книги");
+
+            ShowCommand();
+
+            Console.Write("Введите команду: ");
+            string userInput = Console.ReadLine();
+
+            switch (userInput)
+            {
+                case CommandName:
+                    ShowBooksByNameFound();
+                    break;
+
+                case CommandAuthor:
+                    ShowBooksByAuthorFound();
+                    break;
+
+                case CommandYearOfRelease:
+                    ShowBooksByDateFound();
+                    break;
+
+                default:
+                    Console.WriteLine("Неверная команда");
+                    break;
+            }
+
+            Console.ReadKey();
+        }
+
+        public void ShowAllBooks()
+        {
+            foreach (var book in _books)
+            {
+                IndentLine();
+
+                book.ShowInfo();
             }
         }
 
-        public void AddCardToDeck(Card card)
+        private void ShowCommand()
         {
-            _cards.Add(card);
+            Console.WriteLine("По каким данным вы хотите произвести операцию над произведение: ");
+            Console.WriteLine($"По названию - {CommandName}");
+            Console.WriteLine($"По автору - {CommandAuthor}");
+            Console.WriteLine($"По году выпуска - {CommandYearOfRelease}");
+            Console.WriteLine($"Выйти - {CommandExit}");
+        }
+
+        private string SetText(string infoText)
+        {
+            Console.Write(infoText);
+
+            return Console.ReadLine();
+        }
+
+        private Book GetBookByName()
+        {
+            string userInput = Console.ReadLine();
+
+            foreach (var book in _books)
+            {
+                if (book.Name == userInput)
+                    return book;
+                else
+                    Console.WriteLine("Вы ввели несуществующие данные");
+            }
+
+            return null;
+        }
+
+        private Book GetBookByAuthor()
+        {
+            string userInput = Console.ReadLine();
+
+            foreach (var book in _books)
+            {
+                if (book.Author == userInput)
+                    return book;
+                else
+                    Console.WriteLine("Вы ввели несуществующие данные");
+            }
+
+            return null;
+        }
+
+        private Book GetBookByDate()
+        {
+            string userInput = Console.ReadLine();
+
+            foreach (var book in _books)
+            {
+                if (book.YearOfRelease == userInput)
+                    return book;
+                else
+                    Console.WriteLine("Вы ввели несуществующие данные");
+            }
+
+            return null;
+        }
+
+        private void ShowBooksByNameFound()
+        {
+            string userInput = Console.ReadLine();
+
+            foreach (var book in _books)
+            {
+                if (book.Name == userInput)
+                    book.ShowInfo();
+                else
+                    Console.WriteLine("Вы ввели несуществующие данные");
+            }
+        }
+
+        private void ShowBooksByAuthorFound()
+        {
+            string userInput = Console.ReadLine();
+
+            foreach (var book in _books)
+            {
+                if (book.Author == userInput)
+                    book.ShowInfo();
+                else
+                    Console.WriteLine("Вы ввели несуществующие данные");
+            }
+        }
+
+        private void ShowBooksByDateFound()
+        {
+            string userInput = Console.ReadLine();
+
+            foreach (var book in _books)
+            {
+                if (book.YearOfRelease == userInput)
+                    book.ShowInfo();
+                else
+                    Console.WriteLine("Вы ввели несуществующие данные");
+            }
+        }
+
+        private void IndentLine()
+        {
+            Console.WriteLine(new string('_', 20));
         }
     }
 
-    class Deck
+    class Book
     {
-        private Random _random = new Random();
-
-        private Stack<Card> _cards = new Stack<Card>();
-
-        public Deck()
+        public Book(string name, string author, string yearsOfRelease)
         {
-            Fill();
-            Shuffle();
+            Name = name;
+            Author = author;
+            YearOfRelease = yearsOfRelease;
         }
 
-        public int NumberOfCards => _cards.Count;
+        public string Name { get; private set; }
+        public string Author { get; private set; }
+        public string YearOfRelease { get; private set; }
 
-        public Card GetLastCard()
+        public void ShowInfo()
         {
-            return _cards.Peek();
+            Console.WriteLine($"Название - {Name}");
+            Console.WriteLine($"Автор - {Author}");
+            Console.WriteLine($"Год выпуска - {YearOfRelease}");
         }
-
-        public void DeleteCard()
-        {
-            _cards.Pop();
-        }
-
-        private void Fill()
-        {
-            foreach (Suit suit in Enum.GetValues(typeof(Suit)))
-            {
-                foreach (Rank rank in Enum.GetValues(typeof(Rank)))
-                {
-                    _cards.Push(new Card(suit, rank));
-                }
-            }
-        }
-
-        private void Shuffle()
-        {
-            List<Card> tempCards = new List<Card>(_cards);
-            int secondElementOfArray = 1;
-
-            for (int i = _cards.Count - 1; i > secondElementOfArray; i--)
-            {
-                Card tempCard = tempCards[i];
-                int randomNumber = _random.Next(_cards.Count);
-
-                tempCards[i] = tempCards[randomNumber];
-                tempCards[randomNumber] = tempCard;
-            }
-
-            _cards = new Stack<Card>(tempCards);
-            Console.WriteLine("Карты перемешаны");
-        }
-    }
-
-    class Card
-    {
-        public Card(Suit suit, Rank rank)
-        {
-            Suit = suit;
-            Rank = rank;
-        }
-
-        public Suit Suit { get; private set; }
-        public Rank Rank { get; private set; }
     }
 }
