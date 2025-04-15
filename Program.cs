@@ -7,7 +7,7 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            DeckCards deckCards = new DeckCards();
+            Deck deckCards = new Deck();
             Player player = new Player();
 
             Croupier croupier = new Croupier(deckCards, player);
@@ -20,14 +20,34 @@ namespace ConsoleApp1
         }
     }
 
+    public enum Suit
+    {
+        Spades,
+        Clubs,
+        Diamonds,
+        Hearts
+    }
+
+    public enum Rank
+    {
+        Six = 6,
+        Seven,
+        Eight,
+        Nine,
+        Ten,
+        Jack,
+        Queen,
+        King
+    }
+
     class Croupier
     {
         private Player _player;
-        private DeckCards _deckCards;
+        private Deck _deck;
 
-        public Croupier(DeckCards deckCards, Player player)
+        public Croupier(Deck deckCards, Player player)
         {
-            _deckCards = deckCards;
+            _deck = deckCards;
             _player = player;
         }
 
@@ -41,7 +61,7 @@ namespace ConsoleApp1
 
                 if (int.TryParse(Console.ReadLine(), out int userInpt))
                 {
-                    if (userInpt > 0 && userInpt <= _deckCards.NumberOfCards)
+                    if (userInpt > 0 && userInpt <= _deck.NumberOfCards)
                     {
                         PassCardsToPlayer(userInpt);
                         isOpen = false;
@@ -67,63 +87,95 @@ namespace ConsoleApp1
         {
             for (int i = 0; i < numberOfCards; i++)
             {
-                _player.AddCardToDeck(_deckCards.GetCardFromDeck(i));
+                _player.AddCardToDeck(_deck.GetLastCard());
+                _deck.DeleteCard();
             }
         }
     }
 
     class Player
     {
-        private List<Card> _playerCards = new List<Card>();
+        private List<Card> _cards = new List<Card>();
 
         public void ShowAllCards()
         {
             Console.WriteLine("Карты игрока");
 
-            foreach (var card in _playerCards)
+            foreach (var card in _cards)
             {
-                Console.WriteLine($"Номер карты: {card.Number}");
+                Console.WriteLine($"Значение: {(int)card.Rank} Масть: {card.Suit}");
             }
         }
 
         public void AddCardToDeck(Card card)
         {
-            _playerCards.Add(card);
+            _cards.Add(card);
         }
     }
 
-    class DeckCards
+    class Deck
     {
+        Random random = new Random();
+
         private List<Card> _cards = new List<Card>();
 
-        public DeckCards()
+        public Deck()
         {
-            FillDeck(NumberOfCards);
+            Fill();
+            Shuffle();
         }
 
-        public int NumberOfCards { get; private set; } = 36;
+        public int NumberOfCards => _cards.Count;
 
-        public Card GetCardFromDeck(int index)
+        public Card GetLastCard()
         {
-            return _cards[index];
+            var lastCard = _cards[_cards.Count - 1];
+
+            return lastCard;
         }
 
-        private void FillDeck(int numberOfCards)
+        public void DeleteCard()
         {
-            for (int i = 0; i < numberOfCards; i++)
+            _cards.Remove(GetLastCard());
+        }
+
+        public void Fill()
+        {
+            foreach (Suit suit in Enum.GetValues(typeof(Suit)))
             {
-                _cards.Add(new Card(i + 1));
+                foreach (Rank rank in Enum.GetValues(typeof(Rank)))
+                {
+                    _cards.Add(new Card(suit, rank));
+                }
             }
+        }
+
+        private void Shuffle()
+        {
+            int secondElementOfArray = 1;
+
+            for (int i = _cards.Count - 1; i > secondElementOfArray; i--)
+            {
+                Card tempCard = _cards[i];
+                int randomNumber = random.Next(_cards.Count);
+
+                _cards[i] = _cards[randomNumber];
+                _cards[randomNumber] = tempCard;
+            }
+
+            Console.WriteLine("Карты перемешаны");
         }
     }
 
     class Card
     {
-        public Card(int number)
+        public Card(Suit suit, Rank rank)
         {
-            Number = number;
+            Suit = suit;
+            Rank = rank;
         }
 
-        public int Number { get; private set; }
+        public Suit Suit { get; private set; }
+        public Rank Rank { get; private set; }
     }
 }
