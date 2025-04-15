@@ -117,7 +117,7 @@ namespace ConsoleApp1
     {
         private Random _random = new Random();
 
-        private List<Card> _cards = new List<Card>();
+        private Stack<Card> _cards = new Stack<Card>();
 
         public Deck()
         {
@@ -129,14 +129,12 @@ namespace ConsoleApp1
 
         public Card GetLastCard()
         {
-            Card lastCard = _cards[_cards.Count - 1];
-
-            return lastCard;
+            return _cards.Peek();
         }
 
         public void DeleteCard()
         {
-            _cards.Remove(GetLastCard());
+            _cards.Pop();
         }
 
         private void Fill()
@@ -145,37 +143,27 @@ namespace ConsoleApp1
             {
                 foreach (Rank rank in Enum.GetValues(typeof(Rank)))
                 {
-                    _cards.Add(new Card(suit, rank));
+                    _cards.Push(new Card(suit, rank));
                 }
             }
         }
 
         private void Shuffle()
         {
+            List<Card> tempCards = new List<Card>(_cards);
             int secondElementOfArray = 1;
 
             for (int i = _cards.Count - 1; i > secondElementOfArray; i--)
             {
-                Card tempCard = _cards[i];
+                Card tempCard = tempCards[i];
                 int randomNumber = _random.Next(_cards.Count);
 
-                _cards[i] = _cards[randomNumber];
-                _cards[randomNumber] = tempCard;
+                tempCards[i] = tempCards[randomNumber];
+                tempCards[randomNumber] = tempCard;
             }
 
+            _cards = new Stack<Card>(tempCards);
             Console.WriteLine("Карты перемешаны");
         }
-    }
-
-    class Card
-    {
-        public Card(Suit suit, Rank rank)
-        {
-            Suit = suit;
-            Rank = rank;
-        }
-
-        public Suit Suit { get; private set; }
-        public Rank Rank { get; private set; }
     }
 }
