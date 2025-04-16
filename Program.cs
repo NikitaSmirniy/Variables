@@ -86,7 +86,7 @@ namespace ConsoleApp1
 
             Console.Write("Введите номер книги: ");
 
-            if (int.TryParse(Console.ReadLine(), out int userInput))
+            if (int.TryParse(Console.ReadLine(), out int userInput) && userInput > 0 && userInput <= _books.Count)
                 _books.RemoveAt(userInput - 1);
             else
                 Console.WriteLine("Неверная команда");
@@ -107,15 +107,15 @@ namespace ConsoleApp1
             switch (userInput)
             {
                 case CommandName:
-                    ShowBookInfo(GetBookByName());
+                    ShowBookInfo(TryGetBookByName());
                     break;
 
                 case CommandAuthor:
-                    ShowBookInfo(GetBookByAuthor());
+                    ShowBookInfo(TryGetBookByAuthor());
                     break;
 
                 case CommandYearOfRelease:
-                    ShowBookInfo(GetBookByDate());
+                    ShowBookInfo(TryGetBookByDate());
                     break;
 
                 default:
@@ -153,13 +153,13 @@ namespace ConsoleApp1
             return Console.ReadLine();
         }
 
-        private Book GetBookByName()
+        private Book TryGetBookByName()
         {
             string userInput = Console.ReadLine();
 
             foreach (var book in _books)
             {
-                if (book.Name == userInput)
+                if (book.Name.ToLower() == userInput.ToLower())
                     return book;
             }
 
@@ -167,13 +167,13 @@ namespace ConsoleApp1
             return null;
         }
 
-        private Book GetBookByAuthor()
+        private Book TryGetBookByAuthor()
         {
             string userInput = Console.ReadLine();
 
             foreach (var book in _books)
             {
-                if (book.Author == userInput)
+                if (book.Author.ToLower() == userInput.ToLower())
                     return book;
             }
 
@@ -181,13 +181,13 @@ namespace ConsoleApp1
             return null;
         }
 
-        private Book GetBookByDate()
+        private Book TryGetBookByDate()
         {
             string userInput = Console.ReadLine();
 
             foreach (var book in _books)
             {
-                if (book.YearOfRelease == userInput)
+                if (book.YearOfRelease.ToLower() == userInput.ToLower())
                     return book;
             }
 
