@@ -31,11 +31,11 @@ namespace ConsoleApp1
                 switch (userInput)
                 {
                     case CommandAdd:
-                        bookDepository.Add();
+                        bookDepository.AddBook();
                         break;
 
                     case CommandDelete:
-                        bookDepository.Delete();
+                        bookDepository.DeleteBook();
                         break;
 
                     case CommandSearch:
@@ -58,8 +58,6 @@ namespace ConsoleApp1
                 Console.ReadKey();
                 Console.Clear();
             }
-
-            Console.ReadKey();
         }
     }
 
@@ -68,54 +66,37 @@ namespace ConsoleApp1
         private const string CommandName = "1";
         private const string CommandAuthor = "2";
         private const string CommandYearOfRelease = "3";
-        private const string CommandExit = "4";
 
         private List<Book> _books = new List<Book>();
 
-        public void Add()
+        public void AddBook()
         {
-            IndentLine();
+            DrawLine();
             Console.WriteLine("Заполнение данных книги");
 
-            _books.Add(new Book(SetText("\nНазвание: "), SetText("\nАвтор: "), SetText("\nГод выпуска: ")));
+            _books.Add(new Book(ReadText("\nНазвание: "), ReadText("\nАвтор: "), ReadText("\nГод выпуска: ")));
         }
 
-        public void Delete()
+        public void DeleteBook()
         {
-            IndentLine();
+            DrawLine();
             Console.WriteLine("Удаление книги");
 
-            ShowCommand();
+            ShowAllBooks();
 
-            Console.Write("Введите команду: ");
-            string userInput = Console.ReadLine();
+            Console.Write("Введите номер книги: ");
 
-            switch (userInput)
-            {
-                case CommandName:
-                    _books.Remove(GetBookByName());
-                    break;
+            if (int.TryParse(Console.ReadLine(), out int userInput))
+                _books.RemoveAt(userInput - 1);
+            else
+                Console.WriteLine("Неверная команда");
 
-                case CommandAuthor:
-                    _books.Remove(GetBookByAuthor());
-                    break;
-
-                case CommandYearOfRelease:
-                    _books.Remove(GetBookByDate());
-                    break;
-
-                default:
-                    Console.WriteLine("Неверная команда");
-                    break;
-            }
-
-            Console.WriteLine("Вы удалили книгу");
             Console.ReadKey();
         }
 
         public void SearchBook()
         {
-            IndentLine();
+            DrawLine();
             Console.WriteLine("Поиск книги");
 
             ShowCommand();
@@ -126,15 +107,15 @@ namespace ConsoleApp1
             switch (userInput)
             {
                 case CommandName:
-                    ShowBooksByNameFound();
+                    ShowBookInfo(GetBookByName());
                     break;
 
                 case CommandAuthor:
-                    ShowBooksByAuthorFound();
+                    ShowBookInfo(GetBookByAuthor());
                     break;
 
                 case CommandYearOfRelease:
-                    ShowBooksByDateFound();
+                    ShowBookInfo(GetBookByDate());
                     break;
 
                 default:
@@ -147,11 +128,13 @@ namespace ConsoleApp1
 
         public void ShowAllBooks()
         {
-            foreach (var book in _books)
+            for (int i = 0; i < _books.Count; i++)
             {
-                IndentLine();
+                DrawLine();
 
-                book.ShowInfo();
+                Console.WriteLine($"{i + 1}.");
+
+                ShowBookInfo(_books[i]);
             }
         }
 
@@ -161,10 +144,9 @@ namespace ConsoleApp1
             Console.WriteLine($"По названию - {CommandName}");
             Console.WriteLine($"По автору - {CommandAuthor}");
             Console.WriteLine($"По году выпуска - {CommandYearOfRelease}");
-            Console.WriteLine($"Выйти - {CommandExit}");
         }
 
-        private string SetText(string infoText)
+        private string ReadText(string infoText)
         {
             Console.Write(infoText);
 
@@ -179,10 +161,9 @@ namespace ConsoleApp1
             {
                 if (book.Name == userInput)
                     return book;
-                else
-                    Console.WriteLine("Вы ввели несуществующие данные");
             }
 
+            Console.WriteLine("Такой книги нету");
             return null;
         }
 
@@ -194,10 +175,9 @@ namespace ConsoleApp1
             {
                 if (book.Author == userInput)
                     return book;
-                else
-                    Console.WriteLine("Вы ввели несуществующие данные");
             }
 
+            Console.WriteLine("Такой книги нету");
             return null;
         }
 
@@ -209,53 +189,23 @@ namespace ConsoleApp1
             {
                 if (book.YearOfRelease == userInput)
                     return book;
-                else
-                    Console.WriteLine("Вы ввели несуществующие данные");
             }
 
+            Console.WriteLine("Такой книги нету");
             return null;
         }
 
-        private void ShowBooksByNameFound()
+        private void ShowBookInfo(Book book)
         {
-            string userInput = Console.ReadLine();
-
-            foreach (var book in _books)
+            if (book != null)
             {
-                if (book.Name == userInput)
-                    book.ShowInfo();
-                else
-                    Console.WriteLine("Вы ввели несуществующие данные");
+                Console.WriteLine($"Название - {book.Name}");
+                Console.WriteLine($"Автор - {book.Author}");
+                Console.WriteLine($"Год выпуска - {book.YearOfRelease}");
             }
         }
 
-        private void ShowBooksByAuthorFound()
-        {
-            string userInput = Console.ReadLine();
-
-            foreach (var book in _books)
-            {
-                if (book.Author == userInput)
-                    book.ShowInfo();
-                else
-                    Console.WriteLine("Вы ввели несуществующие данные");
-            }
-        }
-
-        private void ShowBooksByDateFound()
-        {
-            string userInput = Console.ReadLine();
-
-            foreach (var book in _books)
-            {
-                if (book.YearOfRelease == userInput)
-                    book.ShowInfo();
-                else
-                    Console.WriteLine("Вы ввели несуществующие данные");
-            }
-        }
-
-        private void IndentLine()
+        private void DrawLine()
         {
             Console.WriteLine(new string('_', 20));
         }
@@ -273,12 +223,5 @@ namespace ConsoleApp1
         public string Name { get; private set; }
         public string Author { get; private set; }
         public string YearOfRelease { get; private set; }
-
-        public void ShowInfo()
-        {
-            Console.WriteLine($"Название - {Name}");
-            Console.WriteLine($"Автор - {Author}");
-            Console.WriteLine($"Год выпуска - {YearOfRelease}");
-        }
     }
 }
