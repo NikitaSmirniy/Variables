@@ -7,22 +7,27 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            const string CommandAdd = "1";
-            const string CommandDelete = "2";
-            const string CommandSearch = "3";
-            const string CommandShowAll = "4";
+            const string CommandSell = "1";
+            const string CommandShowMagazineMoney = "2";
+            const string CommandShowAllClientItems = "3";
+            const string CommandShowAllMerchantItems = "4";
             const string CommandExit = "5";
 
             bool isOpen = true;
 
-            BookDepository bookDepository = new BookDepository();
+            Magazine magazine = new Magazine();
+
+            Client client = new Client(new Item[0]);
+
+            Merchant merchant = new Merchant(new Item[] { new Item("Apple", 49), new Item("Gum", 99),
+                new Item("Milk", 129), new Item("Toilet paper", 299), new Item("Knife", 599) });
 
             while (isOpen)
             {
-                Console.WriteLine($"Команда добавить - {CommandAdd}");
-                Console.WriteLine($"Команда удалить - {CommandDelete}");
-                Console.WriteLine($"Команда поиск - {CommandSearch}");
-                Console.WriteLine($"Команда показать всю библиотеку - {CommandShowAll}");
+                Console.WriteLine($"Команда продать - {CommandSell}");
+                Console.WriteLine($"Команда показа ваших средств - {CommandShowMagazineMoney}");
+                Console.WriteLine($"Команда показать все товары и средства покупателя - {CommandShowAllClientItems}");
+                Console.WriteLine($"Команда показать все товары торговца - {CommandShowAllMerchantItems}");
                 Console.WriteLine($"Команда выйти - {CommandExit}");
 
                 Console.Write("Введите команду: ");
@@ -30,20 +35,20 @@ namespace ConsoleApp1
 
                 switch (userInput)
                 {
-                    case CommandAdd:
-                        bookDepository.AddBook();
+                    case CommandSell:
+                        merchant.SellItem(client, magazine);
                         break;
 
-                    case CommandDelete:
-                        bookDepository.DeleteBook();
+                    case CommandShowMagazineMoney:
+                        magazine.ShowMoney();
                         break;
 
-                    case CommandSearch:
-                        bookDepository.SearchBook();
+                    case CommandShowAllClientItems:
+                        client.ShowAllItems();
                         break;
 
-                    case CommandShowAll:
-                        bookDepository.ShowAllBooks();
+                    case CommandShowAllMerchantItems:
+                        merchant.ShowAllItems();
                         break;
 
                     case CommandExit:
@@ -61,147 +66,38 @@ namespace ConsoleApp1
         }
     }
 
-    class BookDepository
+    class Magazine
     {
-        private const string CommandName = "1";
-        private const string CommandAuthor = "2";
-        private const string CommandYearOfRelease = "3";
+        public int Money { get; private set; }
 
-        private List<Book> _books = new List<Book>();
-
-        public void AddBook()
+        public void TakeMoney(int sumMoney)
         {
-            DrawLine();
-            Console.WriteLine("Заполнение данных книги");
-
-            _books.Add(new Book(ReadText("\nНазвание: "), ReadText("\nАвтор: "), ReadText("\nГод выпуска: ")));
+            Money += sumMoney;
         }
 
-        public void DeleteBook()
+        public void ShowMoney()
         {
-            DrawLine();
-            Console.WriteLine("Удаление книги");
+            Console.WriteLine($"Ваши деньги: {Money}");
+        }
+    }
 
-            ShowAllBooks();
+    class Person
+    {
+        protected List<Item> _items;
 
-            Console.Write("Введите номер книги: ");
-
-            if (int.TryParse(Console.ReadLine(), out int userInput) && userInput > 0 && userInput <= _books.Count)
-                _books.RemoveAt(userInput - 1);
-            else
-                Console.WriteLine("Неверная команда");
-
-            Console.ReadKey();
+        public Person(Item[] items)
+        {
+            _items = new List<Item>(items);
         }
 
-        public void SearchBook()
+        public virtual void ShowAllItems()
         {
-            DrawLine();
-            Console.WriteLine("Поиск книги");
+            Console.WriteLine("Продукты");
 
-            ShowCommand();
-
-            Console.Write("Введите команду: ");
-            string userInput = Console.ReadLine();
-
-            switch (userInput)
-            {
-                case CommandName:
-                    ShowBookInfo(TryGetBookByName());
-                    break;
-
-                case CommandAuthor:
-                    ShowBookInfo(TryGetBookByAuthor());
-                    break;
-
-                case CommandYearOfRelease:
-                    ShowBookInfo(TryGetBookByDate());
-                    break;
-
-                default:
-                    Console.WriteLine("Неверная команда");
-                    break;
-            }
-
-            Console.ReadKey();
-        }
-
-        public void ShowAllBooks()
-        {
-            for (int i = 0; i < _books.Count; i++)
+            for (int i = 0; i < _items.Count; i++)
             {
                 DrawLine();
-
-                Console.WriteLine($"{i + 1}.");
-
-                ShowBookInfo(_books[i]);
-            }
-        }
-
-        private void ShowCommand()
-        {
-            Console.WriteLine("По каким данным вы хотите произвести операцию над произведение: ");
-            Console.WriteLine($"По названию - {CommandName}");
-            Console.WriteLine($"По автору - {CommandAuthor}");
-            Console.WriteLine($"По году выпуска - {CommandYearOfRelease}");
-        }
-
-        private string ReadText(string infoText)
-        {
-            Console.Write(infoText);
-
-            return Console.ReadLine();
-        }
-
-        private Book TryGetBookByName()
-        {
-            string userInput = Console.ReadLine();
-
-            foreach (var book in _books)
-            {
-                if (book.Name.ToLower() == userInput.ToLower())
-                    return book;
-            }
-
-            Console.WriteLine("Такой книги нету");
-            return null;
-        }
-
-        private Book TryGetBookByAuthor()
-        {
-            string userInput = Console.ReadLine();
-
-            foreach (var book in _books)
-            {
-                if (book.Author.ToLower() == userInput.ToLower())
-                    return book;
-            }
-
-            Console.WriteLine("Такой книги нету");
-            return null;
-        }
-
-        private Book TryGetBookByDate()
-        {
-            string userInput = Console.ReadLine();
-
-            foreach (var book in _books)
-            {
-                if (book.YearOfRelease.ToLower() == userInput.ToLower())
-                    return book;
-            }
-
-            Console.WriteLine("Такой книги нету");
-            return null;
-        }
-
-        private void ShowBookInfo(Book book)
-        {
-            if (book != null)
-            {
-                Console.WriteLine($"Название - {book.Name}");
-                Console.WriteLine($"Автор - {book.Author}");
-                Console.WriteLine($"Год выпуска - {book.YearOfRelease}");
+                Console.WriteLine($"{i + 1}. {_items[i].Name} цена: {_items[i].Price}");
             }
         }
 
@@ -211,17 +107,92 @@ namespace ConsoleApp1
         }
     }
 
-    class Book
+    class Merchant : Person
     {
-        public Book(string name, string author, string yearsOfRelease)
+        public Merchant(Item[] items) : base(items) { }
+
+        public void SellItem(Client client, Magazine magazine)
+        {
+            Console.WriteLine("Продукт под каким номером из списка вы хотите продать");
+
+            ShowAllItems();
+
+            int.TryParse(Console.ReadLine(), out int userInput);
+
+            if (TryGetItem(out Item item, userInput))
+            {
+                if (client.Money >= item.Price)
+                {
+                    client.PayMoney(item.Price);
+                    client.AddItem(item);
+
+                    _items.RemoveAt(userInput - 1);
+                    magazine.TakeMoney(item.Price);
+
+                    Console.WriteLine("Покупатель купил у вас продукт");
+                }
+                else
+                {
+                    Console.WriteLine("У покупателя недостаточно средств");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Вы ввели неверную команду");
+            }
+        }
+
+        private bool TryGetItem(out Item item, int index)
+        {
+            if (index > 0 && index <= _items.Count)
+            {
+                item = _items[index - 1];
+                return true;
+            }
+            else
+            {
+                item = null;
+                return false;
+            }
+        }
+    }
+
+    class Client : Person
+    {
+        public Client(Item[] items, int money = 1250) : base(items)
+        {
+            Money = money;
+        }
+
+        public int Money { get; private set; }
+
+        public void PayMoney(int price)
+        {
+            Money -= price;
+        }
+
+        public void AddItem(Item item)
+        {
+            _items.Add(item);
+        }
+
+        public override void ShowAllItems()
+        {
+            Console.WriteLine($"Средства покупателя: {Money}");
+
+            base.ShowAllItems();
+        }
+    }
+
+    class Item
+    {
+        public Item(string name, int price)
         {
             Name = name;
-            Author = author;
-            YearOfRelease = yearsOfRelease;
+            Price = price;
         }
 
         public string Name { get; private set; }
-        public string Author { get; private set; }
-        public string YearOfRelease { get; private set; }
+        public int Price { get; private set; }
     }
 }
