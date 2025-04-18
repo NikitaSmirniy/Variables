@@ -7,26 +7,24 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            Magazine magazine = new Magazine();
+            Shop shop = new Shop();
 
-            magazine.StartWork();
+            shop.StartWork();
         }
     }
 
-    class Magazine
+    class Shop
     {
         private const string CommandSell = "1";
-        private const string CommandShowMagazineMoney = "2";
-        private const string CommandShowAllClientItems = "3";
-        private const string CommandShowAllMerchantItems = "4";
+        private const string CommandShowMerchantMoney = "2";
+        private const string CommandShowAllMerchantItems = "3";
+        private const string CommandShowAllClientItems = "4";
         private const string CommandExit = "5";
 
         private Client _client = new Client(new Item[0]);
 
         private Merchant _merchant = new Merchant(new Item[] { new Item("Apple", 49), new Item("Gum", 99),
                 new Item("Milk", 129), new Item("Toilet paper", 299), new Item("Knife", 599) });
-
-        public int Money { get; private set; }
 
         public void StartWork()
         {
@@ -35,9 +33,9 @@ namespace ConsoleApp1
             while (isOpen)
             {
                 Console.WriteLine($"Команда продать - {CommandSell}");
-                Console.WriteLine($"Команда показа ваших средств - {CommandShowMagazineMoney}");
-                Console.WriteLine($"Команда показать все товары и средства покупателя - {CommandShowAllClientItems}");
+                Console.WriteLine($"Команда показа средств торговца - {CommandShowMerchantMoney}");
                 Console.WriteLine($"Команда показать все товары торговца - {CommandShowAllMerchantItems}");
+                Console.WriteLine($"Команда показать все товары и средства покупателя - {CommandShowAllClientItems}");
                 Console.WriteLine($"Команда выйти - {CommandExit}");
 
                 Console.Write("Введите команду: ");
@@ -49,16 +47,16 @@ namespace ConsoleApp1
                         SellItem();
                         break;
 
-                    case CommandShowMagazineMoney:
-                        ShowMoney();
+                    case CommandShowMerchantMoney:
+                        _merchant.ShowMoney();
                         break;
 
                     case CommandShowAllClientItems:
-                        _client.ShowAllItems();
+                        _client.ShowAllInfo();
                         break;
 
                     case CommandShowAllMerchantItems:
-                        _merchant.ShowAllItems();
+                        _merchant.ShowAllInfo();
                         break;
 
                     case CommandExit:
@@ -79,7 +77,7 @@ namespace ConsoleApp1
         {
             Console.WriteLine("Продукт под каким номером из списка вы хотите продать");
 
-            _merchant.ShowAllItems();
+            _merchant.ShowAllInfo();
 
             int.TryParse(Console.ReadLine(), out int userInput);
 
@@ -91,12 +89,12 @@ namespace ConsoleApp1
                 {
                     _client.AddItem(item);
 
+                    _merchant.TakeMoney(itemPrice);
                     _merchant.DeleteItemByIndex(userInput - 1);
-                    TakeMoney(itemPrice);
 
                     Console.WriteLine("Покупатель купил у вас продукт");
 
-                    ShowMoney();
+                    _merchant.ShowMoney();
                 }
                 else
                 {
@@ -108,31 +106,21 @@ namespace ConsoleApp1
                 Console.WriteLine("Вы ввели неверную команду");
             }
         }
-
-        private void TakeMoney(int sumMoney)
-        {
-            if (sumMoney > 0)
-                Money += sumMoney;
-        }
-
-        private void ShowMoney()
-        {
-            Console.WriteLine($"Ваши деньги: {Money}");
-        }
     }
 
     class Person
     {
         protected List<Item> Items;
 
-        public int ItemsCount => Items.Count;
-
         public Person(Item[] items)
         {
             Items = new List<Item>(items);
         }
 
-        public virtual void ShowAllItems()
+        public int Money { get; protected set; }
+        public int ItemsCount => Items.Count;
+
+        public virtual void ShowAllInfo()
         {
             Console.WriteLine("Продукты");
 
@@ -158,6 +146,17 @@ namespace ConsoleApp1
             Items.RemoveAt(index);
         }
 
+        public void TakeMoney(int sumMoney)
+        {
+            if (sumMoney > 0)
+                Money += sumMoney;
+        }
+
+        public void ShowMoney()
+        {
+            Console.WriteLine($"Деньги торговца: {Money}");
+        }
+
         public bool TryGetItem(out Item item, int index)
         {
             if (index > 0 && index <= ItemsCount)
@@ -180,8 +179,6 @@ namespace ConsoleApp1
             Money = money;
         }
 
-        public int Money { get; private set; }
-
         public bool TryPayMoney(int itemPrice)
         {
             if (Money >= itemPrice)
@@ -200,11 +197,11 @@ namespace ConsoleApp1
             Items.Add(item);
         }
 
-        public override void ShowAllItems()
+        public override void ShowAllInfo()
         {
             Console.WriteLine($"Средства покупателя: {Money}");
 
-            base.ShowAllItems();
+            base.ShowAllInfo();
         }
     }
 
