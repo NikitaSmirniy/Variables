@@ -7,20 +7,30 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            const string CommandSell = "1";
-            const string CommandShowMagazineMoney = "2";
-            const string CommandShowAllClientItems = "3";
-            const string CommandShowAllMerchantItems = "4";
-            const string CommandExit = "5";
-
-            bool isOpen = true;
-
             Magazine magazine = new Magazine();
 
-            Client client = new Client(new Item[0]);
+            magazine.StartWork();
+        }
+    }
 
-            Merchant merchant = new Merchant(new Item[] { new Item("Apple", 49), new Item("Gum", 99),
+    class Magazine
+    {
+        private const string CommandSell = "1";
+        private const string CommandShowMagazineMoney = "2";
+        private const string CommandShowAllClientItems = "3";
+        private const string CommandShowAllMerchantItems = "4";
+        private const string CommandExit = "5";
+
+        private Client _client = new Client(new Item[0]);
+
+        private Merchant _merchant = new Merchant(new Item[] { new Item("Apple", 49), new Item("Gum", 99),
                 new Item("Milk", 129), new Item("Toilet paper", 299), new Item("Knife", 599) });
+
+        public int Money { get; private set; }
+
+        public void StartWork()
+        {
+            bool isOpen = true;
 
             while (isOpen)
             {
@@ -36,19 +46,19 @@ namespace ConsoleApp1
                 switch (userInput)
                 {
                     case CommandSell:
-                        merchant.SellItem(client, magazine);
+                        SellItem();
                         break;
 
                     case CommandShowMagazineMoney:
-                        magazine.ShowMoney();
+                        ShowMoney();
                         break;
 
                     case CommandShowAllClientItems:
-                        client.ShowAllItems();
+                        _client.ShowAllItems();
                         break;
 
                     case CommandShowAllMerchantItems:
-                        merchant.ShowAllItems();
+                        _merchant.ShowAllItems();
                         break;
 
                     case CommandExit:
@@ -64,18 +74,48 @@ namespace ConsoleApp1
                 Console.Clear();
             }
         }
-    }
 
-    class Magazine
-    {
-        public int Money { get; private set; }
-
-        public void TakeMoney(int sumMoney)
+        private void SellItem()
         {
-            Money += sumMoney;
+            Console.WriteLine("Продукт под каким номером из списка вы хотите продать");
+
+            _merchant.ShowAllItems();
+
+            int.TryParse(Console.ReadLine(), out int userInput);
+
+            if (_merchant.TryGetItem(out Item item, userInput))
+            {
+                int itemPrice = item.Price;
+
+                if (_client.TryPayMoney(itemPrice))
+                {
+                    _client.AddItem(item);
+
+                    _merchant.DeleteItemByIndex(userInput - 1);
+                    TakeMoney(itemPrice);
+
+                    Console.WriteLine("Покупатель купил у вас продукт");
+
+                    ShowMoney();
+                }
+                else
+                {
+                    Console.WriteLine("У покупателя недостаточно средств");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Вы ввели неверную команду");
+            }
         }
 
-        public void ShowMoney()
+        private void TakeMoney(int sumMoney)
+        {
+            if (sumMoney > 0)
+                Money += sumMoney;
+        }
+
+        private void ShowMoney()
         {
             Console.WriteLine($"Ваши деньги: {Money}");
         }
@@ -83,21 +123,23 @@ namespace ConsoleApp1
 
     class Person
     {
-        protected List<Item> _items;
+        protected List<Item> Items;
+
+        public int ItemsCount => Items.Count;
 
         public Person(Item[] items)
         {
-            _items = new List<Item>(items);
+            Items = new List<Item>(items);
         }
 
         public virtual void ShowAllItems()
         {
             Console.WriteLine("Продукты");
 
-            for (int i = 0; i < _items.Count; i++)
+            for (int i = 0; i < ItemsCount; i++)
             {
                 DrawLine();
-                Console.WriteLine($"{i + 1}. {_items[i].Name} цена: {_items[i].Price}");
+                Console.WriteLine($"{i + 1}. {Items[i].Name} цена: {Items[i].Price}");
             }
         }
 
@@ -111,42 +153,16 @@ namespace ConsoleApp1
     {
         public Merchant(Item[] items) : base(items) { }
 
-        public void SellItem(Client client, Magazine magazine)
+        public void DeleteItemByIndex(int index)
         {
-            Console.WriteLine("Продукт под каким номером из списка вы хотите продать");
-
-            ShowAllItems();
-
-            int.TryParse(Console.ReadLine(), out int userInput);
-
-            if (TryGetItem(out Item item, userInput))
-            {
-                if (client.Money >= item.Price)
-                {
-                    client.PayMoney(item.Price);
-                    client.AddItem(item);
-
-                    _items.RemoveAt(userInput - 1);
-                    magazine.TakeMoney(item.Price);
-
-                    Console.WriteLine("Покупатель купил у вас продукт");
-                }
-                else
-                {
-                    Console.WriteLine("У покупателя недостаточно средств");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Вы ввели неверную команду");
-            }
+            Items.RemoveAt(index);
         }
 
-        private bool TryGetItem(out Item item, int index)
+        public bool TryGetItem(out Item item, int index)
         {
-            if (index > 0 && index <= _items.Count)
+            if (index > 0 && index <= ItemsCount)
             {
-                item = _items[index - 1];
+                item = Items[index - 1];
                 return true;
             }
             else
@@ -166,14 +182,22 @@ namespace ConsoleApp1
 
         public int Money { get; private set; }
 
-        public void PayMoney(int price)
+        public bool TryPayMoney(int itemPrice)
         {
-            Money -= price;
+            if (Money >= itemPrice)
+            {
+                Money -= itemPrice;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public void AddItem(Item item)
         {
-            _items.Add(item);
+            Items.Add(item);
         }
 
         public override void ShowAllItems()
