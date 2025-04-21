@@ -7,24 +7,21 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            Shop shop = new Shop();
+            Dispatcher dispatcher = new Dispatcher();
 
-            shop.StartWork();
+            dispatcher.StartWork();
         }
     }
 
-    class Shop
+    class Dispatcher
     {
-        private const string CommandSell = "1";
-        private const string CommandShowMerchantMoney = "2";
-        private const string CommandShowAllMerchantItems = "3";
-        private const string CommandShowAllClientItems = "4";
-        private const string CommandExit = "5";
+        private const string CommandCreateTrain = "1";
+        private const string CommandExit = "2";
+        private const int MaxRandomDiaposon = 100;
+        private const int _maxNumberOfSeats = 30;
 
-        private Client _client = new Client(new Item[0]);
-
-        private Merchant _merchant = new Merchant(new Item[] { new Item("Apple", 49), new Item("Gum", 99),
-                new Item("Milk", 129), new Item("Toilet paper", 299), new Item("Knife", 599) });
+        private List<Train> _trains = new List<Train>();
+        private StringDelimiter _stringDelimiter = new StringDelimiter(40);
 
         public void StartWork()
         {
@@ -32,10 +29,10 @@ namespace ConsoleApp1
 
             while (isOpen)
             {
-                Console.WriteLine($"Команда продать - {CommandSell}");
-                Console.WriteLine($"Команда показа средств торговца - {CommandShowMerchantMoney}");
-                Console.WriteLine($"Команда показать все товары торговца - {CommandShowAllMerchantItems}");
-                Console.WriteLine($"Команда показать все товары и средства покупателя - {CommandShowAllClientItems}");
+                if (TryShowInfo())
+                    ShowAllTrains();
+
+                Console.WriteLine($"Команда создать поезд - {CommandCreateTrain}");
                 Console.WriteLine($"Команда выйти - {CommandExit}");
 
                 Console.Write("Введите команду: ");
@@ -43,20 +40,8 @@ namespace ConsoleApp1
 
                 switch (userInput)
                 {
-                    case CommandSell:
-                        SellItem();
-                        break;
-
-                    case CommandShowMerchantMoney:
-                        _merchant.ShowMoney();
-                        break;
-
-                    case CommandShowAllClientItems:
-                        _client.ShowAllInfo();
-                        break;
-
-                    case CommandShowAllMerchantItems:
-                        _merchant.ShowAllInfo();
+                    case CommandCreateTrain:
+                        AddTrain();
                         break;
 
                     case CommandExit:
@@ -73,147 +58,151 @@ namespace ConsoleApp1
             }
         }
 
-        private void SellItem()
+        private void AddTrain()
         {
-            Console.WriteLine("Продукт под каким номером из списка вы хотите продать");
+            _stringDelimiter.DrawLine();
 
-            _merchant.ShowAllInfo();
+            Console.Write("Добавьте начало маршрута поезда: ");
+            string directionStart = Console.ReadLine();
 
+            _stringDelimiter.DrawLine();
+
+            Console.Write("Добавьте конец маршрута поезда: ");
+            string directionUltimate = Console.ReadLine();
+
+            _stringDelimiter.DrawLine();
+
+            Console.Write($"Введите кол-во мест в вагоне(Не меньше одного и не больше {_maxNumberOfSeats}): ");
+
+            if (TryGetMaxNumber(out int wagonCapacity))
+            {
+                _trains.Add(new Train(directionStart, directionUltimate, MaxRandomDiaposon, wagonCapacity));
+
+                Console.WriteLine("Поезд успешно добавлен в список");
+            }
+            else
+            {
+                Console.WriteLine("Вы ввели неверные условия попробуйте снова!");
+            }
+        }
+
+        private bool TryGetMaxNumber(out int result)
+        {
             int.TryParse(Console.ReadLine(), out int userInput);
 
-            if (_merchant.TryGetItem(out Item item, userInput))
+            if (userInput > 0 && userInput <= _maxNumberOfSeats)
             {
-                int itemPrice = item.Price;
+                result = userInput;
+                return true;
+            }
 
-                if (_client.TryPayMoney(itemPrice))
+            result = 0;
+            return false;
+        }
+
+        private void ShowAllTrains()
+        {
+            Console.WriteLine("Информация о поездах");
+            _stringDelimiter.DrawLine();
+
+            foreach (var train in _trains)
+            {
+                train.ShowAllInfo();
+                _stringDelimiter.DrawLine();
+            }
+        }
+
+        private bool TryShowInfo()
+        {
+            if (_trains.Count > 0)
+                return true;
+
+            return false;
+        }
+    }
+
+    class Train
+    {
+        private Stack<Wagon> _wagons = new Stack<Wagon>();
+        private StringDelimiter _stringDelimiter = new StringDelimiter(40);
+        private Random _random = new Random();
+        private string _directionStart;
+        private string _directionUltimate;
+        private int _passangers;
+
+        public Train(string directionStart, string directionUltimate, int maxRandomDiaposon, int wagonCapacity)
+        {
+            _directionStart = directionStart;
+            _directionUltimate = directionUltimate;
+            _passangers = _random.Next(0, maxRandomDiaposon + 1);
+
+            AddWagons(wagonCapacity, _passangers);
+        }
+
+        public int WagonsCount => _wagons.Count;
+
+        public void ShowAllInfo()
+        {
+            Console.WriteLine($"Направление: {_directionStart} - {_directionUltimate}\n" +
+                $"Кол-во пассажиров в поезде: {_passangers}");
+
+            foreach (var wagon in _wagons)
+            {
+                _stringDelimiter.DrawLine();
+                wagon.ShowAllInfo();
+            }
+        }
+
+        public void AddWagons(int wagonCapacity, int passangers)
+        {
+            while (passangers > 0)
+            {
+                if (passangers - wagonCapacity > 0)
                 {
-                    _client.AddItem(item);
-
-                    _merchant.TakeMoney(itemPrice);
-                    _merchant.DeleteItemByIndex(userInput - 1);
-
-                    Console.WriteLine("Покупатель купил у вас продукт");
-
-                    _merchant.ShowMoney();
+                    _wagons.Push(new Wagon(wagonCapacity, wagonCapacity, WagonsCount + 1));
+                    passangers -= wagonCapacity;
                 }
                 else
                 {
-                    Console.WriteLine("У покупателя недостаточно средств");
+                    _wagons.Push(new Wagon(passangers, wagonCapacity, WagonsCount + 1));
+                    passangers = 0;
                 }
             }
-            else
-            {
-                Console.WriteLine("Вы ввели неверную команду");
-            }
         }
     }
 
-    class Person
+    class Wagon
     {
-        protected List<Item> Items;
+        private int _wagonPassangers;
+        private int _id;
 
-        public Person(Item[] items)
+        public Wagon(int numberOfPassanger, int maxNumberOfPassanger, int id)
         {
-            Items = new List<Item>(items);
+            _wagonPassangers = numberOfPassanger;
+            WagonCapacity = maxNumberOfPassanger;
+            _id = id;
         }
 
-        public int Money { get; protected set; }
-        public int ItemsCount => Items.Count;
+        public int WagonCapacity { get; private set; }
 
-        public virtual void ShowAllInfo()
+        public void ShowAllInfo()
         {
-            Console.WriteLine("Продукты");
-
-            for (int i = 0; i < ItemsCount; i++)
-            {
-                DrawLine();
-                Console.WriteLine($"{i + 1}. {Items[i].Name} цена: {Items[i].Price}");
-            }
-        }
-
-        private void DrawLine()
-        {
-            Console.WriteLine(new string('_', 20));
+            Console.WriteLine($"Вагон №{_id}. Пассажиры в вагоне {_wagonPassangers}/{WagonCapacity}");
         }
     }
 
-    class Merchant : Person
+    class StringDelimiter
     {
-        public Merchant(Item[] items) : base(items) { }
+        private int _lineRange = 20;
 
-        public void DeleteItemByIndex(int index)
+        public StringDelimiter(int lineRange)
         {
-            Items.RemoveAt(index);
+            _lineRange = lineRange;
         }
 
-        public void TakeMoney(int sumMoney)
+        public void DrawLine()
         {
-            if (sumMoney > 0)
-                Money += sumMoney;
+            Console.WriteLine(new string('_', _lineRange));
         }
-
-        public void ShowMoney()
-        {
-            Console.WriteLine($"Деньги торговца: {Money}");
-        }
-
-        public bool TryGetItem(out Item item, int index)
-        {
-            if (index > 0 && index <= ItemsCount)
-            {
-                item = Items[index - 1];
-                return true;
-            }
-            else
-            {
-                item = null;
-                return false;
-            }
-        }
-    }
-
-    class Client : Person
-    {
-        public Client(Item[] items, int money = 1250) : base(items)
-        {
-            Money = money;
-        }
-
-        public bool TryPayMoney(int itemPrice)
-        {
-            if (Money >= itemPrice)
-            {
-                Money -= itemPrice;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public void AddItem(Item item)
-        {
-            Items.Add(item);
-        }
-
-        public override void ShowAllInfo()
-        {
-            Console.WriteLine($"Средства покупателя: {Money}");
-
-            base.ShowAllInfo();
-        }
-    }
-
-    class Item
-    {
-        public Item(string name, int price)
-        {
-            Name = name;
-            Price = price;
-        }
-
-        public string Name { get; private set; }
-        public int Price { get; private set; }
     }
 }
