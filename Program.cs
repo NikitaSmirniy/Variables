@@ -22,6 +22,7 @@ namespace ConsoleApp1
 
         private List<Train> _trains = new List<Train>();
         private StringDelimiter _stringDelimiter = new StringDelimiter(40);
+        private Random _random = new Random();
 
         public void StartWork()
         {
@@ -29,7 +30,7 @@ namespace ConsoleApp1
 
             while (isOpen)
             {
-                if (TryGetInfo())
+                if (_trains.Count > 0)
                     ShowAllTrains();
 
                 Console.WriteLine($"Команда создать поезд - {CommandCreateTrain}");
@@ -87,7 +88,8 @@ namespace ConsoleApp1
 
             if (TryGetMaxNumber(out int wagonCapacity))
             {
-                _trains.Add(new Train(directionStart, directionUltimate, MaxRandomRange, wagonCapacity));
+                int passangers = SetRandomCapacityTrain();
+                _trains.Add(new Train(directionStart, directionUltimate, passangers, AddWagons(wagonCapacity, passangers)));
 
                 Console.WriteLine("Поезд успешно добавлен в список");
             }
@@ -111,24 +113,48 @@ namespace ConsoleApp1
             return false;
         }
 
+        private int SetRandomCapacityTrain()
+        {
+            return _random.Next(0, MaxRandomRange + 1);
+        }
+
+        private Stack<Wagon> AddWagons(int wagonCapacity, int passangers)
+        {
+            Stack<Wagon> wagons = new Stack<Wagon>();
+
+            while (passangers > 0)
+            {
+                if (passangers - wagonCapacity > 0)
+                {
+                    wagons.Push(SetWagonValue(wagonCapacity, wagonCapacity, wagons.Count));
+                    passangers -= wagonCapacity;
+                }
+                else
+                {
+                    wagons.Push(SetWagonValue(passangers, wagonCapacity, wagons.Count));
+                    passangers = 0;
+                }
+            }
+
+            return wagons;
+        }
+
+        private Wagon SetWagonValue(int passangers, int wagonCapacity, int id)
+        {
+            return new Wagon(passangers, wagonCapacity, id + 1);
+        }
+
         private void ShowAllTrains()
         {
             Console.WriteLine("Информация о поездах");
             _stringDelimiter.DrawLine();
 
-            foreach (var train in _trains)
+            for (int i = 0; i < _trains.Count; i++)
             {
-                train.ShowAllInfo();
+                Console.WriteLine($"Поезд №{i + 1}");
+                _trains[i].ShowAllInfo();
                 _stringDelimiter.DrawLine();
             }
-        }
-
-        private bool TryGetInfo()
-        {
-            if (_trains.Count > 0)
-                return true;
-
-            return false;
         }
     }
 
@@ -136,19 +162,15 @@ namespace ConsoleApp1
     {
         private Stack<Wagon> _wagons = new Stack<Wagon>();
         private StringDelimiter _stringDelimiter = new StringDelimiter(40);
-        private Random _random = new Random();
         private Direction _direction;
         private int _passangers;
 
-        public Train(string departurePoint, string arrivalPoint, int maxRandomRange, int wagonCapacity)
+        public Train(string departurePoint, string arrivalPoint, int passangers, Stack<Wagon> wagons)
         {
             _direction = new Direction(departurePoint, arrivalPoint);
-            _passangers = _random.Next(0, maxRandomRange + 1);
-
-            AddWagons(wagonCapacity, _passangers);
+            _passangers = passangers;
+            _wagons = wagons;
         }
-
-        public int WagonsCount => _wagons.Count;
 
         public void ShowAllInfo()
         {
@@ -160,28 +182,6 @@ namespace ConsoleApp1
                 _stringDelimiter.DrawLine();
                 wagon.ShowAllInfo();
             }
-        }
-
-        public void AddWagons(int wagonCapacity, int passangers)
-        {
-            while (passangers > 0)
-            {
-                if (passangers - wagonCapacity > 0)
-                {
-                    SetWagonValue(wagonCapacity, wagonCapacity);
-                    passangers -= wagonCapacity;
-                }
-                else
-                {
-                    SetWagonValue(passangers, wagonCapacity);
-                    passangers = 0;
-                }
-            }
-        }
-
-        private void SetWagonValue(int passangers, int wagonCapacity)
-        {
-            _wagons.Push(new Wagon(passangers, wagonCapacity, WagonsCount + 1));
         }
     }
 
