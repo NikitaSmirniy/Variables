@@ -74,7 +74,7 @@ namespace ConsoleApp1
             Console.Write("Добавьте конец маршрута поезда: ");
             string directionUltimate = Console.ReadLine();
 
-            if (directionStart == directionUltimate)
+            if (directionStart.ToLower() == directionUltimate.ToLower())
             {
                 Console.WriteLine("Пункт отправления не должен быть равен пункту прибытия!!!");
                 Console.ReadKey();
