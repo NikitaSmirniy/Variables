@@ -17,8 +17,6 @@ namespace ConsoleApp1
     {
         private const string CommandCreateTrain = "1";
         private const string CommandExit = "2";
-        private const int MaxRandomRange = 100;
-        private const int MaxNumberOfSeats = 30;
 
         private List<Train> _trains = new List<Train>();
         private StringDelimiter _stringDelimiter = new StringDelimiter(40);
@@ -42,7 +40,7 @@ namespace ConsoleApp1
                 switch (userInput)
                 {
                     case CommandCreateTrain:
-                        AddTrain();
+                        CreateTrain();
                         break;
 
                     case CommandExit:
@@ -59,89 +57,67 @@ namespace ConsoleApp1
             }
         }
 
-        private void AddTrain()
+        private void CreateTrain()
         {
+            int maxNumberOfSeats = 30;
             _stringDelimiter.DrawLine();
+
+            Direction direction = CreateDirection();
+            int tickets = SellTickets();
+            List<Wagon> wagons = CreateWagons(maxNumberOfSeats, tickets);
+
+            _trains.Add(new Train(direction, tickets, wagons));
+        }
+
+        private Direction CreateDirection()
+        {
+            string arrivalPoint = "";
+            string departurePoint = "";
 
             Console.WriteLine("Создание маршрута");
 
-            _stringDelimiter.DrawLine();
-
-            Console.Write("Добавьте начало маршрута поезда: ");
-            string directionStart = Console.ReadLine();
-
-            _stringDelimiter.DrawLine();
-
-            Console.Write("Добавьте конец маршрута поезда: ");
-            string directionUltimate = Console.ReadLine();
-
-            if (directionStart.ToLower() == directionUltimate.ToLower())
+            while (departurePoint.ToLower() == arrivalPoint.ToLower())
             {
-                Console.WriteLine("Пункт отправления не должен быть равен пункту прибытия!!!");
-                Console.ReadKey();
-                return;
+                Console.Write("Добавьте начало маршрута поезда: ");
+                departurePoint = Console.ReadLine();
+
+                _stringDelimiter.DrawLine();
+
+                Console.Write("Добавьте конец маршрута поезда: ");
+                arrivalPoint = Console.ReadLine();
             }
 
-            _stringDelimiter.DrawLine();
-
-            Console.Write($"Введите кол-во мест в вагоне(Не меньше одного и не больше {MaxNumberOfSeats}): ");
-
-            if (TryGetMaxNumber(out int wagonCapacity))
-            {
-                int passangers = SetRandomCapacityTrain();
-                _trains.Add(new Train(directionStart, directionUltimate, passangers, AddWagons(wagonCapacity, passangers)));
-
-                Console.WriteLine("Поезд успешно добавлен в список");
-            }
-            else
-            {
-                Console.WriteLine("Вы ввели неверное кол-во мест в вагоне!");
-            }
+            return new Direction(departurePoint, arrivalPoint);
         }
 
-        private bool TryGetMaxNumber(out int result)
+        private int SellTickets()
         {
-            int.TryParse(Console.ReadLine(), out int userInput);
-
-            if (userInput > 0 && userInput <= MaxNumberOfSeats)
-            {
-                result = userInput;
-                return true;
-            }
-
-            result = 0;
-            return false;
+            int minRandomValue = 100;
+            int maxRandomValue = 700;
+            
+            return _random.Next(minRandomValue, maxRandomValue + 1);
         }
 
-        private int SetRandomCapacityTrain()
+        private List<Wagon> CreateWagons(int wagonCapacity, int tickets)
         {
-            return _random.Next(0, MaxRandomRange + 1);
-        }
+            List<Wagon> wagons = new List<Wagon>();
 
-        private Stack<Wagon> AddWagons(int wagonCapacity, int passangers)
-        {
-            Stack<Wagon> wagons = new Stack<Wagon>();
+            int wagonsCount = tickets / wagonCapacity;
 
-            while (passangers > 0)
+            if (IsNeedAdditionalWagon(tickets, wagonCapacity))
+                wagonsCount++;
+
+            for (int i = 0; i < wagonsCount; i++)
             {
-                if (passangers - wagonCapacity > 0)
-                {
-                    wagons.Push(SetWagonValue(wagonCapacity, wagonCapacity, wagons.Count));
-                    passangers -= wagonCapacity;
-                }
-                else
-                {
-                    wagons.Push(SetWagonValue(passangers, wagonCapacity, wagons.Count));
-                    passangers = 0;
-                }
+                wagons.Add(new Wagon(wagonCapacity));
             }
 
             return wagons;
         }
 
-        private Wagon SetWagonValue(int passangers, int wagonCapacity, int id)
+        private bool IsNeedAdditionalWagon(int tickets, int wagonCapacity)
         {
-            return new Wagon(passangers, wagonCapacity, id + 1);
+            return tickets % wagonCapacity != 0;
         }
 
         private void ShowAllTrains()
@@ -160,14 +136,14 @@ namespace ConsoleApp1
 
     class Train
     {
-        private Stack<Wagon> _wagons = new Stack<Wagon>();
+        private List<Wagon> _wagons = new List<Wagon>();
         private StringDelimiter _stringDelimiter = new StringDelimiter(40);
         private Direction _direction;
         private int _passangers;
 
-        public Train(string departurePoint, string arrivalPoint, int passangers, Stack<Wagon> wagons)
+        public Train(Direction direction, int passangers, List<Wagon> wagons)
         {
-            _direction = new Direction(departurePoint, arrivalPoint);
+            _direction = direction;
             _passangers = passangers;
             _wagons = wagons;
         }
@@ -187,38 +163,33 @@ namespace ConsoleApp1
 
     class Direction
     {
-        public Direction(string departurePoint, string arrivalPoint)
-        {
-            _departurePoint = departurePoint;
-            _arrivalPoint = arrivalPoint;
-        }
+        private string _departure;
+        private string _arrival;
 
-        private string _departurePoint;
-        private string _arrivalPoint;
+        public Direction(string departure, string arrival)
+        {
+            _departure = departure;
+            _arrival = arrival;
+        }
 
         public void ShowDirection()
         {
-            Console.WriteLine($"Направление: {_departurePoint} - {_arrivalPoint}");
+            Console.WriteLine($"Направление: {_departure} - {_arrival}");
         }
     }
 
     class Wagon
     {
-        private int _wagonPassangers;
-        private int _id;
-
-        public Wagon(int numberOfPassanger, int maxNumberOfPassanger, int id)
+        public Wagon(int wagonCapacity)
         {
-            _wagonPassangers = numberOfPassanger;
-            WagonCapacity = maxNumberOfPassanger;
-            _id = id;
+            WagonCapacity = wagonCapacity;
         }
 
         public int WagonCapacity { get; private set; }
 
         public void ShowAllInfo()
         {
-            Console.WriteLine($"Вагон №{_id}. Пассажиры в вагоне {_wagonPassangers}/{WagonCapacity}");
+            Console.WriteLine($"Вместимость вагона: {WagonCapacity}");
         }
     }
 
