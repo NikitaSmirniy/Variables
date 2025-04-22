@@ -9,7 +9,7 @@ namespace ConsoleApp1
         {
             Dispatcher dispatcher = new Dispatcher();
 
-            dispatcher.StartWork();
+            dispatcher.Work();
         }
     }
 
@@ -22,7 +22,7 @@ namespace ConsoleApp1
         private StringDelimiter _stringDelimiter = new StringDelimiter(40);
         private Random _random = new Random();
 
-        public void StartWork()
+        public void Work()
         {
             bool isOpen = true;
 
@@ -180,16 +180,16 @@ namespace ConsoleApp1
 
     class Wagon
     {
-        public Wagon(int wagonCapacity)
-        {
-            WagonCapacity = wagonCapacity;
-        }
+        private int _capacity;
 
-        public int WagonCapacity { get; private set; }
+        public Wagon(int capacity)
+        {
+            _capacity = capacity;
+        }
 
         public void ShowAllInfo()
         {
-            Console.WriteLine($"Вместимость вагона: {WagonCapacity}");
+            Console.WriteLine($"Вместимость вагона: {_capacity}");
         }
     }
 
