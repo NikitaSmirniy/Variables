@@ -7,40 +7,48 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            Dispatcher dispatcher = new Dispatcher();
+            Arena arena = new Arena();
 
-            dispatcher.Work();
+            arena.Work();
         }
     }
 
-    class Dispatcher
+    class Arena
     {
-        private const string CommandCreateTrain = "1";
+        private const string CommandShowFight = "1";
         private const string CommandExit = "2";
 
-        private List<Train> _trains = new List<Train>();
-        private StringDelimiter _stringDelimiter = new StringDelimiter(40);
-        private Random _random = new Random();
+        private StringDelimiter _stringDelimiter = new StringDelimiter(30);
+
+        private List<Warrior> _warriors = new List<Warrior>()
+        {
+            new Necromancer(125, 12, 75,
+            "Это колдун из древнего племени 'индейцев' способен вызывать мертвых которые служат своему хозяину."),
+            new Viking(200, 15, 50, "Этот викинг пришёл на арену, что-бы выплеснуть свою ярость."),
+            new ManTree(400, 0, 30, "Это существо когда-то было человеком, но попав под влияние собственной магии потеряло человеческий облик и обрёл быструю регенирацию."),
+            new Magician(100, 6, 80, "Это маг из древнего племени 'индейцев' способен выпускать огненные шары.", 100),
+            new Archer(175, 25, 65, "Этот лучник имеет большой опыт в боях, на арену он пришёл исключительно за наживой.")
+        };
 
         public void Work()
         {
             bool isOpen = true;
 
+            Console.WriteLine("Приветствую вас на арене гладиаторских боёв");
+
             while (isOpen)
             {
-                if (_trains.Count > 0)
-                    ShowAllTrains();
+                Console.WriteLine($"Команда - {CommandShowFight} посмотреть бой");
+                Console.WriteLine($"Команда - {CommandExit} выйти");
 
-                Console.WriteLine($"Команда создать поезд - {CommandCreateTrain}");
-                Console.WriteLine($"Команда выйти - {CommandExit}");
+                Console.Write("Выберете комнаду: ");
 
-                Console.Write("Введите команду: ");
                 string userInput = Console.ReadLine();
 
                 switch (userInput)
                 {
-                    case CommandCreateTrain:
-                        CreateTrain();
+                    case CommandShowFight:
+                        ShowFight();
                         break;
 
                     case CommandExit:
@@ -48,7 +56,7 @@ namespace ConsoleApp1
                         break;
 
                     default:
-                        Console.WriteLine("Введина неверная команда");
+                        Console.WriteLine("Вы ввели неверную команду");
                         break;
                 }
 
@@ -57,139 +65,304 @@ namespace ConsoleApp1
             }
         }
 
-        private void CreateTrain()
+        private void ShowFight()
         {
-            int maxNumberOfSeats = 30;
-            _stringDelimiter.DrawLine();
+            ShowWarriors();
 
-            Direction direction = CreateDirection();
-            int tickets = SellTickets();
-            List<Wagon> wagons = CreateWagons(maxNumberOfSeats, tickets);
+            if (ChuseWarrior(out Warrior warrior1) == false || ChuseWarrior(out Warrior warrior2) == false)
+                return;
 
-            _trains.Add(new Train(direction, tickets, wagons));
-        }
+            Console.Clear();
 
-        private Direction CreateDirection()
-        {
-            string arrivalPoint = "";
-            string departurePoint = "";
-
-            Console.WriteLine("Создание маршрута");
-
-            while (departurePoint.ToLower() == arrivalPoint.ToLower())
+            while (warrior1.Health > 0 && warrior2.Health > 0)
             {
-                Console.Write("Добавьте начало маршрута поезда: ");
-                departurePoint = Console.ReadLine();
+                warrior1.Attack(warrior2);
+                warrior2.ShowCurrentHealth();
 
                 _stringDelimiter.DrawLine();
 
-                Console.Write("Добавьте конец маршрута поезда: ");
-                arrivalPoint = Console.ReadLine();
+                warrior2.Attack(warrior1);
+                warrior1.ShowCurrentHealth();
+
+                Console.ReadKey();
+                Console.Clear();
             }
 
-            return new Direction(departurePoint, arrivalPoint);
+            ShowBattleOutcome(warrior1, warrior2);
         }
 
-        private int SellTickets()
+        private bool ChuseWarrior(out Warrior warrior)
         {
-            int minRandomValue = 100;
-            int maxRandomValue = 700;
-            
-            return _random.Next(minRandomValue, maxRandomValue + 1);
-        }
+            Console.Write("Выберите гладиатора: ");
 
-        private List<Wagon> CreateWagons(int wagonCapacity, int tickets)
-        {
-            List<Wagon> wagons = new List<Wagon>();
-
-            int wagonsCount = tickets / wagonCapacity;
-
-            if (IsNeedAdditionalWagon(tickets, wagonCapacity))
-                wagonsCount++;
-
-            for (int i = 0; i < wagonsCount; i++)
+            if (int.TryParse(Console.ReadLine(), out int userInput))
             {
-                wagons.Add(new Wagon(wagonCapacity));
+                if (userInput - 1 >= 0 && userInput - 1 < _warriors.Count)
+                {
+                    Warrior newWarrior = _warriors[userInput - 1];
+                    warrior = newWarrior.Clone();
+
+                    Console.WriteLine($"Вы выбрали гладиатора под номером - {userInput}");
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine("Такого бойца нет в списке!");
+                }
             }
-
-            return wagons;
-        }
-
-        private bool IsNeedAdditionalWagon(int tickets, int wagonCapacity)
-        {
-            return tickets % wagonCapacity != 0;
-        }
-
-        private void ShowAllTrains()
-        {
-            Console.WriteLine("Информация о поездах");
-            _stringDelimiter.DrawLine();
-
-            for (int i = 0; i < _trains.Count; i++)
+            else
             {
-                Console.WriteLine($"Поезд №{i + 1}");
-                _trains[i].ShowAllInfo();
-                _stringDelimiter.DrawLine();
+                Console.WriteLine("Вы ввели неверные символы!");
             }
-        }
-    }
 
-    class Train
-    {
-        private List<Wagon> _wagons = new List<Wagon>();
-        private StringDelimiter _stringDelimiter = new StringDelimiter(40);
-        private Direction _direction;
-        private int _passangers;
-
-        public Train(Direction direction, int passangers, List<Wagon> wagons)
-        {
-            _direction = direction;
-            _passangers = passangers;
-            _wagons = wagons;
+            Console.ReadKey();
+            warrior = null;
+            return false;
         }
 
-        public void ShowAllInfo()
+        private void ShowWarriors()
         {
-            Console.WriteLine($"Кол-во пассажиров в поезде: {_passangers}");
-            _direction.ShowDirection();
+            Console.WriteLine("**Список гладиаторов**");
 
-            foreach (var wagon in _wagons)
+            for (int i = 0; i < _warriors.Count; i++)
             {
                 _stringDelimiter.DrawLine();
-                wagon.ShowAllInfo();
+
+                Console.Write($"Гладиатор №{i + 1}. ");
+                _warriors[i].ShowStats();
             }
         }
-    }
 
-    class Direction
-    {
-        private string _departure;
-        private string _arrival;
-
-        public Direction(string departure, string arrival)
+        private void ShowBattleOutcome(Warrior warrior1, Warrior warrior2)
         {
-            _departure = departure;
-            _arrival = arrival;
-        }
-
-        public void ShowDirection()
-        {
-            Console.WriteLine($"Направление: {_departure} - {_arrival}");
+            if (warrior1.Health <= 0 && warrior2.Health <= 0)
+                Console.WriteLine("В этом бою победила ничья");
+            else if (warrior1.Health <= 0)
+                Console.WriteLine("В этом бою победил второй гладиатор");
+            else if (warrior2.Health <= 0)
+                Console.WriteLine("В этом бою победил первый гладиатор");
         }
     }
 
-    class Wagon
-    {
-        private int _capacity;
+    enum WarriorType { Magician, Archer, Viking, Necromancer, ManTree }
 
-        public Wagon(int capacity)
+    abstract class Warrior
+    {
+        protected int _maxHealth;
+        protected int _armor;
+        protected int _damage;
+        protected string _description;
+
+        public Warrior(int maxHealth, int armor, int damage, string description, WarriorType warriorType)
         {
-            _capacity = capacity;
+            _maxHealth = GetValue(maxHealth);
+            _armor = GetValue(armor);
+            _damage = GetValue(damage);
+
+            Health = _maxHealth;
+            _description = description;
+            _warriorType = warriorType;
         }
 
-        public void ShowAllInfo()
+        public int Health { get; protected set; }
+
+        public WarriorType _warriorType { get; private set; }
+
+        public virtual void TakeDamage(int damage)
         {
-            Console.WriteLine($"Вместимость вагона: {_capacity}");
+            Health -= damage;
+        }
+
+        public virtual void Attack(Warrior warrior)
+        {
+            warrior.TakeDamage(_damage);
+        }
+
+        public void ShowStats()
+        {
+            Console.WriteLine($"\nХарактеристики\nТип: {_warriorType}\nЗдоровье: {Health}\nБроня: {_armor}\nУрон: {_damage}");
+            Console.WriteLine($"Описание: {_description}");
+        }
+
+        public void ShowCurrentHealth()
+        {
+            Console.WriteLine($"{_warriorType } Здоровье: {Health}/{_maxHealth}");
+        }
+
+        public abstract Warrior Clone();
+
+        private int GetValue(int value)
+        {
+            if (value > 0)
+                return value;
+
+            return 1;
+        }
+    }
+
+    class Archer : Warrior
+    {
+        private int _dodgeChance = 50;
+
+        private Randomizer _randomizer = new Randomizer();
+
+        public Archer(int maxHealth, int armor, int damage, string description) :
+            base(maxHealth, armor, damage, description, WarriorType.Archer)
+        { }
+
+        public override void TakeDamage(int damage)
+        {
+            if (_randomizer.GenerateRndomValue() >= _dodgeChance)
+                base.TakeDamage(damage);
+            else
+                Console.WriteLine($"{_warriorType} задоджил атаку");
+        }
+
+        public override Warrior Clone()
+        {
+            return new Archer(Health, _armor, _damage, _description);
+        }
+    }
+
+    class Necromancer : Warrior
+    {
+        private int _doubleDamageChance = 50;
+        private int _damageModify = 2;
+
+        private Randomizer _randomizer = new Randomizer();
+
+        public Necromancer(int maxHealth, int armor, int damage, string description) :
+            base(maxHealth, armor, damage, description, WarriorType.Necromancer)
+        { }
+
+        public override void Attack(Warrior warrior)
+        {
+            if (_randomizer.GenerateRndomValue() > _doubleDamageChance)
+            {
+                warrior.TakeDamage(_damage * _damageModify);
+                Console.WriteLine($"{_warriorType} Наносит крит. урон");
+            }
+            else
+            {
+                warrior.TakeDamage(_damage);
+            }
+        }
+
+        public override Warrior Clone()
+        {
+            return new Necromancer(Health, _armor, _damage, _description);
+        }
+    }
+
+    class Magician : Warrior
+    {
+        private int _mana;
+        private int _maxMana;
+        private int _abilutyPrice = 25;
+        private int _damageModify = 2;
+
+        public Magician(int maxHealth, int armor, int damage, string description, int maxMana) :
+            base(maxHealth, armor, damage, description, WarriorType.Magician)
+        {
+            _maxMana = maxMana;
+            _mana = _maxMana;
+        }
+
+        public override void Attack(Warrior warrior)
+        {
+            if (_mana > 0)
+            {
+                warrior.TakeDamage(_damage * _damageModify);
+
+                Console.WriteLine($"{_warriorType} Нанёс урон огненным шаром");
+
+                _mana -= _abilutyPrice;
+            }
+            else
+            {
+                warrior.TakeDamage(_damage);
+            }
+        }
+
+        public override Warrior Clone()
+        {
+            return new Magician(Health, _armor, _damage, _description, _maxMana);
+        }
+    }
+
+    class Viking : Warrior
+    {
+        private int _rage;
+        private int _limitRage = 2;
+        private int _rageAttackCount = 2;
+
+        public Viking(int maxHealth, int armor, int damage, string description) :
+            base(maxHealth, armor, damage, description, WarriorType.Viking)
+        { }
+
+        public override void Attack(Warrior warrior)
+        {
+            if (_rage >= _limitRage)
+            {
+                for (int i = 0; i < _rageAttackCount; i++)
+                {
+                    warrior.TakeDamage(_damage);
+                }
+
+                _rage = 0;
+                Console.WriteLine($"{_warriorType} Впал в ярость и нанес сразу несколько ударов по сопернику");
+            }
+            else
+            {
+                warrior.TakeDamage(_damage);
+            }
+        }
+
+        public override void TakeDamage(int damage)
+        {
+            base.TakeDamage(damage);
+            _rage++;
+        }
+
+        public override Warrior Clone()
+        {
+            return new Viking(Health, _armor, _damage, _description);
+        }
+    }
+
+    class ManTree : Warrior
+    {
+        private int _rage;
+        private int _limitRage = 3;
+        private int _healModify = 2;
+
+        public ManTree(int maxHealth, int armor, int damage, string description) :
+            base(maxHealth, armor, damage, description, WarriorType.ManTree)
+        { }
+
+        private int _healRepair => _maxHealth / _healModify;
+
+        public override void TakeDamage(int damage)
+        {
+            base.TakeDamage(damage);
+            _rage++;
+
+            CureHealth();
+        }
+
+        public override Warrior Clone()
+        {
+            return new ManTree(Health, _armor, _damage, _description);
+        }
+
+        private void CureHealth()
+        {
+            if (_rage >= _limitRage)
+            {
+                Health += _healRepair;
+                _rage = 0;
+                Console.WriteLine($"{_warriorType} накопил ярость и вылечил себе часть здоровья");
+            }
         }
     }
 
@@ -205,6 +378,17 @@ namespace ConsoleApp1
         public void DrawLine()
         {
             Console.WriteLine(new string('_', _lineRange));
+        }
+    }
+
+    class Randomizer
+    {
+        private Random _random = new Random();
+        private int _maxRandomValue = 100;
+
+        public int GenerateRndomValue()
+        {
+            return _random.Next(0, _maxRandomValue + 1);
         }
     }
 }
