@@ -19,6 +19,7 @@ namespace ConsoleApp1
         private const string CommandExit = "2";
 
         private StringDelimiter _stringDelimiter = new StringDelimiter(30);
+        private Randomizer _randomizer = new Randomizer();
 
         private List<Warrior> _warriors = new List<Warrior>()
         {
@@ -76,7 +77,10 @@ namespace ConsoleApp1
 
             while (warrior1.Health > 0 && warrior2.Health > 0)
             {
-                warrior1.Attack(warrior2);
+                if (_randomizer.GenerateRndomValue() > 50)
+
+
+                    warrior1.Attack(warrior2);
                 warrior2.ShowCurrentHealth();
 
                 _stringDelimiter.DrawLine();
@@ -170,12 +174,16 @@ namespace ConsoleApp1
 
         public virtual void TakeDamage(int damage)
         {
-            Health -= damage;
+            if (damage > 0)
+                Health -= damage - _armor;
+            else
+                Health--;
         }
 
         public virtual void Attack(Warrior warrior)
         {
-            warrior.TakeDamage(_damage);
+            if (Health > 0)
+                warrior.TakeDamage(_damage);
         }
 
         public void ShowStats()
@@ -357,9 +365,15 @@ namespace ConsoleApp1
 
         private void CureHealth()
         {
-            if (_rage >= _limitRage)
+            if (_rage >= _limitRage && Health < _maxHealth)
             {
-                Health += _healRepair;
+                int necessaryHealth = _maxHealth - Health;
+
+                if (_healRepair <= necessaryHealth)
+                    Health += _healRepair;
+                else
+                    Health += necessaryHealth;
+
                 _rage = 0;
                 Console.WriteLine($"{_warriorType} накопил ярость и вылечил себе часть здоровья");
             }
