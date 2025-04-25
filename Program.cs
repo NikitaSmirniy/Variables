@@ -21,15 +21,20 @@ namespace ConsoleApp1
         private StringDelimiter _stringDelimiter = new StringDelimiter(30);
         private Randomizer _randomizer = new Randomizer();
 
-        private List<Warrior> _warriors = new List<Warrior>()
+        private List<Warrior> _warriors;
+
+        public Arena()
+        {
+            _warriors = new List<Warrior>()
         {
             new Necromancer(125, 12, 75,
             "Это колдун из древнего племени 'индейцев' способен вызывать мертвых которые служат своему хозяину."),
             new Viking(200, 15, 50, "Этот викинг пришёл на арену, что-бы выплеснуть свою ярость."),
-            new ManTree(400, 0, 30, "Это существо когда-то было человеком, но попав под влияние собственной магии потеряло человеческий облик и обрёл быструю регенирацию."),
-            new Magician(100, 6, 80, "Это маг из древнего племени 'индейцев' способен выпускать огненные шары.", 100),
+            new ManTree(400, 0, 25, "Это существо когда-то было человеком, но попав под влияние собственной магии потеряло человеческий облик и обрёл быструю регенирацию."),
+            new Magician(100, 6, 60, "Это маг из древнего племени 'индейцев' способен выпускать огненные шары.", 100),
             new Archer(175, 25, 65, "Этот лучник имеет большой опыт в боях, на арену он пришёл исключительно за наживой.")
         };
+        }
 
         public void Work()
         {
@@ -49,7 +54,7 @@ namespace ConsoleApp1
                 switch (userInput)
                 {
                     case CommandShowFight:
-                        ShowFight();
+                        StartFight();
                         break;
 
                     case CommandExit:
@@ -66,11 +71,11 @@ namespace ConsoleApp1
             }
         }
 
-        private void ShowFight()
+        private void StartFight()
         {
             ShowWarriors();
 
-            if (TryChuseWarrior(out Warrior warrior1) == false || TryChuseWarrior(out Warrior warrior2) == false)
+            if (TryGetWarrior(out Warrior warrior1) == false || TryGetWarrior(out Warrior warrior2) == false)
                 return;
 
             Console.Clear();
@@ -92,18 +97,18 @@ namespace ConsoleApp1
             ShowBattleOutcome(warrior1, warrior2);
         }
 
-        private bool TryChuseWarrior(out Warrior warrior)
+        private bool TryGetWarrior(out Warrior warrior)
         {
             Console.Write("Выберите гладиатора: ");
 
-            if (int.TryParse(Console.ReadLine(), out int userInput))
+            if (int.TryParse(Console.ReadLine(), out int heroIndex))
             {
-                if (userInput - 1 >= 0 && userInput - 1 < _warriors.Count)
+                if (heroIndex - 1 >= 0 && heroIndex - 1 < _warriors.Count)
                 {
-                    Warrior newWarrior = _warriors[userInput - 1];
+                    Warrior newWarrior = _warriors[heroIndex - 1];
                     warrior = newWarrior.Clone();
 
-                    Console.WriteLine($"Вы выбрали гладиатора под номером - {userInput}");
+                    Console.WriteLine($"Вы выбрали гладиатора под номером - {heroIndex}");
                     return true;
                 }
                 else
@@ -154,54 +159,52 @@ namespace ConsoleApp1
         protected int Damage;
         protected string Description;
 
-        public Warrior(int maxHealth, int armor, int damage, string description, WarriorType warriorType)
+        public Warrior(int maxHealth, int armor, int damage, string description, WarriorType type)
         {
-            MaxHealth = GetValue(maxHealth);
-            Armor = GetValue(armor);
-            Damage = GetValue(damage);
+            MaxHealth = GetStat(maxHealth);
+            Armor = GetStat(armor);
+            Damage = GetStat(damage);
 
             Health = MaxHealth;
             Description = description;
-            WarriorType = warriorType;
+            Type = type;
         }
 
         public int Health { get; protected set; }
 
-        public WarriorType WarriorType { get; private set; }
+        public WarriorType Type { get; private set; }
 
         public virtual void TakeDamage(int damage)
         {
-            if (damage > 0)
+            if (damage < Armor)
                 Health -= damage - Armor;
             else
                 Health--;
         }
 
-        public virtual void Attack(Warrior warrior)
+        public virtual void Attack(Warrior enemy)
         {
             if (Health > 0)
-                warrior.TakeDamage(Damage);
-            else
-                return;
+                enemy.TakeDamage(Damage);
         }
 
         public void ShowStats()
         {
-            Console.WriteLine($"\nХарактеристики\nТип: {WarriorType}\nЗдоровье: {Health}\nБроня: {Armor}\nУрон: {Damage}");
+            Console.WriteLine($"\nХарактеристики\nТип: {Type}\nЗдоровье: {Health}\nБроня: {Armor}\nУрон: {Damage}");
             Console.WriteLine($"Описание: {Description}");
         }
 
         public void ShowCurrentHealth()
         {
-            Console.WriteLine($"{WarriorType } Здоровье: {Health}/{MaxHealth}");
+            Console.WriteLine($"{Type } Здоровье: {Health}/{MaxHealth}");
         }
 
         public abstract Warrior Clone();
 
-        private int GetValue(int value)
+        private int GetStat(int stat)
         {
-            if (value > 0)
-                return value;
+            if (stat > 0)
+                return stat;
 
             return 1;
         }
@@ -222,7 +225,7 @@ namespace ConsoleApp1
             if (_randomizer.GenerateRndomValue() >= _dodgeChance)
                 base.TakeDamage(damage);
             else
-                Console.WriteLine($"{WarriorType} задоджил атаку");
+                Console.WriteLine($"{Type} задоджил атаку");
         }
 
         public override Warrior Clone()
@@ -242,16 +245,16 @@ namespace ConsoleApp1
             base(maxHealth, armor, damage, description, WarriorType.Necromancer)
         { }
 
-        public override void Attack(Warrior warrior)
+        public override void Attack(Warrior enemy)
         {
             if (_randomizer.GenerateRndomValue() > _doubleDamageChance)
             {
-                warrior.TakeDamage(Damage * _damageModify);
-                Console.WriteLine($"{WarriorType} Наносит крит. урон");
+                enemy.TakeDamage(Damage * _damageModify);
+                Console.WriteLine($"{Type} Наносит крит. урон");
             }
             else
             {
-                warrior.TakeDamage(Damage);
+                enemy.TakeDamage(Damage);
             }
         }
 
@@ -275,19 +278,19 @@ namespace ConsoleApp1
             _mana = _maxMana;
         }
 
-        public override void Attack(Warrior warrior)
+        public override void Attack(Warrior enemy)
         {
-            if (_mana > 0)
+            if (_mana >= _abilutyPrice)
             {
-                warrior.TakeDamage(Damage * _damageModify);
-
-                Console.WriteLine($"{WarriorType} Нанёс урон огненным шаром");
-
                 _mana -= _abilutyPrice;
+
+                enemy.TakeDamage(Damage * _damageModify);
+
+                Console.WriteLine($"{Type} Нанёс урон огненным шаром");
             }
             else
             {
-                warrior.TakeDamage(Damage);
+                enemy.TakeDamage(Damage);
             }
         }
 
@@ -300,7 +303,7 @@ namespace ConsoleApp1
     class Viking : Warrior
     {
         private int _rage;
-        private int _limitRage = 2;
+        private int _limitRage = 3;
 
         private int _rageAttackCount = 2;
 
@@ -308,28 +311,25 @@ namespace ConsoleApp1
             base(maxHealth, armor, damage, description, WarriorType.Viking)
         { }
 
-        public override void Attack(Warrior warrior)
+        public override void Attack(Warrior enemy)
         {
+            _rage++;
+
             if (_rage >= _limitRage)
             {
                 for (int i = 0; i < _rageAttackCount; i++)
                 {
-                    warrior.TakeDamage(Damage);
+                    enemy.TakeDamage(Damage);
                 }
 
                 _rage = 0;
-                Console.WriteLine($"{WarriorType} Впал в ярость и нанес сразу несколько ударов по сопернику");
+
+                Console.WriteLine($"{Type} Впал в ярость и нанес сразу несколько ударов по сопернику");
             }
             else
             {
-                warrior.TakeDamage(Damage);
+                enemy.TakeDamage(Damage);
             }
-        }
-
-        public override void TakeDamage(int damage)
-        {
-            base.TakeDamage(damage);
-            _rage++;
         }
 
         public override Warrior Clone()
@@ -375,9 +375,40 @@ namespace ConsoleApp1
                     Health += necessaryHealth;
 
                 _rage = 0;
-                Console.WriteLine($"{WarriorType} накопил ярость и вылечил себе часть здоровья");
+                Console.WriteLine($"{Type} накопил ярость и вылечил себе часть здоровья");
             }
         }
+    }
+
+    class Client
+    {
+        private List<Item> _products = new List<Item>();
+        private List<Item> _bag = new List<Item>();
+
+        public Client(List<Item> products, int money)
+        {
+            _products = products;
+            Money = money;
+        }
+
+        public int Money { get; private set; }
+
+        //public bool TryBuy(int )
+        //{
+        //    if
+        //}
+    }
+
+    class Item
+    {
+        public Item(string name, int price)
+        {
+            Name = name;
+            Price = price;
+        }
+
+        public string Name { get; private set; }
+        public int Price { get; private set; }
     }
 
     class StringDelimiter
