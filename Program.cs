@@ -7,207 +7,247 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            Supermarket supermark = new Supermarket(10);
+            List<Platoon> platoons = new List<Platoon>() { new Platoon(60, "Орлы", new Multipurpose()), new Platoon(45, "Акулы", new HeavySoldier()) };
 
-            supermark.Work();
+            WarController warController = new WarController(platoons);
+
+            warController.Work();
         }
     }
 
-    class Supermarket
+    class WarController
     {
-        private StringDelimiter stringDelimiter = new StringDelimiter(30);
-        private List<Item> _items = new List<Item>();
-        private Queue<Client> _clients = new Queue<Client>();
-        private int _clientsCount;
-        private int _money;
+        private List<Platoon> _platoons = new List<Platoon>();
 
-        public Supermarket(int clientsCount)
+        public WarController(List<Platoon> platoons)
         {
-            _clientsCount = clientsCount;
-
-            AddItems();
-
-            AddClients();
+            _platoons = platoons;
         }
 
         public void Work()
         {
-            ShowItems();
+            int firstPlatoon = 0;
+            int secondPlatoon = 1;
+            bool isOpen = true;
 
-            stringDelimiter.DrawLine();
+            _platoons[firstPlatoon].Fill();
+            _platoons[secondPlatoon].Fill();
 
-            ServeClients();
-
-            stringDelimiter.DrawLine();
-
-            Console.WriteLine($"Работа завершена\n за сегодня мы заработали: {_money} долларс");
-            Console.ReadKey();
-        }
-
-        private void AddClients()
-        {
-            Random random = new Random();
-            int minRandomMoney = 1000;
-            int maxRandomMoney = 2500;
-
-            for (int i = 0; i < _clientsCount; i++)
-                _clients.Enqueue(new Client(FillClientCart(), random.Next(minRandomMoney, maxRandomMoney)));
-        }
-
-        private void AddItems()
-        {
-            _items.Add(new Item("Яблоко 'Забродившее'", 50));
-            _items.Add(new Item("Водка 'Тундра'", 300));
-            _items.Add(new Item("Чупс со вкусом пива", 10));
-            _items.Add(new Item("Чипсы 'Пивные'", 400));
-            _items.Add(new Item("Вино", 500));
-            _items.Add(new Item("Пиво 'Гиннесс'", 200));
-        }
-
-        private void ServeClients()
-        {
-            while (_clients.Count > 0)
+            while (isOpen)
             {
-                _money += _clients.Dequeue().Buy();
+                Attack(firstPlatoon, secondPlatoon);
+                Attack(secondPlatoon, firstPlatoon);
 
-                stringDelimiter.DrawLine();
+                if (TryGetWinPlatoon(out Platoon deadPlatoon))
+                {
+                    isOpen = false;
 
-                Console.WriteLine("Клиент обслужен");
+                    _platoons.Remove(deadPlatoon);
+
+                    ShowWinner();
+                }
+
                 Console.ReadKey();
-
-                stringDelimiter.DrawLine();
+                Console.Clear();
             }
         }
 
-        private List<Item> FillClientCart()
+        private void ShowWinner()
         {
-            List<Item> items = new List<Item>();
+            int firstPlatoon = 0;
+            Platoon winnerPlatoon = _platoons[firstPlatoon];
 
-            int minItemCount = 1;
-            int maxItemCount = 10;
-            int randomItemsCount = Randomizer.GenerateRandomValue(minItemCount, maxItemCount);
+            Console.WriteLine($"Побеждает взвод под названием {winnerPlatoon.Name}");
+            Console.WriteLine("В его отряде остались: ");
 
-            for (int i = 0; i < randomItemsCount; i++)
-                items.Add(_items[Randomizer.GenerateRandomValue(0, _items.Count - 1)].Clone());
-
-            return items;
+            winnerPlatoon.ShowSoldersCondition();
         }
 
-        private void ShowItems()
+        private void Attack(int striker, int defender)
         {
-            Console.WriteLine("Ассортимент товаров");
+            _platoons[striker].Attack(_platoons[defender]);
 
-            foreach (var item in _items)
-                item.ShowInfo();
-        }
-    }
+            _platoons[defender].CalculateLosesse();
 
-    class Client
-    {
-        private List<Item> _cartItems = new List<Item>();
-        private List<Item> _bagItems;
+            _platoons[defender].ShowSoldersCondition();
 
-        public Client(List<Item> products, int money)
-        {
-            _cartItems = products;
-            Money = money;
-        }
-
-        public int Money { get; private set; }
-
-        public int Buy()
-        {
-            while (_cartItems.Count > 0)
-            {
-                if (Money >= GetSumBuy(out int sumBuy))
-                {
-                    Console.WriteLine("Я купил продукты");
-                    Console.ReadKey();
-
-                    _bagItems = new List<Item>(_cartItems);
-                    _cartItems.Clear();
-                    ShowBag();
-
-                    return sumBuy;
-                }
-                else
-                {
-                    Item dropItem = GetRandomItemFromCart();
-
-                    Console.WriteLine("Мне не хватает денег для покупки и мне пришлось убрать один продукт из корзины ");
-                    dropItem.ShowInfo();
-
-
-                    _cartItems.Remove(dropItem);
-
-                    Console.ReadKey();
-                }
-            }
-
-            Console.WriteLine("Я не смог ничего купить");
             Console.ReadKey();
-
-            return 0;
+            Console.Clear(); 
         }
 
-        public int GetSumBuy(out int sumBuy)
+        private bool TryGetWinPlatoon(out Platoon deadPlatoon)
         {
-            sumBuy = 0;
+            foreach (var platoon in _platoons)
+            {
+                if (platoon.SoldiersCount <= 0)
+                {
+                    deadPlatoon = platoon;
+                    return true;
+                }
+            }
 
-            foreach (var item in _cartItems)
-                sumBuy += item.Price;
-
-            return sumBuy;
-        }
-
-        private Item GetRandomItemFromCart()
-        {
-            return _cartItems[Randomizer.GenerateRandomValue(0, _cartItems.Count - 1)];
-        }
-
-        private void ShowBag()
-        {
-            Console.WriteLine("**Вот список мои купленных продуктов**");
-
-            foreach (var bagItem in _bagItems)
-                bagItem.ShowInfo();
+            deadPlatoon = null;
+            return false;
         }
     }
 
-    class Item
+    class Platoon
     {
-        public Item(string name, int price)
+        private List<Soldier> _soldiers = new List<Soldier>();
+        private Soldier _typeOfTroops;
+        private int Capacity;
+
+        public Platoon(int capacity, string name, Soldier typeOfTroops)
         {
+            Capacity = capacity;
             Name = name;
-            Price = price;
+            _typeOfTroops = typeOfTroops;
         }
 
         public string Name { get; private set; }
-        public int Price { get; private set; }
+        public int SoldiersCount => _soldiers.Count;
 
-        public void ShowInfo()
+        public void Attack(Platoon enemy)
         {
-            Console.WriteLine($"{Name} цена: {Price}");
+            if (SoldiersCount > 0)
+            {
+                foreach (var soldier in _soldiers)
+                    soldier.Attack(enemy._soldiers);
+            }
         }
 
-        public Item Clone()
+        public void ShowSoldersCondition()
         {
-            return new Item(Name, Price);
+            Console.WriteLine("Выжившие члены взвода");
+
+            for (int i = 0; i < _soldiers.Count; i++)
+            {
+                Console.Write($"{i + 1}.");
+                _soldiers[i].ShowCurrentHealth();
+            }
+        }
+
+        public void CalculateLosesse()
+        {
+            for (int i = _soldiers.Count - 1; i >= 0; i--)
+            {
+                if (_soldiers[i].IsAlive == false)
+                    _soldiers.Remove(_soldiers[i]);
+            }
+        }
+
+        public void Fill()
+        {
+            for (int i = 0; i < Capacity; i++)
+                _soldiers.Add(_typeOfTroops.Clone());
         }
     }
 
-    class StringDelimiter
+    abstract class Soldier
     {
-        private int _lineRange = 20;
+        protected int _maxHealth = 100;
+        protected int Armor = 10;
+        protected int Damage = 50;
 
-        public StringDelimiter(int lineRange)
+        public Soldier()
         {
-            _lineRange = lineRange;
+            Health = _maxHealth;
         }
 
-        public void DrawLine()
+        public int Health { get; private set; }
+        public bool IsAlive => Health > 0;
+
+        public virtual void TakeDamage(int damage)
         {
-            Console.WriteLine(new string('-', _lineRange));
+            if (Armor < damage)
+                Health -= damage - Armor;
+            else
+                Health--;
+        }
+
+        public abstract void Attack(List<Soldier> enemys);
+        public void ShowCurrentHealth() => Console.WriteLine($"Здоровье: {Health}/{_maxHealth}");
+
+        public abstract Soldier Clone();
+
+        protected Soldier GetRandomEnemy(List<Soldier> enemys)
+        {
+            return enemys[Randomizer.GenerateRandomValue(0, enemys.Count)];
+        }
+    }
+
+    class CommonSoldier : Soldier
+    {
+        public override void Attack(List<Soldier> enemys)
+        {
+            var target = GetRandomEnemy(enemys);
+
+            target.TakeDamage(Damage);
+        }
+
+        public override Soldier Clone()
+        {
+            return new CommonSoldier();
+        }
+    }
+
+    class HeavySoldier : Soldier
+    {
+        private int _damageModifier = 2;
+
+        public override void Attack(List<Soldier> enemys)
+        {
+                var target = GetRandomEnemy(enemys);
+
+                target.TakeDamage(Damage * _damageModifier);
+        }
+
+        public override Soldier Clone()
+        {
+            return new HeavySoldier();
+        }
+    }
+
+    class Multipurpose : Soldier
+    {
+        private int _attackCount = 3;
+
+        public override void Attack(List<Soldier> enemys)
+        {
+            List<Soldier> enemysToAttack = new List<Soldier>(enemys);
+
+            if (_attackCount > enemysToAttack.Count)
+                _attackCount = enemysToAttack.Count;
+
+            for (int i = 0; i < _attackCount; i++)
+            {
+                var enemy = GetRandomEnemy(enemysToAttack);
+
+                enemy.TakeDamage(Damage);
+
+                enemysToAttack.Remove(enemy);
+            }
+        }
+
+        public override Soldier Clone()
+        {
+            return new Multipurpose();
+        }
+    }
+
+    class Viking : Soldier
+    {
+        private int _attackCount = 3;
+
+        public override void Attack(List<Soldier> enemys)
+        {
+            for (int i = 0; i < _attackCount; i++)
+                GetRandomEnemy(enemys).TakeDamage(Damage);
+        }
+
+        public override Soldier Clone()
+        {
+            return new Viking();
         }
     }
 
@@ -217,7 +257,7 @@ namespace ConsoleApp1
 
         public static int GenerateRandomValue(int minRandomValue, int maxRandomValue)
         {
-            return _random.Next(minRandomValue, maxRandomValue + 1);
+            return _random.Next(minRandomValue, maxRandomValue);
         }
     }
 }
