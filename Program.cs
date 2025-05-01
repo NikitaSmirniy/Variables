@@ -42,11 +42,11 @@ namespace ConsoleApp1
                 platoon1.RemoveDeadSoldiers();
                 platoon1.ShowSoldersCondition();
 
-                if (TryGetDeadPlatoon(platoon1, platoon2, out Platoon deadPlatoon))
+                if (TryGetWinnerPlatoon(platoon1, platoon2, out Platoon winnerPlatoon))
                 {
                     isOpen = false;
 
-                    ShowWinner(deadPlatoon);
+                    ShowWinner(winnerPlatoon);
                 }
 
                 Console.ReadKey();
@@ -70,20 +70,20 @@ namespace ConsoleApp1
             Console.Clear();
         }
 
-        private bool TryGetDeadPlatoon(Platoon platoon1, Platoon platoon2, out Platoon deadPlatoon)
+        private bool TryGetWinnerPlatoon(Platoon platoon1, Platoon platoon2, out Platoon winnerPlatoon)
         {
-            if (platoon1.SoldiersCount <= 0)
+            if (platoon1.SoldiersCount > 0)
             {
-                deadPlatoon = platoon1;
+                winnerPlatoon = platoon1;
                 return true;
             }
-            else if (platoon2.SoldiersCount <= 0)
+            else if (platoon2.SoldiersCount > 0)
             {
-                deadPlatoon = platoon2;
+                winnerPlatoon = platoon2;
                 return true;
             }
 
-            deadPlatoon = null;
+            winnerPlatoon = null;
             return false;
         }
     }
@@ -98,7 +98,7 @@ namespace ConsoleApp1
             List<Soldier> soldiers = new List<Soldier>();
 
             for (int i = 0; i < count; i++)
-                soldiers.Add(_soldiers[Randomizer.GenerateRandomValue(0, _soldiers.Count)]);
+                soldiers.Add(_soldiers[Randomizer.GenerateRandomValue(0, _soldiers.Count)].Clone());
 
             return soldiers;
         }
@@ -230,14 +230,14 @@ namespace ConsoleApp1
 
         public Multipurpose(int maxHealth, int armor, int damage) : base(maxHealth, armor, damage) { }
 
-        public override void Attack(List<Soldier> enemys)
+        public override void Attack(List<Soldier> enemies)
         {
-            List<Soldier> enemysToAttack = new List<Soldier>(enemys);
+            List<Soldier> enemysToAttack = new List<Soldier>(enemies);
 
-            if (_attackCount > enemysToAttack.Count)
-                _attackCount = enemysToAttack.Count;
+            int enemiesCount = enemysToAttack.Count;
+            int attackCount = _attackCount < enemiesCount ? _attackCount : enemiesCount;
 
-            for (int i = 0; i < _attackCount; i++)
+            for (int i = 0; i < attackCount; i++)
             {
                 var enemy = GetRandomEnemy(enemysToAttack);
 
