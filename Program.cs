@@ -7,44 +7,46 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            List<Platoon> platoons = new List<Platoon>() { new Platoon(60, "Орлы", new Multipurpose()), new Platoon(45, "Акулы", new HeavySoldier()) };
+            PlatoonCreater platoonCreater = new PlatoonCreater();
 
-            WarController warController = new WarController(platoons);
+            BattleField warController = new BattleField(platoonCreater);
 
             warController.Work();
         }
     }
 
-    class WarController
+    class BattleField
     {
-        private List<Platoon> _platoons = new List<Platoon>();
+        private PlatoonCreater _platoonCreater;
 
-        public WarController(List<Platoon> platoons)
+        public BattleField(PlatoonCreater platoonCreater)
         {
-            _platoons = platoons;
+            _platoonCreater = platoonCreater;
         }
 
         public void Work()
         {
-            int firstPlatoon = 0;
-            int secondPlatoon = 1;
             bool isOpen = true;
+            int capacityPlatoon = 60;
 
-            _platoons[firstPlatoon].Fill();
-            _platoons[secondPlatoon].Fill();
+            Platoon platoon1 = new Platoon(_platoonCreater.Create(capacityPlatoon), "Первая команда");
+            Platoon platoon2 = new Platoon(_platoonCreater.Create(capacityPlatoon), "Вторая команда");
 
             while (isOpen)
             {
-                Attack(firstPlatoon, secondPlatoon);
-                Attack(secondPlatoon, firstPlatoon);
+                Attack(platoon1, platoon2);
+                platoon2.RemoveDeadSoldiers();
+                platoon2.ShowSoldersCondition();
 
-                if (TryGetWinPlatoon(out Platoon deadPlatoon))
+                Attack(platoon2, platoon1);
+                platoon1.RemoveDeadSoldiers();
+                platoon1.ShowSoldersCondition();
+
+                if (TryGetDeadPlatoon(platoon1, platoon2, out Platoon deadPlatoon))
                 {
                     isOpen = false;
 
-                    _platoons.Remove(deadPlatoon);
-
-                    ShowWinner();
+                    ShowWinner(deadPlatoon);
                 }
 
                 Console.ReadKey();
@@ -52,38 +54,33 @@ namespace ConsoleApp1
             }
         }
 
-        private void ShowWinner()
+        private void ShowWinner(Platoon winnerPlatoon)
         {
-            int firstPlatoon = 0;
-            Platoon winnerPlatoon = _platoons[firstPlatoon];
-
             Console.WriteLine($"Побеждает взвод под названием {winnerPlatoon.Name}");
             Console.WriteLine("В его отряде остались: ");
 
             winnerPlatoon.ShowSoldersCondition();
         }
 
-        private void Attack(int striker, int defender)
+        private void Attack(Platoon striker, Platoon defender)
         {
-            _platoons[striker].Attack(_platoons[defender]);
-
-            _platoons[defender].CalculateLosesse();
-
-            _platoons[defender].ShowSoldersCondition();
+            striker.Attack(defender.GetSoldiers());
 
             Console.ReadKey();
-            Console.Clear(); 
+            Console.Clear();
         }
 
-        private bool TryGetWinPlatoon(out Platoon deadPlatoon)
+        private bool TryGetDeadPlatoon(Platoon platoon1, Platoon platoon2, out Platoon deadPlatoon)
         {
-            foreach (var platoon in _platoons)
+            if (platoon1.SoldiersCount <= 0)
             {
-                if (platoon.SoldiersCount <= 0)
-                {
-                    deadPlatoon = platoon;
-                    return true;
-                }
+                deadPlatoon = platoon1;
+                return true;
+            }
+            else if (platoon2.SoldiersCount <= 0)
+            {
+                deadPlatoon = platoon2;
+                return true;
             }
 
             deadPlatoon = null;
@@ -91,28 +88,41 @@ namespace ConsoleApp1
         }
     }
 
+    class PlatoonCreater
+    {
+        private List<Soldier> _soldiers = new List<Soldier>() { new CommonSoldier(100, 15, 25), new HeavySoldier(100, 15, 20),
+            new Multipurpose(100, 15, 10), new Viking(100, 15, 10) };
+
+        public List<Soldier> Create(int count)
+        {
+            List<Soldier> soldiers = new List<Soldier>();
+
+            for (int i = 0; i < count; i++)
+                soldiers.Add(_soldiers[Randomizer.GenerateRandomValue(0, _soldiers.Count)]);
+
+            return soldiers;
+        }
+    }
+
     class Platoon
     {
         private List<Soldier> _soldiers = new List<Soldier>();
-        private Soldier _typeOfTroops;
-        private int Capacity;
 
-        public Platoon(int capacity, string name, Soldier typeOfTroops)
+        public Platoon(List<Soldier> soldiers, string name)
         {
-            Capacity = capacity;
             Name = name;
-            _typeOfTroops = typeOfTroops;
+            _soldiers = soldiers;
         }
 
         public string Name { get; private set; }
         public int SoldiersCount => _soldiers.Count;
 
-        public void Attack(Platoon enemy)
+        public void Attack(List<Soldier> enemies)
         {
             if (SoldiersCount > 0)
             {
                 foreach (var soldier in _soldiers)
-                    soldier.Attack(enemy._soldiers);
+                    soldier.Attack(enemies);
             }
         }
 
@@ -127,7 +137,7 @@ namespace ConsoleApp1
             }
         }
 
-        public void CalculateLosesse()
+        public void RemoveDeadSoldiers()
         {
             for (int i = _soldiers.Count - 1; i >= 0; i--)
             {
@@ -136,22 +146,24 @@ namespace ConsoleApp1
             }
         }
 
-        public void Fill()
+        public List<Soldier> GetSoldiers()
         {
-            for (int i = 0; i < Capacity; i++)
-                _soldiers.Add(_typeOfTroops.Clone());
+            return new List<Soldier>(_soldiers);
         }
     }
 
     abstract class Soldier
     {
-        protected int _maxHealth = 100;
-        protected int Armor = 10;
-        protected int Damage = 50;
+        protected int MaxHealth;
+        protected int Armor;
+        protected int Damage;
 
-        public Soldier()
+        public Soldier(int maxHealth, int armor, int damage)
         {
-            Health = _maxHealth;
+            MaxHealth = maxHealth;
+            Armor = armor;
+            Damage = damage;
+            Health = MaxHealth;
         }
 
         public int Health { get; private set; }
@@ -166,7 +178,7 @@ namespace ConsoleApp1
         }
 
         public abstract void Attack(List<Soldier> enemys);
-        public void ShowCurrentHealth() => Console.WriteLine($"Здоровье: {Health}/{_maxHealth}");
+        public void ShowCurrentHealth() => Console.WriteLine($"Здоровье: {Health}/{MaxHealth}");
 
         public abstract Soldier Clone();
 
@@ -178,6 +190,8 @@ namespace ConsoleApp1
 
     class CommonSoldier : Soldier
     {
+        public CommonSoldier(int maxHealth, int armor, int damage) : base(maxHealth, armor, damage) { }
+
         public override void Attack(List<Soldier> enemys)
         {
             var target = GetRandomEnemy(enemys);
@@ -187,7 +201,7 @@ namespace ConsoleApp1
 
         public override Soldier Clone()
         {
-            return new CommonSoldier();
+            return new CommonSoldier(MaxHealth, Armor, Damage);
         }
     }
 
@@ -195,22 +209,26 @@ namespace ConsoleApp1
     {
         private int _damageModifier = 2;
 
+        public HeavySoldier(int maxHealth, int armor, int damage) : base(maxHealth, armor, damage) { }
+
         public override void Attack(List<Soldier> enemys)
         {
-                var target = GetRandomEnemy(enemys);
+            var target = GetRandomEnemy(enemys);
 
-                target.TakeDamage(Damage * _damageModifier);
+            target.TakeDamage(Damage * _damageModifier);
         }
 
         public override Soldier Clone()
         {
-            return new HeavySoldier();
+            return new HeavySoldier(MaxHealth, Armor, Damage);
         }
     }
 
     class Multipurpose : Soldier
     {
         private int _attackCount = 3;
+
+        public Multipurpose(int maxHealth, int armor, int damage) : base(maxHealth, armor, damage) { }
 
         public override void Attack(List<Soldier> enemys)
         {
@@ -231,13 +249,15 @@ namespace ConsoleApp1
 
         public override Soldier Clone()
         {
-            return new Multipurpose();
+            return new Multipurpose(MaxHealth, Armor, Damage);
         }
     }
 
     class Viking : Soldier
     {
         private int _attackCount = 3;
+
+        public Viking(int maxHealth, int armor, int damage) : base(maxHealth, armor, damage) { }
 
         public override void Attack(List<Soldier> enemys)
         {
@@ -247,7 +267,7 @@ namespace ConsoleApp1
 
         public override Soldier Clone()
         {
-            return new Viking();
+            return new Viking(MaxHealth, Armor, Damage);
         }
     }
 
