@@ -7,267 +7,226 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            PlatoonCreater platoonCreater = new PlatoonCreater();
+            Aquarium aquarium = new Aquarium(8);
 
-            BattleField warController = new BattleField(platoonCreater);
+            AquariumController warController = new AquariumController(aquarium);
 
             warController.Work();
         }
     }
 
-    class BattleField
+    class AquariumController
     {
-        private PlatoonCreater _platoonCreater;
+        private const string CommandAddFish = "1";
+        private const string CommandRemoveFish = "2";
+        private const string CommandExit = "3";
 
-        public BattleField(PlatoonCreater platoonCreater)
+        private Aquarium _aquarium;
+
+        public AquariumController(Aquarium aquarium)
         {
-            _platoonCreater = platoonCreater;
+            _aquarium = aquarium;
         }
 
         public void Work()
         {
             bool isOpen = true;
-            int capacityPlatoon = 60;
-
-            Platoon platoon1 = new Platoon(_platoonCreater.Create(capacityPlatoon), "Первая команда");
-            Platoon platoon2 = new Platoon(_platoonCreater.Create(capacityPlatoon), "Вторая команда");
 
             while (isOpen)
             {
-                Attack(platoon1, platoon2);
-                platoon2.RemoveDeadSoldiers();
-                platoon2.ShowSoldersCondition();
+                _aquarium.ShowAllFishInfo();
 
-                Attack(platoon2, platoon1);
-                platoon1.RemoveDeadSoldiers();
-                platoon1.ShowSoldersCondition();
+                StringDelimiter.DrawLine();
 
-                if (TryGetWinnerPlatoon(platoon1, platoon2, out Platoon winnerPlatoon))
+                Console.WriteLine($"Комнада {CommandAddFish} - добавить рыбку");
+                Console.WriteLine($"Комнада {CommandRemoveFish} - убрать рыбку");
+                Console.WriteLine($"Комнада {CommandExit} - выйти");
+
+                StringDelimiter.DrawLine();
+
+                Console.Write("Введите команду: ");
+
+                string userInput = Console.ReadLine();
+
+                StringDelimiter.DrawLine();
+
+                switch (userInput)
                 {
-                    isOpen = false;
+                    case CommandAddFish:
+                        _aquarium.AddFish();
+                        break;
 
-                    ShowWinner(winnerPlatoon);
+                    case CommandRemoveFish:
+                        _aquarium.RemoveFish();
+                        break;
+
+                    case CommandExit:
+                        isOpen = false;
+                        break;
+
+                    default:
+                        Console.WriteLine("Команда не проходит");
+                        break;
                 }
 
-                Console.ReadKey();
+                Console.ReadLine();
                 Console.Clear();
+
+                _aquarium.LifeFish();
             }
         }
+    }
 
-        private void ShowWinner(Platoon winnerPlatoon)
+    class Aquarium
+    {
+        private List<Fish> _fish = new List<Fish>();
+        private int _capacity;
+
+        public Aquarium(int capacity)
         {
-            Console.WriteLine($"Побеждает взвод под названием {winnerPlatoon.Name}");
-            Console.WriteLine("В его отряде остались: ");
-
-            winnerPlatoon.ShowSoldersCondition();
+            _capacity = capacity;
         }
 
-        private void Attack(Platoon striker, Platoon defender)
+        public void LifeFish()
         {
-            striker.Attack(defender.GetSoldiers());
-
-            Console.ReadKey();
-            Console.Clear();
+            foreach (var fish in _fish)
+                fish.Older();
         }
 
-        private bool TryGetWinnerPlatoon(Platoon platoon1, Platoon platoon2, out Platoon winnerPlatoon)
+        public void AddFish() => _fish.Add(new Fish(AddNameFish(), AddLifetimeFish()));
+
+        public void RemoveFish()
         {
-            if (platoon1.SoldiersCount > 0)
+            if (TryGetFish(out Fish fish))
+                _fish.Remove(fish);
+        }
+
+        public void ShowAllFishInfo()
+        {
+            foreach (var fish in _fish)
+                fish.ShowInfo();
+
+            StringDelimiter.DrawLine();
+
+            Console.WriteLine($"Аквариум заполнен на {_fish.Count} из {_capacity} рыб");
+        }
+
+        private string AddNameFish()
+        {
+            string noneNameText = "Никто";
+
+            Console.Write("Как будут звать рыбку: ");
+            string nameFish = Console.ReadLine();
+
+            if (nameFish != "")
+                return nameFish;
+
+            return noneNameText;
+        }
+
+        private int AddLifetimeFish()
+        {
+            int minLifeTime = 3;
+            int maxLifeTime = 8;
+
+            return Randomizer.GenerateRandomValue(minLifeTime, maxLifeTime + 1);
+        }
+
+        private bool TryGetFish(out Fish resultingFish)
+        {
+            List<Fish> foundFish = new List<Fish>();
+
+            Console.Write("Введите имя рыбки из списка, которую вы хотели-бы убрать: ");
+
+            string fishName = Console.ReadLine();
+
+            foreach (var fish in _fish)
             {
-                winnerPlatoon = platoon1;
+                if (fish.Name.ToLower() == fishName.ToLower())
+                    foundFish.Add(fish);
+            }
+
+            if (foundFish.Count > 1)
+            {
+                for (int i = 0; i < foundFish.Count; i++)
+                {
+                    Console.Write($"{i + 1}. ");
+                    foundFish[i].ShowInfo();
+                }
+
+                StringDelimiter.DrawLine();
+
+                Console.Write("Найдены совпадения, выберите рыбку под нужным номером, что-бы убрать её: ");
+
+                if (int.TryParse(Console.ReadLine(), out int foundFishIndex) && foundFishIndex <= foundFish.Count)
+                {
+                    Console.WriteLine($"Рыбка под номером {foundFishIndex} была убрана из аквариума");
+                    Console.ReadLine();
+
+                    resultingFish = foundFish[foundFishIndex - 1];
+
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine($"Рыбки под номером {foundFishIndex} нет в аквариуме");
+                }
+            }
+            else if (foundFish.Count == 1)
+            {
+                Console.WriteLine($"Рыбка под именем {fishName} была убрана из аквариума");
+                Console.ReadLine();
+
+                resultingFish = foundFish[foundFish.Count - 1];
+
                 return true;
             }
-            else if (platoon2.SoldiersCount > 0)
+            else
             {
-                winnerPlatoon = platoon2;
-                return true;
+                Console.WriteLine($"Рыбки под именем {fishName} нет в аквариуме");
+                Console.ReadLine();
             }
 
-            winnerPlatoon = null;
+            resultingFish = null;
+
             return false;
         }
     }
 
-    class PlatoonCreater
+    class Fish
     {
-        private List<Soldier> _soldiers = new List<Soldier>() { new CommonSoldier(100, 15, 25), new HeavySoldier(100, 15, 20),
-            new Multipurpose(100, 15, 10), new Viking(100, 15, 10) };
+        private int _age;
 
-        public List<Soldier> Create(int count)
-        {
-            List<Soldier> soldiers = new List<Soldier>();
-
-            for (int i = 0; i < count; i++)
-                soldiers.Add(_soldiers[Randomizer.GenerateRandomValue(0, _soldiers.Count)].Clone());
-
-            return soldiers;
-        }
-    }
-
-    class Platoon
-    {
-        private List<Soldier> _soldiers = new List<Soldier>();
-
-        public Platoon(List<Soldier> soldiers, string name)
+        public Fish(string name, int lifeTime)
         {
             Name = name;
-            _soldiers = soldiers;
+            Lifetime = lifeTime;
         }
 
         public string Name { get; private set; }
-        public int SoldiersCount => _soldiers.Count;
+        public int Lifetime { get; private set; }
 
-        public void Attack(List<Soldier> enemies)
+        private bool IsAlive => _age < Lifetime;
+
+        public void Older()
         {
-            if (SoldiersCount > 0)
-            {
-                foreach (var soldier in _soldiers)
-                    soldier.Attack(enemies);
-            }
+            if (IsAlive)
+                _age++;
         }
 
-        public void ShowSoldersCondition()
+        public void ShowInfo()
         {
-            Console.WriteLine("Выжившие члены взвода");
+            Console.Write($"Рыбка: {Name} ");
 
-            for (int i = 0; i < _soldiers.Count; i++)
-            {
-                Console.Write($"{i + 1}.");
-                _soldiers[i].ShowCurrentHealth();
-            }
+            ShowAgeFish();
         }
 
-        public void RemoveDeadSoldiers()
+        private void ShowAgeFish()
         {
-            for (int i = _soldiers.Count - 1; i >= 0; i--)
-            {
-                if (_soldiers[i].IsAlive == false)
-                    _soldiers.Remove(_soldiers[i]);
-            }
-        }
-
-        public List<Soldier> GetSoldiers()
-        {
-            return new List<Soldier>(_soldiers);
-        }
-    }
-
-    abstract class Soldier
-    {
-        protected int MaxHealth;
-        protected int Armor;
-        protected int Damage;
-
-        public Soldier(int maxHealth, int armor, int damage)
-        {
-            MaxHealth = maxHealth;
-            Armor = armor;
-            Damage = damage;
-            Health = MaxHealth;
-        }
-
-        public int Health { get; private set; }
-        public bool IsAlive => Health > 0;
-
-        public virtual void TakeDamage(int damage)
-        {
-            if (Armor < damage)
-                Health -= damage - Armor;
+            if (IsAlive)
+                Console.WriteLine($"ей {_age} лет.");
             else
-                Health--;
-        }
-
-        public abstract void Attack(List<Soldier> enemys);
-        public void ShowCurrentHealth() => Console.WriteLine($"Здоровье: {Health}/{MaxHealth}");
-
-        public abstract Soldier Clone();
-
-        protected Soldier GetRandomEnemy(List<Soldier> enemys)
-        {
-            return enemys[Randomizer.GenerateRandomValue(0, enemys.Count)];
-        }
-    }
-
-    class CommonSoldier : Soldier
-    {
-        public CommonSoldier(int maxHealth, int armor, int damage) : base(maxHealth, armor, damage) { }
-
-        public override void Attack(List<Soldier> enemys)
-        {
-            var target = GetRandomEnemy(enemys);
-
-            target.TakeDamage(Damage);
-        }
-
-        public override Soldier Clone()
-        {
-            return new CommonSoldier(MaxHealth, Armor, Damage);
-        }
-    }
-
-    class HeavySoldier : Soldier
-    {
-        private int _damageModifier = 2;
-
-        public HeavySoldier(int maxHealth, int armor, int damage) : base(maxHealth, armor, damage) { }
-
-        public override void Attack(List<Soldier> enemys)
-        {
-            var target = GetRandomEnemy(enemys);
-
-            target.TakeDamage(Damage * _damageModifier);
-        }
-
-        public override Soldier Clone()
-        {
-            return new HeavySoldier(MaxHealth, Armor, Damage);
-        }
-    }
-
-    class Multipurpose : Soldier
-    {
-        private int _attackCount = 3;
-
-        public Multipurpose(int maxHealth, int armor, int damage) : base(maxHealth, armor, damage) { }
-
-        public override void Attack(List<Soldier> enemies)
-        {
-            List<Soldier> enemysToAttack = new List<Soldier>(enemies);
-
-            int enemiesCount = enemysToAttack.Count;
-            int attackCount = _attackCount < enemiesCount ? _attackCount : enemiesCount;
-
-            for (int i = 0; i < attackCount; i++)
-            {
-                var enemy = GetRandomEnemy(enemysToAttack);
-
-                enemy.TakeDamage(Damage);
-
-                enemysToAttack.Remove(enemy);
-            }
-        }
-
-        public override Soldier Clone()
-        {
-            return new Multipurpose(MaxHealth, Armor, Damage);
-        }
-    }
-
-    class Viking : Soldier
-    {
-        private int _attackCount = 3;
-
-        public Viking(int maxHealth, int armor, int damage) : base(maxHealth, armor, damage) { }
-
-        public override void Attack(List<Soldier> enemys)
-        {
-            for (int i = 0; i < _attackCount; i++)
-                GetRandomEnemy(enemys).TakeDamage(Damage);
-        }
-
-        public override Soldier Clone()
-        {
-            return new Viking(MaxHealth, Armor, Damage);
+                Console.WriteLine($"прожила {_age} лет. Её больше нет в живых :(");
         }
     }
 
@@ -278,6 +237,14 @@ namespace ConsoleApp1
         public static int GenerateRandomValue(int minRandomValue, int maxRandomValue)
         {
             return _random.Next(minRandomValue, maxRandomValue);
+        }
+    }
+
+    static class StringDelimiter
+    {
+        public static void DrawLine(int lineRange = 20)
+        {
+            Console.WriteLine(new string('-', lineRange));
         }
     }
 }
