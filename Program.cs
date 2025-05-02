@@ -9,9 +9,9 @@ namespace ConsoleApp1
         {
             Aquarium aquarium = new Aquarium(8);
 
-            AquariumController warController = new AquariumController(aquarium);
+            AquariumController aquariumController = new AquariumController(aquarium);
 
-            warController.Work();
+            aquariumController.Work();
         }
     }
 
@@ -93,7 +93,8 @@ namespace ConsoleApp1
                 fish.Older();
         }
 
-        public void AddFish() => _fish.Add(new Fish(AddNameFish(), AddLifetimeFish()));
+        public void AddFish() => 
+            _fish.Add(new Fish(AddNameFish(), AddLifetimeFish()));
 
         public void RemoveFish()
         {
@@ -232,11 +233,11 @@ namespace ConsoleApp1
 
     static class Randomizer
     {
-        private static Random _random = new Random();
+        private static Random s_random = new Random();
 
         public static int GenerateRandomValue(int minRandomValue, int maxRandomValue)
         {
-            return _random.Next(minRandomValue, maxRandomValue);
+            return s_random.Next(minRandomValue, maxRandomValue);
         }
     }
 
