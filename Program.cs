@@ -9,13 +9,13 @@ namespace ConsoleApp1
         {
             Aquarium aquarium = new Aquarium(8);
 
-            AquariumController aquariumController = new AquariumController(aquarium);
+            Aquarist aquarist = new Aquarist(aquarium);
 
-            aquariumController.Work();
+            aquarist.Work();
         }
     }
 
-    class AquariumController
+    class Aquarist
     {
         private const string CommandAddFish = "1";
         private const string CommandRemoveFish = "2";
@@ -23,7 +23,7 @@ namespace ConsoleApp1
 
         private Aquarium _aquarium;
 
-        public AquariumController(Aquarium aquarium)
+        public Aquarist(Aquarium aquarium)
         {
             _aquarium = aquarium;
         }
@@ -90,10 +90,10 @@ namespace ConsoleApp1
         public void LifeFish()
         {
             foreach (var fish in _fish)
-                fish.Older();
+                fish.GrowUp();
         }
 
-        public void AddFish() => 
+        public void AddFish() =>
             _fish.Add(new Fish(AddNameFish(), AddLifetimeFish()));
 
         public void RemoveFish()
@@ -141,42 +141,18 @@ namespace ConsoleApp1
 
             string fishName = Console.ReadLine();
 
-            foreach (var fish in _fish)
-            {
-                if (fish.Name.ToLower() == fishName.ToLower())
-                    foundFish.Add(fish);
-            }
+            foundFish = FindMatch(fishName);
 
             if (foundFish.Count > 1)
             {
-                for (int i = 0; i < foundFish.Count; i++)
-                {
-                    Console.Write($"{i + 1}. ");
-                    foundFish[i].ShowInfo();
-                }
+                bool isFind = TryGetMatch(foundFish, out Fish matchFish);
+                resultingFish = matchFish;
 
-                StringDelimiter.DrawLine();
-
-                Console.Write("Найдены совпадения, выберите рыбку под нужным номером, что-бы убрать её: ");
-
-                if (int.TryParse(Console.ReadLine(), out int foundFishIndex) && foundFishIndex <= foundFish.Count)
-                {
-                    Console.WriteLine($"Рыбка под номером {foundFishIndex} была убрана из аквариума");
-                    Console.ReadLine();
-
-                    resultingFish = foundFish[foundFishIndex - 1];
-
-                    return true;
-                }
-                else
-                {
-                    Console.WriteLine($"Рыбки под номером {foundFishIndex} нет в аквариуме");
-                }
+                return isFind;
             }
             else if (foundFish.Count == 1)
             {
                 Console.WriteLine($"Рыбка под именем {fishName} была убрана из аквариума");
-                Console.ReadLine();
 
                 resultingFish = foundFish[foundFish.Count - 1];
 
@@ -185,10 +161,54 @@ namespace ConsoleApp1
             else
             {
                 Console.WriteLine($"Рыбки под именем {fishName} нет в аквариуме");
-                Console.ReadLine();
             }
 
+            Console.ReadLine();
+
             resultingFish = null;
+
+            return false;
+        }
+
+        private List<Fish> FindMatch(string wantedMatch)
+        {
+            List<Fish> matchesFound = new List<Fish>();
+
+            foreach (var fish in _fish)
+            {
+                if (fish.Name.ToLower() == wantedMatch.ToLower())
+                    matchesFound.Add(fish);
+            }
+
+            return matchesFound;
+        }
+
+        private bool TryGetMatch(List<Fish> foundFish, out Fish result)
+        {
+            for (int i = 0; i < foundFish.Count; i++)
+            {
+                Console.Write($"{i + 1}. ");
+                foundFish[i].ShowInfo();
+            }
+
+            StringDelimiter.DrawLine();
+
+            Console.Write("Найдены совпадения, выберите рыбку под нужным номером, что-бы убрать её: ");
+
+            if (int.TryParse(Console.ReadLine(), out int foundFishIndex) && foundFishIndex <= foundFish.Count)
+            {
+                Console.WriteLine($"Рыбка под номером {foundFishIndex} была убрана из аквариума");
+
+                result = foundFish[foundFishIndex - 1];
+
+                return true;
+            }
+            else
+            {
+                Console.WriteLine($"Рыбки под номером {foundFishIndex} нет в аквариуме");
+            }
+
+            result = null;
 
             return false;
         }
@@ -209,7 +229,7 @@ namespace ConsoleApp1
 
         private bool IsAlive => _age < Lifetime;
 
-        public void Older()
+        public void GrowUp()
         {
             if (IsAlive)
                 _age++;
@@ -219,10 +239,10 @@ namespace ConsoleApp1
         {
             Console.Write($"Рыбка: {Name} ");
 
-            ShowAgeFish();
+            ShowAge();
         }
 
-        private void ShowAgeFish()
+        private void ShowAge()
         {
             if (IsAlive)
                 Console.WriteLine($"ей {_age} лет.");
