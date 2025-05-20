@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace ConsoleApp1
 {
@@ -7,25 +6,51 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            Aquarium aquarium = new Aquarium(8);
+            Enclosure[] _enclosures = new Enclosure[4];
 
-            Aquarist aquarist = new Aquarist(aquarium);
+            _enclosures[0] = new Enclosure("Вольер с львами", new Animal[]
+                {
+                new Animal("Лев", AnimalGender.FemaleGender, "Рррр!"),
+                new Animal("Львица", AnimalGender.MaleGender, "Рррр!")
+                });
 
-            aquarist.Work();
+            _enclosures[1] = new Enclosure("Вольер с обезьянами", new Animal[]
+            {
+                new Animal("Обезьяна", AnimalGender.MaleGender, "Ууу-ааа!"),
+                new Animal("Обезьяна", AnimalGender.FemaleGender, "Ууу-ааа!"),
+                new Animal("Обезьяна", AnimalGender.FemaleGender, "Ууу-ааа!")
+            });
+
+            _enclosures[2] = new Enclosure("Вольер с попугаями", new Animal[]
+{
+                new Animal("Попугай", AnimalGender.FemaleGender, "Кар-кар!"),
+                new Animal("Попугай", AnimalGender.MaleGender, "Привет!")
+});
+
+            _enclosures[3] = new Enclosure("Вольер с медведями", new Animal[]
+{
+                new Animal("Медведь", AnimalGender.MaleGender, "Ррррр!"),
+                new Animal("Медведь", AnimalGender.FemaleGender, "Ммммм!")
+});
+
+            Zoo zoo = new Zoo(_enclosures);
+
+            Zookeeper zookeeper = new Zookeeper(zoo);
+
+            zookeeper.Work();
         }
     }
 
-    class Aquarist
+    class Zookeeper
     {
-        private const string CommandAddFish = "1";
-        private const string CommandRemoveFish = "2";
-        private const string CommandExit = "3";
+        private const string CommandShow = "1";
+        private const string CommandExit = "2";
 
-        private Aquarium _aquarium;
+        private Zoo _zoo;
 
-        public Aquarist(Aquarium aquarium)
+        public Zookeeper(Zoo zoo)
         {
-            _aquarium = aquarium;
+            _zoo = zoo;
         }
 
         public void Work()
@@ -34,30 +59,19 @@ namespace ConsoleApp1
 
             while (isOpen)
             {
-                _aquarium.ShowAllFishInfo();
+                Console.Clear();
 
-                StringDelimiter.DrawLine();
-
-                Console.WriteLine($"Комнада {CommandAddFish} - добавить рыбку");
-                Console.WriteLine($"Комнада {CommandRemoveFish} - убрать рыбку");
-                Console.WriteLine($"Комнада {CommandExit} - выйти");
-
-                StringDelimiter.DrawLine();
+                Console.WriteLine($"Команда {CommandShow} - подойти к вольерам");
+                Console.WriteLine($"Команда {CommandExit} - выйти");
 
                 Console.Write("Введите команду: ");
 
                 string userInput = Console.ReadLine();
 
-                StringDelimiter.DrawLine();
-
                 switch (userInput)
                 {
-                    case CommandAddFish:
-                        _aquarium.AddFish();
-                        break;
-
-                    case CommandRemoveFish:
-                        _aquarium.RemoveFish();
+                    case CommandShow:
+                        _zoo.ShowEnclosures();
                         break;
 
                     case CommandExit:
@@ -65,207 +79,118 @@ namespace ConsoleApp1
                         break;
 
                     default:
-                        Console.WriteLine("Команда не проходит");
+                        Console.WriteLine("Введина неверная команда");
                         break;
                 }
 
-                Console.ReadLine();
-                Console.Clear();
-
-                _aquarium.LifeFish();
+                Console.ReadKey();
             }
         }
     }
 
-    class Aquarium
+    class Zoo
     {
-        private List<Fish> _fish = new List<Fish>();
-        private int _capacity;
+        private Enclosure[] _enclosuries;
 
-        public Aquarium(int capacity)
+        public Zoo(Enclosure[] enclosuries)
         {
-            _capacity = capacity;
+            _enclosuries = enclosuries;
         }
 
-        public void LifeFish()
+        public void ShowEnclosures()
         {
-            foreach (var fish in _fish)
-                fish.GrowUp();
+            Console.Write("Введите номер вольера к которому хотите подойти: ");
+
+            if (TryGetEnclosure(out Enclosure enclosure))
+                enclosure.ShowInfo();
         }
 
-        public void AddFish() =>
-            _fish.Add(new Fish(AddNameFish(), AddLifetimeFish()));
-
-        public void RemoveFish()
+        private bool TryGetEnclosure(out Enclosure enclosure)
         {
-            if (TryGetFish(out Fish fish))
-                _fish.Remove(fish);
-        }
-
-        public void ShowAllFishInfo()
-        {
-            foreach (var fish in _fish)
-                fish.ShowInfo();
-
-            StringDelimiter.DrawLine();
-
-            Console.WriteLine($"Аквариум заполнен на {_fish.Count} из {_capacity} рыб");
-        }
-
-        private string AddNameFish()
-        {
-            string noneNameText = "Никто";
-
-            Console.Write("Как будут звать рыбку: ");
-            string nameFish = Console.ReadLine();
-
-            if (nameFish != "")
-                return nameFish;
-
-            return noneNameText;
-        }
-
-        private int AddLifetimeFish()
-        {
-            int minLifeTime = 3;
-            int maxLifeTime = 8;
-
-            return Randomizer.GenerateRandomValue(minLifeTime, maxLifeTime + 1);
-        }
-
-        private bool TryGetFish(out Fish resultingFish)
-        {
-            List<Fish> foundFish = new List<Fish>();
-
-            Console.Write("Введите имя рыбки из списка, которую вы хотели-бы убрать: ");
-
-            string fishName = Console.ReadLine();
-
-            foundFish = FindMatch(fishName);
-
-            if (foundFish.Count > 1)
+            if (int.TryParse(Console.ReadLine(), out int userInput))
             {
-                bool isFind = TryGetMatch(foundFish, out Fish matchFish);
-                resultingFish = matchFish;
+                if (userInput > 0 && userInput <= _enclosuries.Length)
+                {
+                    Enclosure chooseEncloser = _enclosuries[userInput - 1];
 
-                return isFind;
-            }
-            else if (foundFish.Count == 1)
-            {
-                Console.WriteLine($"Рыбка под именем {fishName} была убрана из аквариума");
+                    enclosure = chooseEncloser;
 
-                resultingFish = foundFish[foundFish.Count - 1];
+                    return true;
+                }
 
-                return true;
-            }
-            else
-            {
-                Console.WriteLine($"Рыбки под именем {fishName} нет в аквариуме");
+                Console.WriteLine($"Вольера под номером {userInput} не существует в нашем зоопарке");
+
+                enclosure = null;
+
+                return false;
             }
 
-            Console.ReadLine();
+            Console.WriteLine("Введено неверное значение");
 
-            resultingFish = null;
-
-            return false;
-        }
-
-        private List<Fish> FindMatch(string wantedMatch)
-        {
-            List<Fish> matchesFound = new List<Fish>();
-
-            foreach (var fish in _fish)
-            {
-                if (fish.Name.ToLower() == wantedMatch.ToLower())
-                    matchesFound.Add(fish);
-            }
-
-            return matchesFound;
-        }
-
-        private bool TryGetMatch(List<Fish> foundFish, out Fish result)
-        {
-            for (int i = 0; i < foundFish.Count; i++)
-            {
-                Console.Write($"{i + 1}. ");
-                foundFish[i].ShowInfo();
-            }
-
-            StringDelimiter.DrawLine();
-
-            Console.Write("Найдены совпадения, выберите рыбку под нужным номером, что-бы убрать её: ");
-
-            if (int.TryParse(Console.ReadLine(), out int foundFishIndex) && foundFishIndex <= foundFish.Count)
-            {
-                Console.WriteLine($"Рыбка под номером {foundFishIndex} была убрана из аквариума");
-
-                result = foundFish[foundFishIndex - 1];
-
-                return true;
-            }
-            else
-            {
-                Console.WriteLine($"Рыбки под номером {foundFishIndex} нет в аквариуме");
-            }
-
-            result = null;
+            enclosure = null;
 
             return false;
         }
     }
 
-    class Fish
+    class Enclosure
     {
-        private int _age;
+        private Animal[] _animals = new Animal[0];
 
-        public Fish(string name, int lifeTime)
+        public Enclosure(string name, Animal[] animals)
         {
+            _animals = animals;
             Name = name;
-            Lifetime = lifeTime;
         }
 
         public string Name { get; private set; }
-        public int Lifetime { get; private set; }
-
-        private bool IsAlive => _age < Lifetime;
-
-        public void GrowUp()
-        {
-            if (IsAlive)
-                _age++;
-        }
 
         public void ShowInfo()
         {
-            Console.Write($"Рыбка: {Name} ");
+            Console.WriteLine($"В этом вольере живут: {Name}");
 
-            ShowAge();
-        }
-
-        private void ShowAge()
-        {
-            if (IsAlive)
-                Console.WriteLine($"ей {_age} лет.");
-            else
-                Console.WriteLine($"прожила {_age} лет. Её больше нет в живых :(");
+            foreach (var animal in _animals)
+                animal.ShowInfo();
         }
     }
 
-    static class Randomizer
+    class Animal
     {
-        private static Random s_random = new Random();
-
-        public static int GenerateRandomValue(int minRandomValue, int maxRandomValue)
+        public Animal(string name, string gender, string sound)
         {
-            return s_random.Next(minRandomValue, maxRandomValue);
+            Name = name;
+            Gender = gender;
+            Sound = sound;
+        }
+
+        public string Name { get; private set; }
+        public string Gender { get; private set; }
+        public string Sound { get; private set; }
+
+        public void ShowInfo()
+        {
+            string personalPronoun = GetGender();
+
+            Console.WriteLine($"Это {Name} {Gender} пола и {personalPronoun} {Sound}");
+        }
+
+        private string GetGender()
+        {
+            string malePersonalPronoun = "он";
+            string femalePersonalPronoun = "она";
+
+            if (Gender == AnimalGender.MaleGender)
+                return malePersonalPronoun;
+            else if (Gender == AnimalGender.FemaleGender)
+                return femalePersonalPronoun;
+
+            return "";
         }
     }
 
-    static class StringDelimiter
+    static class AnimalGender
     {
-        public static void DrawLine(int lineRange = 20)
-        {
-            Console.WriteLine(new string('-', lineRange));
-        }
+        public const string MaleGender = "Самец";
+        public const string FemaleGender = "Самка";
     }
 }
