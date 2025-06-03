@@ -6,38 +6,42 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            ZooFactory zooFactory = new ZooFactory();
+            CarsFactory carsFactory = new CarsFactory();
+            StorageFactory storageFactory = new StorageFactory();
 
-            Zoo zoo = zooFactory.Create(new string[] { "Лев", "Обезьяна", "Попугай", "Медведь" }, new string[] { "Рррр!", "Ууу-ааа!", "Привет!", "Ммммм!" });
+            CarService carService = new CarService(carsFactory.Create(), storageFactory.Create(5));
+            CarServiceController carServiceController = new CarServiceController(carService);
 
-            Zookeeper zookeeper = new Zookeeper(zoo);
-
-            zookeeper.Work();
+            carServiceController.Work();
         }
     }
 
-    class Zookeeper
+    class CarServiceController
     {
-        private const string CommandShow = "1";
+        private const string CommandRepair = "1";
         private const string CommandExit = "2";
 
-        private Zoo _zoo;
+        private CarService _carService;
 
-        public Zookeeper(Zoo zoo)
+        public CarServiceController(CarService carService)
         {
-            _zoo = zoo;
+            _carService = carService;
         }
 
         public void Work()
         {
             bool isOpen = true;
 
-            while (isOpen)
+            while (isOpen && _carService.BrokenCarsCount > 0)
             {
                 Console.Clear();
 
-                Console.WriteLine($"Команда {CommandShow} - подойти к вольерам");
+                _carService.ShowClients();
+
+                Console.WriteLine($"Команда {CommandRepair} - приступить к след. клиенту");
                 Console.WriteLine($"Команда {CommandExit} - выйти");
+
+                _carService. Show();
 
                 Console.Write("Введите команду: ");
 
@@ -45,8 +49,8 @@ namespace ConsoleApp1
 
                 switch (userInput)
                 {
-                    case CommandShow:
-                        _zoo.ShowEnclosure();
+                    case CommandRepair:
+                        _carService.Repair();
                         break;
 
                     case CommandExit:
@@ -54,168 +58,471 @@ namespace ConsoleApp1
                         break;
 
                     default:
-                        Console.WriteLine("Введина неверная команда");
+                        Console.WriteLine("Неверная команда повторите ввод!!!");
                         break;
                 }
+
+                _carService.TakeOutClient();
 
                 Console.ReadKey();
             }
         }
     }
 
-    class Zoo
+    class CarService
     {
-        private List<Enclosure> _enclosuries;
+        private Queue<Car> _brokenCars = new Queue<Car>();
+        private Storage _storage;
 
-        public Zoo(List<Enclosure> enclosuries)
+        private int _costFixedPenalty = 1000;
+
+        public CarService(Queue<Car> brokenCars, Storage storage)
         {
-            _enclosuries = enclosuries;
+            _brokenCars = brokenCars;
+            _storage = storage;
         }
 
-        public void ShowEnclosure()
+        public int Money { get; private set; }
+        public int BrokenCarsCount => _brokenCars.Count;
+
+        public void TakeMoney(int sum)
         {
-            ShowEnclosuresName();
-
-            Console.Write("Введите номер вольера к которому хотите подойти: ");
-
-            if (TryGetEnclosure(out Enclosure enclosure))
-                enclosure.ShowInfo();
+            if (sum > 0)
+                Money += sum;
+            else
+                Money++;
         }
 
-        private void ShowEnclosuresName()
-        {
-            for (int i = 0; i < _enclosuries.Count; i++)
-                Console.WriteLine($"{i + 1} {_enclosuries[i].Name}");
-        }
+        public void ShowMoney() =>
+            Console.WriteLine($"Ваш счёт: {Money}");
 
-        private bool TryGetEnclosure(out Enclosure enclosure)
+        public void Show()
         {
-            if (int.TryParse(Console.ReadLine(), out int userInput))
+            foreach (var storageCell in _storage.GetCells())
             {
-                if (userInput > 0 && userInput <= _enclosuries.Count)
-                {
-                    Enclosure chooseEncloser = _enclosuries[userInput - 1];
+                storageCell.ShowInfo();
+            }
+        }
 
-                    enclosure = chooseEncloser;
+        private void PayPenalty(int penalty) =>
+            Money -= penalty;
+
+        public void ShowClients()
+        {
+            foreach (var brokenCar in _brokenCars)
+            {
+                brokenCar.ShowInfo();
+                StringDelimiter.DrawLine();
+            }
+        }
+
+        public void Repair()
+        {
+            const string CommandRepair = "1";
+            const string CommandCancell = "2";
+
+            Car brokenCar = _brokenCars.Peek();
+
+            Console.WriteLine($"Если хотите начать ремонт машины введите {CommandRepair}");
+            Console.WriteLine($"Если не хотите начинать ремонт машины введите {CommandCancell}");
+
+            Console.Write("Введите команду: ");
+
+            string userInput = Console.ReadLine();
+
+            if (userInput == CommandRepair)
+            {
+                userInput = Console.ReadLine();
+
+                switch (userInput)
+                {
+                    case CommandRepair:
+                        ReplaceDetail(brokenCar.GetDetails());
+                        break;
+
+                    case CommandCancell:
+                        PayPenalty(GetBrokenDetailsSum(brokenCar.GetDetails()));
+                        break;
+
+                    default:
+                        Console.WriteLine("Неверная команда повторите ввод!!!");
+                        break;
+                }
+
+                Console.ReadKey();
+            }
+            else
+            {
+                PayPenalty(_costFixedPenalty);
+
+                Console.WriteLine($"Вы отказались ремонтировать машину и платите фексированный штраф в размере: {_costFixedPenalty}");
+            }
+
+            brokenCar.ShowInfo();
+
+            Console.WriteLine("Машина уехала");
+        }
+
+        public void TakeOutClient()
+        {
+            if (BrokenCarsCount > 0)
+                _brokenCars.Dequeue();
+        }
+
+        private void ReplaceDetail(List<Detail> details)
+        {
+            if (TryGetBrokenDetail(details, out Detail brokenDetail))
+            {
+                foreach (var storageCell in _storage.GetCells())
+                {
+                    if (storageCell.Quantity > 0 && storageCell.Detail == brokenDetail)
+                    {
+                        brokenDetail = storageCell.Detail.Clone();
+
+                        storageCell.IssuePart();
+
+                        return;
+                    }
+                    else if(storageCell.Quantity == 0 && storageCell.Detail != brokenDetail)
+                    {
+                        Console.WriteLine("На складе закончились такие детали");
+                    }
+                }
+            }
+        }
+
+        private bool TryGetBrokenDetail(List<Detail> details, out Detail brokenDetail)
+        {
+            foreach (var detail in details)
+            {
+                if (detail.IsBroken)
+                {
+                    brokenDetail = detail;
 
                     return true;
                 }
-
-                Console.WriteLine($"Вольера под номером {userInput} не существует в нашем зоопарке");
-
-                enclosure = null;
-
-                return false;
             }
 
-            Console.WriteLine("Введено неверное значение");
-
-            enclosure = null;
+            brokenDetail = null;
 
             return false;
         }
+
+        private int GetBrokenDetailsSum(List<Detail> details)
+        {
+            int sum = 0;
+
+            foreach (var detail in details)
+                sum += detail.CostPrice;
+
+            return sum;
+        }
     }
 
-    class EnclosureFactory
+    class DetailFactory
     {
-        public Enclosure Create(string animalName, string animalSound)
+        public List<Detail> GetDetails()
         {
-            string name = $"Вольер в котором содержатся животное {animalName}";
+            List<Detail> deatails = new List<Detail>()
+            {
+            new Fan(),
+            new Windscreen(),
+            new Headlight(),
+            new Bumper(),
+            new Accumulator(),
+            new Engine(),
+            new Filter(),
+            };
 
+            return deatails.ToList();
+        }
+    }
 
-            string[] genders = { "Самец", "Самка" };
-            string[] personalPronouns = { "он", "она" };
+    class CarsFactory
+    {
+        public Queue<Car> Create()
+        {
+            Queue<Car> newCars = new Queue<Car>();
 
+            int carsCount = GetRandomCount();
+
+            for (int i = 0; i < carsCount; i++)
+                newCars.Enqueue(new Car(GetRandomTitle(), GetRandomDetails()));
+
+            return newCars;
+        }
+
+        private int GetRandomCount()
+        {
             int minValue = 2;
             int maxValue = 10;
-            int animalCount = Randomizer.GenerateRandomValue(minValue, maxValue + 1);
 
-            AnimalFactory animalFactory = new AnimalFactory();
+            return Randomizer.GenerateRandomValue(minValue, maxValue + 1);
+        }
 
-            List<Animal> animals = new List<Animal>();
+        private List<Detail> GetRandomDetails()
+        {
+            DetailFactory detailFactory = new DetailFactory();
+            List<Detail> parts = detailFactory.GetDetails();
 
-            for (int i = 0; i < animalCount; i++)
+            int maxFailureChance = 100;
+            int minFailureChance = 0;
+            int failureChance = 25;
+
+            int failureDetails = 0;
+
+            foreach (var part in parts)
             {
-                int randomGender = Randomizer.GenerateRandomValue(0, genders.Length);
-
-                string gender = genders[randomGender];
-
-                string personalPronoun = personalPronouns[randomGender];
-
-                animals.Add(animalFactory.Create(animalName, gender, animalSound, personalPronoun));
+                if (failureChance >= Randomizer.GenerateRandomValue(minFailureChance, maxFailureChance))
+                {
+                    failureDetails++;
+                    part.Break();
+                }
             }
 
-            return new Enclosure(name, animals);
-        }
-    }
-
-    class ZooFactory
-    {
-        public Zoo Create(string[] animalNames, string[] animalSounds)
-        {
-            int minValue = 2;
-            int maxValue = 4;
-            int enclosuresCount = Randomizer.GenerateRandomValue(minValue, maxValue + 1);
-
-            EnclosureFactory enclosureFactory = new EnclosureFactory();
-
-            List<Enclosure> enclosures = new List<Enclosure>();
-
-            for (int i = 0; i < enclosuresCount; i++)
+            if (failureDetails == 0)
             {
-                enclosures.Add(enclosureFactory.Create(animalNames[i], animalSounds[i]));
+                int randomIndex = Randomizer.GenerateRandomValue(0, parts.Count);
+                parts[randomIndex].Break();
             }
 
-            return new Zoo(enclosures);
+            List<Detail> newParts = new List<Detail>(parts);
+
+            return newParts;
+        }
+
+        private string GetRandomTitle()
+        {
+            var carTitles = Enum.GetNames(typeof(CarTitles));
+            int carTitlesCount = carTitles.Length;
+            string randomCarTitle = carTitles.GetValue(Randomizer.GenerateRandomValue(0, carTitlesCount)).ToString();
+
+            return randomCarTitle;
         }
     }
 
-    class AnimalFactory
+    class Car
     {
-        public Animal Create(string name, string gender, string sound, string personalPronoun)
-        {
-            return new Animal(name, gender, sound, personalPronoun);
-        }
-    }
+        private List<Detail> _details = new List<Detail>();
 
-    class Enclosure
-    {
-        private List<Animal> _animals;
-
-        public Enclosure(string name, List<Animal> animals)
+        public Car(string name, List<Detail> details)
         {
-            _animals = animals;
             Name = name;
+            _details = details;
         }
 
         public string Name { get; private set; }
 
         public void ShowInfo()
         {
-            Console.WriteLine($"В этом вольере живут: {Name}");
+            Console.WriteLine(Name + "\n");
 
-            foreach (var animal in _animals)
-                animal.ShowInfo();
+            foreach (var detail in _details)
+                detail.ShowInfo();
+        }
+
+        public List<Detail> GetDetails()
+        {
+            return _details.ToList();
         }
     }
 
-    class Animal
+    class StorageFactory
     {
-        public Animal(string name, string gender, string sound, string personalPronoun)
+        public Storage Create(int storageCellQuantity)
         {
-            Name = name;
-            Gender = gender;
-            Sound = sound;
-            PersonalPronoun = personalPronoun;
+            return new Storage(CreateStorageCells(storageCellQuantity));
+        }
+
+        private List<StorageCell> CreateStorageCells(int storageCellQuantity)
+        {
+            DetailFactory detailFactory = new DetailFactory();
+            List<StorageCell> storageCells = new List<StorageCell>();
+
+            List<Detail> details = detailFactory.GetDetails();
+
+            for (int i = 0; i < details.Count; i++)
+                storageCells.Add(new StorageCell(details[i], storageCellQuantity, details[i].CostPrice));
+
+            return storageCells;
+        }
+    }
+
+    class Storage
+    {
+        private List<StorageCell> _storageCells;
+
+        public Storage(List<StorageCell> storageCells)
+        {
+            _storageCells = storageCells;
+        }
+
+        public List<StorageCell> GetCells()
+        {
+            return _storageCells;
+        }
+    }
+
+    class StorageCell
+    {
+        public StorageCell(Detail detail, int quantity, int costPrice)
+        {
+            Detail = detail;
+            Quantity = quantity;
+            CostPrice = costPrice;
+        }
+
+        public Detail Detail { get; private set; }
+        public int Quantity { get; private set; }
+        public int CostPrice { get; private set; }
+
+        public void ShowInfo()
+        {
+            Console.WriteLine($"{Detail.Name} - {Quantity}.");
+        }
+
+        public void IssuePart()
+        {
+            if (Quantity > 0)
+                Quantity--;
+        }
+    }
+
+    abstract class Detail
+    {
+        public Detail()
+        {
+            Name = GetType().Name;
         }
 
         public string Name { get; private set; }
-        public string Gender { get; private set; }
-        public string Sound { get; private set; }
-        public string PersonalPronoun { get; private set; }
+        public bool IsBroken { get; private set; }
+        public int CostPrice { get; protected set; }
 
-        public void ShowInfo() =>
-            Console.WriteLine($"Это {Name} {Gender} пола и {PersonalPronoun} {Sound}");
+        public void ShowInfo()
+        {
+            string status = GetStatus();
+
+            Console.WriteLine($"{Name} состояние: {status}");
+        }
+
+        public abstract Detail Clone();
+
+        private string GetStatus()
+        {
+            string bedState = "Плохое";
+            string goodState = "Хорошое";
+
+            if (IsBroken)
+                return bedState;
+
+            return goodState;
+        }
+
+        public void Break()
+        {
+            IsBroken = true;
+        }
+    }
+
+    class Fan : Detail
+    {
+        public Fan()
+        {
+            CostPrice = 3000;
+        }
+
+        public override Detail Clone()
+        {
+            return new Fan();
+        }
+    }
+
+    class Windscreen : Detail
+    {
+        public Windscreen()
+        {
+            CostPrice = 30000;
+        }
+
+        public override Detail Clone()
+        {
+            return new Windscreen();
+        }
+    }
+
+    class Headlight : Detail
+    {
+        public Headlight()
+        {
+            CostPrice = 8000;
+        }
+
+        public override Detail Clone()
+        {
+            return new Headlight();
+        }
+    }
+
+    class Bumper : Detail
+    {
+        public Bumper()
+        {
+            CostPrice = 17000;
+        }
+
+        public override Detail Clone()
+        {
+            return new Bumper();
+        }
+    }
+
+    class Accumulator : Detail
+    {
+        public Accumulator()
+        {
+            CostPrice = 23000;
+        }
+
+        public override Detail Clone()
+        {
+            return new Accumulator();
+        }
+    }
+
+    class Engine : Detail
+    {
+        public Engine()
+        {
+            CostPrice = 230000;
+        }
+
+        public override Detail Clone()
+        {
+            return new Engine();
+        }
+    }
+
+    class Filter : Detail
+    {
+        public Filter()
+        {
+            CostPrice = 4000;
+        }
+
+        public override Detail Clone()
+        {
+            return new Filter();
+        }
+    }
+
+    enum CarTitles
+    {
+        BMW,
+        Lada,
+        Tayota,
+        Mercedes,
+        Wolksvagen
     }
 
     static class Randomizer
