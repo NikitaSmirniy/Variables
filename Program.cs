@@ -41,7 +41,7 @@ namespace ConsoleApp1
                 Console.WriteLine($"Команда {CommandRepair} - приступить к след. клиенту");
                 Console.WriteLine($"Команда {CommandExit} - выйти");
 
-                _carService. Show();
+                _carService.Show();
 
                 Console.Write("Введите команду: ");
 
@@ -61,8 +61,6 @@ namespace ConsoleApp1
                         Console.WriteLine("Неверная команда повторите ввод!!!");
                         break;
                 }
-
-                _carService.TakeOutClient();
 
                 Console.ReadKey();
             }
@@ -121,27 +119,26 @@ namespace ConsoleApp1
             const string CommandRepair = "1";
             const string CommandCancell = "2";
 
-            Car brokenCar = _brokenCars.Peek();
+            var brokenCar = _brokenCars.Peek();
+            int detailsCount = brokenCar.GetDetails().Count;
 
-            Console.WriteLine($"Если хотите начать ремонт машины введите {CommandRepair}");
-            Console.WriteLine($"Если не хотите начинать ремонт машины введите {CommandCancell}");
-
-            Console.Write("Введите команду: ");
-
-            string userInput = Console.ReadLine();
-
-            if (userInput == CommandRepair)
+            for (int i = 0; i < detailsCount; i++)
             {
-                userInput = Console.ReadLine();
+                Console.WriteLine($"Если хотите начать ремонт машины введите {CommandRepair}");
+                Console.WriteLine($"Если не хотите начинать ремонт машины введите {CommandCancell}");
+
+                Console.Write("Введите команду: ");
+
+                string userInput = Console.ReadLine();
 
                 switch (userInput)
                 {
                     case CommandRepair:
-                        ReplaceDetail(brokenCar.GetDetails());
+                        ReplaceDetail(brokenCar.GetDetails(), brokenCar);
                         break;
 
                     case CommandCancell:
-                        PayPenalty(GetBrokenDetailsSum(brokenCar.GetDetails()));
+                        PayPenalty(GetBrokenDetailSum(brokenCar.GetDetails()));
                         break;
 
                     default:
@@ -149,44 +146,33 @@ namespace ConsoleApp1
                         break;
                 }
 
-                Console.ReadKey();
-            }
-            else
-            {
-                PayPenalty(_costFixedPenalty);
+                ShowMoney();
 
-                Console.WriteLine($"Вы отказались ремонтировать машину и платите фексированный штраф в размере: {_costFixedPenalty}");
+                Console.ReadKey();
             }
 
             brokenCar.ShowInfo();
 
+            TakeOutClient();
+
             Console.WriteLine("Машина уехала");
         }
 
-        public void TakeOutClient()
+        private void TakeOutClient()
         {
             if (BrokenCarsCount > 0)
                 _brokenCars.Dequeue();
         }
 
-        private void ReplaceDetail(List<Detail> details)
+        private void ReplaceDetail(List<Detail> details, Car car)
         {
             if (TryGetBrokenDetail(details, out Detail brokenDetail))
             {
-                foreach (var storageCell in _storage.GetCells())
+                if (_storage.TryTakeDetail(brokenDetail.Name, out Detail detail))
                 {
-                    if (storageCell.Quantity > 0 && storageCell.Detail == brokenDetail)
-                    {
-                        brokenDetail = storageCell.Detail.Clone();
+                    car.RepairDetail(brokenDetail, detail);
 
-                        storageCell.IssuePart();
-
-                        return;
-                    }
-                    else if(storageCell.Quantity == 0 && storageCell.Detail != brokenDetail)
-                    {
-                        Console.WriteLine("На складе закончились такие детали");
-                    }
+                    TakeMoney(detail.CostPrice);
                 }
             }
         }
@@ -208,14 +194,11 @@ namespace ConsoleApp1
             return false;
         }
 
-        private int GetBrokenDetailsSum(List<Detail> details)
+        private int GetBrokenDetailSum(List<Detail> details)
         {
-            int sum = 0;
+            TryGetBrokenDetail(details, out Detail detail);
 
-            foreach (var detail in details)
-                sum += detail.CostPrice;
-
-            return sum;
+            return detail.CostPrice;
         }
     }
 
@@ -321,9 +304,15 @@ namespace ConsoleApp1
                 detail.ShowInfo();
         }
 
+        public void RepairDetail(Detail oldDetail, Detail newDetail)
+        {
+            _details.Remove(oldDetail);
+            _details.Add(newDetail);
+        }
+
         public List<Detail> GetDetails()
         {
-            return _details.ToList();
+            return _details;
         }
     }
 
@@ -360,6 +349,23 @@ namespace ConsoleApp1
         public List<StorageCell> GetCells()
         {
             return _storageCells;
+        }
+
+        public bool TryTakeDetail(string name, out Detail detail)
+        {
+            foreach (var storageCell in _storageCells)
+            {
+                if (storageCell.Detail.Name == name)
+                {
+                    detail = storageCell.Detail;
+
+                    return true;
+                }
+            }
+
+            detail = null;
+
+            return false;
         }
     }
 
