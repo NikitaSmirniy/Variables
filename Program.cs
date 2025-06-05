@@ -41,8 +41,6 @@ namespace ConsoleApp1
                 Console.WriteLine($"Команда {CommandRepair} - приступить к след. клиенту");
                 Console.WriteLine($"Команда {CommandExit} - выйти");
 
-                _carService.Show();
-
                 Console.Write("Введите команду: ");
 
                 string userInput = Console.ReadLine();
@@ -72,8 +70,6 @@ namespace ConsoleApp1
         private Queue<Car> _brokenCars = new Queue<Car>();
         private Storage _storage;
 
-        private int _costFixedPenalty = 1000;
-
         public CarService(Queue<Car> brokenCars, Storage storage)
         {
             _brokenCars = brokenCars;
@@ -94,17 +90,6 @@ namespace ConsoleApp1
         public void ShowMoney() =>
             Console.WriteLine($"Ваш счёт: {Money}");
 
-        public void Show()
-        {
-            foreach (var storageCell in _storage.GetCells())
-            {
-                storageCell.ShowInfo();
-            }
-        }
-
-        private void PayPenalty(int penalty) =>
-            Money -= penalty;
-
         public void ShowClients()
         {
             foreach (var brokenCar in _brokenCars)
@@ -120,10 +105,11 @@ namespace ConsoleApp1
             const string CommandCancell = "2";
 
             var brokenCar = _brokenCars.Peek();
-            int detailsCount = brokenCar.GetDetails().Count;
 
-            for (int i = 0; i < detailsCount; i++)
+            for (int i = 0; i < brokenCar.DetailsCount; i++)
             {
+                Console.Clear();
+
                 Console.WriteLine($"Если хотите начать ремонт машины введите {CommandRepair}");
                 Console.WriteLine($"Если не хотите начинать ремонт машины введите {CommandCancell}");
 
@@ -138,7 +124,7 @@ namespace ConsoleApp1
                         break;
 
                     case CommandCancell:
-                        PayPenalty(GetBrokenDetailSum(brokenCar.GetDetails()));
+                        PayPenalty(GetBrokenDetailPrice(brokenCar.GetDetails()));
                         break;
 
                     default:
@@ -147,6 +133,8 @@ namespace ConsoleApp1
                 }
 
                 ShowMoney();
+
+                _storage.ShowInfo();
 
                 Console.ReadKey();
             }
@@ -157,6 +145,9 @@ namespace ConsoleApp1
 
             Console.WriteLine("Машина уехала");
         }
+
+        private void PayPenalty(int penalty) =>
+            Money -= penalty;
 
         private void TakeOutClient()
         {
@@ -172,7 +163,7 @@ namespace ConsoleApp1
                 {
                     car.RepairDetail(brokenDetail, detail);
 
-                    TakeMoney(detail.CostPrice);
+                    TakeMoney(detail.Price);
                 }
             }
         }
@@ -194,11 +185,12 @@ namespace ConsoleApp1
             return false;
         }
 
-        private int GetBrokenDetailSum(List<Detail> details)
+        private int GetBrokenDetailPrice(List<Detail> details)
         {
-            TryGetBrokenDetail(details, out Detail detail);
+            if (TryGetBrokenDetail(details, out Detail detail))
+                return detail.Price;
 
-            return detail.CostPrice;
+            return 0;
         }
     }
 
@@ -208,13 +200,13 @@ namespace ConsoleApp1
         {
             List<Detail> deatails = new List<Detail>()
             {
-            new Fan(),
-            new Windscreen(),
-            new Headlight(),
-            new Bumper(),
-            new Accumulator(),
-            new Engine(),
-            new Filter(),
+            new Detail("Fan", 2000),
+            new Detail("Windscreen", 2400),
+            new Detail("Headlight", 2600),
+            new Detail("Bumper", 1800),
+            new Detail("Accumulator", 3500),
+            new Detail("Engine", 5000),
+            new Detail("Filter", 1000),
             };
 
             return deatails.ToList();
@@ -295,6 +287,7 @@ namespace ConsoleApp1
         }
 
         public string Name { get; private set; }
+        public int DetailsCount => _details.Count;
 
         public void ShowInfo()
         {
@@ -331,7 +324,7 @@ namespace ConsoleApp1
             List<Detail> details = detailFactory.GetDetails();
 
             for (int i = 0; i < details.Count; i++)
-                storageCells.Add(new StorageCell(details[i], storageCellQuantity, details[i].CostPrice));
+                storageCells.Add(new StorageCell(details[i], storageCellQuantity, details[i].Price));
 
             return storageCells;
         }
@@ -346,9 +339,15 @@ namespace ConsoleApp1
             _storageCells = storageCells;
         }
 
-        public List<StorageCell> GetCells()
+        public void ShowInfo()
         {
-            return _storageCells;
+            foreach (var storageCell in _storageCells)
+            {
+                Console.WriteLine("Детали на складе:");
+
+                StringDelimiter.DrawLine();
+                storageCell.ShowInfo();
+            }
         }
 
         public bool TryTakeDetail(string name, out Detail detail)
@@ -358,6 +357,8 @@ namespace ConsoleApp1
                 if (storageCell.Detail.Name == name)
                 {
                     detail = storageCell.Detail;
+
+                    storageCell.IssueDetail();
 
                     return true;
                 }
@@ -387,23 +388,24 @@ namespace ConsoleApp1
             Console.WriteLine($"{Detail.Name} - {Quantity}.");
         }
 
-        public void IssuePart()
+        public void IssueDetail()
         {
             if (Quantity > 0)
                 Quantity--;
         }
     }
 
-    abstract class Detail
+    class Detail
     {
-        public Detail()
+        public Detail(string name, int price)
         {
-            Name = GetType().Name;
+            Name = name;
+            Price = price;
         }
 
         public string Name { get; private set; }
         public bool IsBroken { get; private set; }
-        public int CostPrice { get; protected set; }
+        public int Price { get; protected set; }
 
         public void ShowInfo()
         {
@@ -412,7 +414,10 @@ namespace ConsoleApp1
             Console.WriteLine($"{Name} состояние: {status}");
         }
 
-        public abstract Detail Clone();
+        public void Break()
+        {
+            IsBroken = true;
+        }
 
         private string GetStatus()
         {
@@ -423,102 +428,6 @@ namespace ConsoleApp1
                 return bedState;
 
             return goodState;
-        }
-
-        public void Break()
-        {
-            IsBroken = true;
-        }
-    }
-
-    class Fan : Detail
-    {
-        public Fan()
-        {
-            CostPrice = 3000;
-        }
-
-        public override Detail Clone()
-        {
-            return new Fan();
-        }
-    }
-
-    class Windscreen : Detail
-    {
-        public Windscreen()
-        {
-            CostPrice = 30000;
-        }
-
-        public override Detail Clone()
-        {
-            return new Windscreen();
-        }
-    }
-
-    class Headlight : Detail
-    {
-        public Headlight()
-        {
-            CostPrice = 8000;
-        }
-
-        public override Detail Clone()
-        {
-            return new Headlight();
-        }
-    }
-
-    class Bumper : Detail
-    {
-        public Bumper()
-        {
-            CostPrice = 17000;
-        }
-
-        public override Detail Clone()
-        {
-            return new Bumper();
-        }
-    }
-
-    class Accumulator : Detail
-    {
-        public Accumulator()
-        {
-            CostPrice = 23000;
-        }
-
-        public override Detail Clone()
-        {
-            return new Accumulator();
-        }
-    }
-
-    class Engine : Detail
-    {
-        public Engine()
-        {
-            CostPrice = 230000;
-        }
-
-        public override Detail Clone()
-        {
-            return new Engine();
-        }
-    }
-
-    class Filter : Detail
-    {
-        public Filter()
-        {
-            CostPrice = 4000;
-        }
-
-        public override Detail Clone()
-        {
-            return new Filter();
         }
     }
 
@@ -538,6 +447,14 @@ namespace ConsoleApp1
         public static int GenerateRandomValue(int minRandomValue, int maxRandomValue)
         {
             return s_random.Next(minRandomValue, maxRandomValue);
+        }
+    }
+
+    static class StringDelimiter
+    {
+        public static void DrawLine(int lineRange = 20)
+        {
+            Console.WriteLine(new string('-', lineRange));
         }
     }
 }
