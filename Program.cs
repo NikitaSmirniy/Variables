@@ -6,24 +6,25 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
+            DetailFactory detailFactory = new DetailFactory();
             CarsFactory carsFactory = new CarsFactory();
             StorageFactory storageFactory = new StorageFactory();
 
-            CarService carService = new CarService(carsFactory.Create(), storageFactory.Create(5));
-            CarServiceController carServiceController = new CarServiceController(carService);
+            CarService carService = new CarService(carsFactory.Create(detailFactory), storageFactory.Create(5, detailFactory));
+            CarServiceHandler carServiceController = new CarServiceHandler(carService);
 
             carServiceController.Work();
         }
     }
 
-    class CarServiceController
+    class CarServiceHandler
     {
         private const string CommandRepair = "1";
         private const string CommandExit = "2";
 
         private CarService _carService;
 
-        public CarServiceController(CarService carService)
+        public CarServiceHandler(CarService carService)
         {
             _carService = carService;
         }
@@ -79,17 +80,6 @@ namespace ConsoleApp1
         public int Money { get; private set; }
         public int BrokenCarsCount => _brokenCars.Count;
 
-        public void TakeMoney(int sum)
-        {
-            if (sum > 0)
-                Money += sum;
-            else
-                Money++;
-        }
-
-        public void ShowMoney() =>
-            Console.WriteLine($"Ваш счёт: {Money}");
-
         public void ShowClients()
         {
             foreach (var brokenCar in _brokenCars)
@@ -101,12 +91,26 @@ namespace ConsoleApp1
 
         public void Repair()
         {
+            Car brokenCar = _brokenCars.Dequeue();
+
+            for (int i = 0; i < brokenCar.DetailsCount; i++)
+            {
+                ReadUser(brokenCar);
+            }
+
+            brokenCar.ShowInfo();
+
+            Console.WriteLine("Машина уехала");
+        }
+
+        private void ReadUser(Car brokenCar)
+        {
             const string CommandRepair = "1";
             const string CommandCancell = "2";
 
-            var brokenCar = _brokenCars.Peek();
+            bool isRun = true;
 
-            for (int i = 0; i < brokenCar.DetailsCount; i++)
+            while (isRun)
             {
                 Console.Clear();
 
@@ -138,22 +142,21 @@ namespace ConsoleApp1
 
                 Console.ReadKey();
             }
-
-            brokenCar.ShowInfo();
-
-            TakeOutClient();
-
-            Console.WriteLine("Машина уехала");
         }
 
         private void PayPenalty(int penalty) =>
             Money -= penalty;
 
-        private void TakeOutClient()
+        private void TakeMoney(int sum)
         {
-            if (BrokenCarsCount > 0)
-                _brokenCars.Dequeue();
+            if (sum > 0)
+                Money += sum;
+            else
+                Money++;
         }
+
+        private void ShowMoney() =>
+            Console.WriteLine($"Ваш счёт: {Money}");
 
         private void ReplaceDetail(List<Detail> details, Car car)
         {
@@ -215,14 +218,14 @@ namespace ConsoleApp1
 
     class CarsFactory
     {
-        public Queue<Car> Create()
+        public Queue<Car> Create(DetailFactory detailFactory)
         {
             Queue<Car> newCars = new Queue<Car>();
 
             int carsCount = GetRandomCount();
 
             for (int i = 0; i < carsCount; i++)
-                newCars.Enqueue(new Car(GetRandomTitle(), GetRandomDetails()));
+                newCars.Enqueue(new Car(GetRandomTitle(), GetRandomDetails(detailFactory)));
 
             return newCars;
         }
@@ -235,9 +238,8 @@ namespace ConsoleApp1
             return Randomizer.GenerateRandomValue(minValue, maxValue + 1);
         }
 
-        private List<Detail> GetRandomDetails()
+        private List<Detail> GetRandomDetails(DetailFactory detailFactory)
         {
-            DetailFactory detailFactory = new DetailFactory();
             List<Detail> parts = detailFactory.GetDetails();
 
             int maxFailureChance = 100;
@@ -261,9 +263,7 @@ namespace ConsoleApp1
                 parts[randomIndex].Break();
             }
 
-            List<Detail> newParts = new List<Detail>(parts);
-
-            return newParts;
+            return new List<Detail>(parts);
         }
 
         private string GetRandomTitle()
@@ -311,14 +311,13 @@ namespace ConsoleApp1
 
     class StorageFactory
     {
-        public Storage Create(int storageCellQuantity)
+        public Storage Create(int storageCellQuantity, DetailFactory detailFactory)
         {
-            return new Storage(CreateStorageCells(storageCellQuantity));
+            return new Storage(CreateStorageCells(storageCellQuantity, detailFactory));
         }
 
-        private List<StorageCell> CreateStorageCells(int storageCellQuantity)
+        private List<StorageCell> CreateStorageCells(int storageCellQuantity, DetailFactory detailFactory)
         {
-            DetailFactory detailFactory = new DetailFactory();
             List<StorageCell> storageCells = new List<StorageCell>();
 
             List<Detail> details = detailFactory.GetDetails();
@@ -332,27 +331,27 @@ namespace ConsoleApp1
 
     class Storage
     {
-        private List<StorageCell> _storageCells;
+        private List<StorageCell> _сells;
 
-        public Storage(List<StorageCell> storageCells)
+        public Storage(List<StorageCell> сells)
         {
-            _storageCells = storageCells;
+            _сells = сells;
         }
 
         public void ShowInfo()
         {
-            foreach (var storageCell in _storageCells)
+            foreach (var сell in _сells)
             {
                 Console.WriteLine("Детали на складе:");
 
                 StringDelimiter.DrawLine();
-                storageCell.ShowInfo();
+                сell.ShowInfo();
             }
         }
 
         public bool TryTakeDetail(string name, out Detail detail)
         {
-            foreach (var storageCell in _storageCells)
+            foreach (var storageCell in _сells)
             {
                 if (storageCell.Detail.Name == name)
                 {
