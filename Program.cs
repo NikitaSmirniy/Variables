@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace ConsoleApp1
 {
@@ -37,10 +39,20 @@ namespace ConsoleApp1
             {
                 Console.Clear();
 
-                _carService.ShowClients();
+                Console.WriteLine("Главное меню");
+
+                _carService.ShowCountClient();
+
+                _carService.ShowMoney();
 
                 Console.WriteLine($"Команда {CommandRepair} - приступить к след. клиенту");
                 Console.WriteLine($"Команда {CommandExit} - выйти");
+
+                _carService.ShowLastCar();
+
+                _carService.ShowStorage();
+
+                StringDelimiter.DrawLine();
 
                 Console.Write("Введите команду: ");
 
@@ -63,6 +75,10 @@ namespace ConsoleApp1
 
                 Console.ReadKey();
             }
+
+            Console.WriteLine("Работа выполнена");
+
+            Console.ReadKey();
         }
     }
 
@@ -80,27 +96,76 @@ namespace ConsoleApp1
         public int Money { get; private set; }
         public int BrokenCarsCount => _brokenCars.Count;
 
-        public void ShowClients()
+        public void ShowCountClient()
         {
-            foreach (var brokenCar in _brokenCars)
-            {
-                brokenCar.ShowInfo();
-                StringDelimiter.DrawLine();
-            }
+            StringDelimiter.DrawLine();
+
+            Console.WriteLine($"Кол-во клиентов: {BrokenCarsCount}");
         }
 
         public void Repair()
         {
+            const string CommandRepair = "1";
+            const string CommandCancell = "2";
+
+            bool isRun = true;
+
+            ShowLastCar();
+
             Car brokenCar = _brokenCars.Dequeue();
 
-            for (int i = 0; i < brokenCar.DetailsCount; i++)
+            while (isRun)
             {
-                ReadUser(brokenCar);
+                Console.Clear();
+
+                Console.WriteLine($"Команда {CommandRepair} - приступить к починке след. детали");
+                Console.WriteLine($"Команда {CommandCancell} - отказать в починке");
+
+                Console.Write("Введите команду: ");
+
+                string userInput = Console.ReadLine();
+
+                switch (userInput)
+                {
+                    case CommandRepair:
+                        isRun = ReplaceDetail(brokenCar);
+                        break;
+
+                    case CommandCancell:
+                        PayPenalty(GetBrokenDetailPrice(brokenCar.GetDetails()));
+                        isRun = false;
+                        break;
+
+                    default:
+                        Console.WriteLine("Неверная команда повторите ввод!!!");
+                        break;
+                }
             }
 
             brokenCar.ShowInfo();
 
             Console.WriteLine("Машина уехала");
+        }
+
+        public void ShowMoney()
+        {
+            StringDelimiter.DrawLine();
+
+            Console.WriteLine($"Ваш счёт: {Money}");
+        }
+
+        public void ShowLastCar()
+        {
+            Car nextBrokenCar = _brokenCars.Peek();
+
+            nextBrokenCar.ShowInfo();
+        }
+
+        public void ShowStorage()
+        {
+            StringDelimiter.DrawLine();
+
+            _storage.ShowInfo();
         }
 
         private void ReadUser(Car brokenCar)
@@ -114,8 +179,8 @@ namespace ConsoleApp1
             {
                 Console.Clear();
 
-                Console.WriteLine($"Если хотите начать ремонт машины введите {CommandRepair}");
-                Console.WriteLine($"Если не хотите начинать ремонт машины введите {CommandCancell}");
+                Console.WriteLine($"Если хотите начать ремонт машины введите - {CommandRepair}");
+                Console.WriteLine($"Если не хотите начинать ремонт машины введите - {CommandCancell}");
 
                 Console.Write("Введите команду: ");
 
@@ -124,7 +189,7 @@ namespace ConsoleApp1
                 switch (userInput)
                 {
                     case CommandRepair:
-                        ReplaceDetail(brokenCar.GetDetails(), brokenCar);
+                        ReplaceDetail(brokenCar);
                         break;
 
                     case CommandCancell:
@@ -155,20 +220,21 @@ namespace ConsoleApp1
                 Money++;
         }
 
-        private void ShowMoney() =>
-            Console.WriteLine($"Ваш счёт: {Money}");
-
-        private void ReplaceDetail(List<Detail> details, Car car)
+        private bool ReplaceDetail(Car car)
         {
-            if (TryGetBrokenDetail(details, out Detail brokenDetail))
+            if (TryGetBrokenDetail(car.GetDetails(), out Detail brokenDetail))
             {
                 if (_storage.TryTakeDetail(brokenDetail.Name, out Detail detail))
                 {
                     car.RepairDetail(brokenDetail, detail);
 
                     TakeMoney(detail.Price);
+
+                    return true;
                 }
             }
+
+            return false;
         }
 
         private bool TryGetBrokenDetail(List<Detail> details, out Detail brokenDetail)
@@ -291,6 +357,8 @@ namespace ConsoleApp1
 
         public void ShowInfo()
         {
+            StringDelimiter.DrawLine();
+
             Console.WriteLine(Name + "\n");
 
             foreach (var detail in _details)
@@ -305,7 +373,7 @@ namespace ConsoleApp1
 
         public List<Detail> GetDetails()
         {
-            return _details;
+            return new List<Detail>(_details);
         }
     }
 
