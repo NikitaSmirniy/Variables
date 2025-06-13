@@ -48,7 +48,7 @@ namespace ConsoleApp1
                 Console.WriteLine($"Команда {CommandRepair} - приступить к след. клиенту");
                 Console.WriteLine($"Команда {CommandExit} - выйти");
 
-                _carService.ShowLastCar();
+                _carService.ShowNextCar();
 
                 _carService.ShowStorage();
 
@@ -110,7 +110,7 @@ namespace ConsoleApp1
 
             bool isRun = true;
 
-            ShowLastCar();
+            ShowNextCar();
 
             Car brokenCar = _brokenCars.Dequeue();
 
@@ -154,59 +154,14 @@ namespace ConsoleApp1
             Console.WriteLine($"Ваш счёт: {Money}");
         }
 
-        public void ShowLastCar()
-        {
-            Car nextBrokenCar = _brokenCars.Peek();
-
-            nextBrokenCar.ShowInfo();
-        }
+        public void ShowNextCar() =>
+            _brokenCars.Peek().ShowInfo();
 
         public void ShowStorage()
         {
             StringDelimiter.DrawLine();
 
             _storage.ShowInfo();
-        }
-
-        private void ReadUser(Car brokenCar)
-        {
-            const string CommandRepair = "1";
-            const string CommandCancell = "2";
-
-            bool isRun = true;
-
-            while (isRun)
-            {
-                Console.Clear();
-
-                Console.WriteLine($"Если хотите начать ремонт машины введите - {CommandRepair}");
-                Console.WriteLine($"Если не хотите начинать ремонт машины введите - {CommandCancell}");
-
-                Console.Write("Введите команду: ");
-
-                string userInput = Console.ReadLine();
-
-                switch (userInput)
-                {
-                    case CommandRepair:
-                        ReplaceDetail(brokenCar);
-                        break;
-
-                    case CommandCancell:
-                        PayPenalty(GetBrokenDetailPrice(brokenCar.GetDetails()));
-                        break;
-
-                    default:
-                        Console.WriteLine("Неверная команда повторите ввод!!!");
-                        break;
-                }
-
-                ShowMoney();
-
-                _storage.ShowInfo();
-
-                Console.ReadKey();
-            }
         }
 
         private void PayPenalty(int penalty) =>
@@ -216,15 +171,13 @@ namespace ConsoleApp1
         {
             if (sum > 0)
                 Money += sum;
-            else
-                Money++;
         }
 
         private bool ReplaceDetail(Car car)
         {
             if (TryGetBrokenDetail(car.GetDetails(), out Detail brokenDetail))
             {
-                if (_storage.TryTakeDetail(brokenDetail.Name, out Detail detail))
+                if (_storage.TryGetNecessaryDetail(brokenDetail.Name, out Detail detail))
                 {
                     car.RepairDetail(brokenDetail, detail);
 
@@ -265,7 +218,7 @@ namespace ConsoleApp1
 
     class DetailFactory
     {
-        public List<Detail> GetDetails()
+        public List<Detail> Create()
         {
             List<Detail> deatails = new List<Detail>()
             {
@@ -288,15 +241,15 @@ namespace ConsoleApp1
         {
             Queue<Car> newCars = new Queue<Car>();
 
-            int carsCount = GetRandomCount();
+            int carsCount = GenerateRandomCount();
 
             for (int i = 0; i < carsCount; i++)
-                newCars.Enqueue(new Car(GetRandomTitle(), GetRandomDetails(detailFactory)));
+                newCars.Enqueue(new Car(GenerateRandomTitle(), GetRandomDetails(detailFactory)));
 
             return newCars;
         }
 
-        private int GetRandomCount()
+        private int GenerateRandomCount()
         {
             int minValue = 2;
             int maxValue = 10;
@@ -306,7 +259,7 @@ namespace ConsoleApp1
 
         private List<Detail> GetRandomDetails(DetailFactory detailFactory)
         {
-            List<Detail> parts = detailFactory.GetDetails();
+            List<Detail> parts = detailFactory.Create();
 
             int maxFailureChance = 100;
             int minFailureChance = 0;
@@ -332,7 +285,7 @@ namespace ConsoleApp1
             return new List<Detail>(parts);
         }
 
-        private string GetRandomTitle()
+        private string GenerateRandomTitle()
         {
             var carTitles = Enum.GetNames(typeof(CarTitles));
             int carTitlesCount = carTitles.Length;
@@ -353,7 +306,6 @@ namespace ConsoleApp1
         }
 
         public string Name { get; private set; }
-        public int DetailsCount => _details.Count;
 
         public void ShowInfo()
         {
@@ -388,7 +340,7 @@ namespace ConsoleApp1
         {
             List<StorageCell> storageCells = new List<StorageCell>();
 
-            List<Detail> details = detailFactory.GetDetails();
+            List<Detail> details = detailFactory.Create();
 
             for (int i = 0; i < details.Count; i++)
                 storageCells.Add(new StorageCell(details[i], storageCellQuantity, details[i].Price));
@@ -417,7 +369,7 @@ namespace ConsoleApp1
             }
         }
 
-        public bool TryTakeDetail(string name, out Detail detail)
+        public bool TryGetNecessaryDetail(string name, out Detail detail)
         {
             foreach (var storageCell in _сells)
             {
