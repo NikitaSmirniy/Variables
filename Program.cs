@@ -8,51 +8,44 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            DetailFactory detailFactory = new DetailFactory();
-            CarsFactory carsFactory = new CarsFactory();
-            StorageFactory storageFactory = new StorageFactory();
+            PrisonsFactory prisonsFactory = new PrisonsFactory();
 
-            CarService carService = new CarService(carsFactory.Create(detailFactory), storageFactory.Create(5, detailFactory));
-            CarServiceHandler carServiceController = new CarServiceHandler(carService);
+            List<Prison> prisons = prisonsFactory.Create(20);
 
-            carServiceController.Work();
+            DataBase dataBase = new DataBase(prisons);
+
+            dataBase.Work();
         }
     }
 
-    class CarServiceHandler
+    class DataBase
     {
-        private const string CommandRepair = "1";
-        private const string CommandExit = "2";
+        private List<Prison> _prisons;
 
-        private CarService _carService;
-
-        public CarServiceHandler(CarService carService)
+        public DataBase(List<Prison> prisons)
         {
-            _carService = carService;
+            _prisons = prisons;
         }
 
         public void Work()
         {
+            const string CommandFindPrisons = "1";
+            const string CommandShowAllPrisons = "2";
+            const string CommandClearConsole = "3";
+            const string CommandExit = "4";
+
             bool isOpen = true;
 
-            while (isOpen && _carService.BrokenCarsCount > 0)
+            while (isOpen)
             {
-                Console.Clear();
-
-                Console.WriteLine("Главное меню");
-
-                _carService.ShowCountClient();
-
-                _carService.ShowMoney();
-
-                Console.WriteLine($"Команда {CommandRepair} - приступить к след. клиенту");
-                Console.WriteLine($"Команда {CommandExit} - выйти");
-
-                _carService.ShowNextCar();
-
-                _carService.ShowStorage();
+                Console.WriteLine("ГЛАВНОЕ МЕНЮ");
 
                 StringDelimiter.DrawLine();
+
+                Console.WriteLine($"Команда {CommandFindPrisons} - найти преступников по данным");
+                Console.WriteLine($"Команда {CommandShowAllPrisons} - показать данные всех преступников");
+                Console.WriteLine($"Команда {CommandClearConsole} - очистить консоль");
+                Console.WriteLine($"Команда {CommandExit} - выйти");
 
                 Console.Write("Введите команду: ");
 
@@ -60,8 +53,16 @@ namespace ConsoleApp1
 
                 switch (userInput)
                 {
-                    case CommandRepair:
-                        _carService.Repair();
+                    case CommandFindPrisons:
+                        FindPrisons();
+                        break;
+
+                    case CommandShowAllPrisons:
+                        ShowAllPrisons();
+                        break;
+
+                    case CommandClearConsole:
+                        Console.Clear();
                         break;
 
                     case CommandExit:
@@ -69,394 +70,165 @@ namespace ConsoleApp1
                         break;
 
                     default:
-                        Console.WriteLine("Неверная команда повторите ввод!!!");
+                        Console.WriteLine("Введена неверная команда");
                         break;
                 }
 
                 Console.ReadKey();
             }
+        }
 
-            Console.WriteLine("Работа выполнена");
+        private void FindPrisons()
+        {
+            StringDelimiter.DrawLine();
+
+            Console.WriteLine("Поиск преступника будет происходить по параметрам(рост, вес, национальность)");
+
+            Console.Write("Рост: ");
+
+            int.TryParse(Console.ReadLine(), out int height);
+
+            Console.Write("Вес: ");
+
+            int.TryParse(Console.ReadLine(), out int weight);
+
+            Console.Write("Нация: ");
+
+            string nationality = Console.ReadLine();
+
+            var filteretPrisons = _prisons.FindAll(prison => prison.Height == height && prison.Weight
+            == weight && prison.Nationality.ToLower() == nationality.ToLower() && prison.IsConcluded == false);
+
+            ShowAllPrisons(filteretPrisons);
 
             Console.ReadKey();
         }
-    }
 
-    class CarService
-    {
-        private Queue<Car> _brokenCars = new Queue<Car>();
-        private Storage _storage;
-
-        public CarService(Queue<Car> brokenCars, Storage storage)
+        private void ShowAllPrisons()
         {
-            _brokenCars = brokenCars;
-            _storage = storage;
+            foreach (var prison in _prisons)
+                prison.ShowInfo();
         }
 
-        public int Money { get; private set; }
-        public int BrokenCarsCount => _brokenCars.Count;
-
-        public void ShowCountClient()
+        private void ShowAllPrisons(List<Prison> prisons)
         {
-            StringDelimiter.DrawLine();
-
-            Console.WriteLine($"Кол-во клиентов: {BrokenCarsCount}");
-        }
-
-        public void Repair()
-        {
-            const string CommandRepair = "1";
-            const string CommandCancell = "2";
-
-            bool isRun = true;
-
-            ShowNextCar();
-
-            Car brokenCar = _brokenCars.Dequeue();
-
-            while (isRun)
-            {
-                Console.Clear();
-
-                Console.WriteLine($"Команда {CommandRepair} - приступить к починке след. детали");
-                Console.WriteLine($"Команда {CommandCancell} - отказать в починке");
-
-                Console.Write("Введите команду: ");
-
-                string userInput = Console.ReadLine();
-
-                switch (userInput)
-                {
-                    case CommandRepair:
-                        isRun = ReplaceDetail(brokenCar);
-                        break;
-
-                    case CommandCancell:
-                        PayPenalty(GetBrokenDetailPrice(brokenCar.GetDetails()));
-                        isRun = false;
-                        break;
-
-                    default:
-                        Console.WriteLine("Неверная команда повторите ввод!!!");
-                        break;
-                }
-            }
-
-            brokenCar.ShowInfo();
-
-            Console.WriteLine("Машина уехала");
-        }
-
-        public void ShowMoney()
-        {
-            StringDelimiter.DrawLine();
-
-            Console.WriteLine($"Ваш счёт: {Money}");
-        }
-
-        public void ShowNextCar() =>
-            _brokenCars.Peek().ShowInfo();
-
-        public void ShowStorage()
-        {
-            StringDelimiter.DrawLine();
-
-            _storage.ShowInfo();
-        }
-
-        private void PayPenalty(int penalty) =>
-            Money -= penalty;
-
-        private void TakeMoney(int sum)
-        {
-            if (sum > 0)
-                Money += sum;
-        }
-
-        private bool ReplaceDetail(Car car)
-        {
-            if (TryGetBrokenDetail(car.GetDetails(), out Detail brokenDetail))
-            {
-                if (_storage.TryGetNecessaryDetail(brokenDetail.Name, out Detail detail))
-                {
-                    car.RepairDetail(brokenDetail, detail);
-
-                    TakeMoney(detail.Price);
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private bool TryGetBrokenDetail(List<Detail> details, out Detail brokenDetail)
-        {
-            foreach (var detail in details)
-            {
-                if (detail.IsBroken)
-                {
-                    brokenDetail = detail;
-
-                    return true;
-                }
-            }
-
-            brokenDetail = null;
-
-            return false;
-        }
-
-        private int GetBrokenDetailPrice(List<Detail> details)
-        {
-            if (TryGetBrokenDetail(details, out Detail detail))
-                return detail.Price;
-
-            return 0;
+            foreach (var prison in prisons)
+                prison.ShowInfo();
         }
     }
 
-    class DetailFactory
+    class Prison
     {
-        public List<Detail> Create()
+        public Prison(string name, bool isServingTime, int height, int weight, string nationality)
         {
-            List<Detail> deatails = new List<Detail>()
-            {
-            new Detail("Fan", 2000),
-            new Detail("Windscreen", 2400),
-            new Detail("Headlight", 2600),
-            new Detail("Bumper", 1800),
-            new Detail("Accumulator", 3500),
-            new Detail("Engine", 5000),
-            new Detail("Filter", 1000),
-            };
+            Name = name;
+            IsConcluded = isServingTime;
+            Height = height;
+            Weight = weight;
+            Nationality = nationality;
+        }
 
-            return deatails.ToList();
+        public string Name { get; }
+        public bool IsConcluded { get; }
+        public int Height { get; }
+        public int Weight { get; }
+        public string Nationality { get; }
+
+        public void ShowInfo()
+        {
+            StringDelimiter.DrawLine();
+
+            string isConcludedText = GetConcludedText();
+
+            Console.WriteLine($"{isConcludedText}\nИмя: {Name}\nРост: {Height}\nВес: {Weight}\nНация: {Nationality}");
+        }
+
+        private string GetConcludedText()
+        {
+            string concludedText = "Заключен";
+            string unconcludedText = "Не заключен";
+
+            return IsConcluded == true ? concludedText : unconcludedText;
         }
     }
 
-    class CarsFactory
+    class PrisonsFactory
     {
-        public Queue<Car> Create(DetailFactory detailFactory)
+        public List<Prison> Create(int count)
         {
-            Queue<Car> newCars = new Queue<Car>();
+            List<Prison> newPrisons = new List<Prison>();
 
-            int carsCount = GenerateRandomCount();
+            NameStorage nameStorage = new NameStorage();
+            NationalyStorage nationalyStorage = new NationalyStorage();
 
-            for (int i = 0; i < carsCount; i++)
-                newCars.Enqueue(new Car(GenerateRandomTitle(), GetRandomDetails(detailFactory)));
+            int minHeight = 150;
+            int maxHeight = 210;
 
-            return newCars;
+            int minWeight = 40;
+            int maxWeight = 170;
+
+            for (int i = 0; i < count; i++)
+            {
+                newPrisons.Add(new Prison(GetRandomText(nameStorage.Generate()), GetRandomBoolean(),
+                GetRandomValue(minHeight, maxHeight), GetRandomValue(minWeight, maxWeight), GetRandomText(nationalyStorage.Generate())));
+            }
+
+            return newPrisons;
         }
 
-        private int GenerateRandomCount()
+        private bool GetRandomBoolean()
         {
-            int minValue = 2;
-            int maxValue = 10;
+            bool[] booleanArray = { true, false };
 
+            return booleanArray[Randomizer.GenerateRandomValue(0, 1 + 1)];
+        }
+
+        private string GetRandomText(List<string> text)
+        {
+            return text[Randomizer.GenerateRandomValue(0, text.Count)];
+        }
+
+        private int GetRandomValue(int minValue, int maxValue)
+        {
             return Randomizer.GenerateRandomValue(minValue, maxValue + 1);
         }
+    }
 
-        private List<Detail> GetRandomDetails(DetailFactory detailFactory)
+    class NameStorage
+    {
+        private List<string> _names = new List<string>
         {
-            List<Detail> parts = detailFactory.Create();
+            "Jon",
+            "Billy",
+            "Xerox",
+            "Constantine",
+            "Vladimir",
+            "Alex",
+            "Freddy"
+        };
 
-            int maxFailureChance = 100;
-            int minFailureChance = 0;
-            int failureChance = 25;
-
-            int failureDetails = 0;
-
-            foreach (var part in parts)
-            {
-                if (failureChance >= Randomizer.GenerateRandomValue(minFailureChance, maxFailureChance))
-                {
-                    failureDetails++;
-                    part.Break();
-                }
-            }
-
-            if (failureDetails == 0)
-            {
-                int randomIndex = Randomizer.GenerateRandomValue(0, parts.Count);
-                parts[randomIndex].Break();
-            }
-
-            return new List<Detail>(parts);
-        }
-
-        private string GenerateRandomTitle()
+        public List<string> Generate()
         {
-            var carTitles = Enum.GetNames(typeof(CarTitles));
-            int carTitlesCount = carTitles.Length;
-            string randomCarTitle = carTitles.GetValue(Randomizer.GenerateRandomValue(0, carTitlesCount)).ToString();
-
-            return randomCarTitle;
+            return new List<string>(_names);
         }
     }
 
-    class Car
+    class NationalyStorage
     {
-        private List<Detail> _details = new List<Detail>();
-
-        public Car(string name, List<Detail> details)
+        private List<string> _nationaly = new List<string>
         {
-            Name = name;
-            _details = details;
-        }
+            "Russian",
+            "German",
+            "Japanese",
+            "Chinese",
+            "American",
+            "Italian"
+        };
 
-        public string Name { get; private set; }
-
-        public void ShowInfo()
+        public List<string> Generate()
         {
-            StringDelimiter.DrawLine();
-
-            Console.WriteLine(Name + "\n");
-
-            foreach (var detail in _details)
-                detail.ShowInfo();
+            return new List<string>(_nationaly);
         }
-
-        public void RepairDetail(Detail oldDetail, Detail newDetail)
-        {
-            _details.Remove(oldDetail);
-            _details.Add(newDetail);
-        }
-
-        public List<Detail> GetDetails()
-        {
-            return new List<Detail>(_details);
-        }
-    }
-
-    class StorageFactory
-    {
-        public Storage Create(int storageCellQuantity, DetailFactory detailFactory)
-        {
-            return new Storage(CreateStorageCells(storageCellQuantity, detailFactory));
-        }
-
-        private List<StorageCell> CreateStorageCells(int storageCellQuantity, DetailFactory detailFactory)
-        {
-            List<StorageCell> storageCells = new List<StorageCell>();
-
-            List<Detail> details = detailFactory.Create();
-
-            for (int i = 0; i < details.Count; i++)
-                storageCells.Add(new StorageCell(details[i], storageCellQuantity, details[i].Price));
-
-            return storageCells;
-        }
-    }
-
-    class Storage
-    {
-        private List<StorageCell> _сells;
-
-        public Storage(List<StorageCell> сells)
-        {
-            _сells = сells;
-        }
-
-        public void ShowInfo()
-        {
-            foreach (var сell in _сells)
-            {
-                Console.WriteLine("Детали на складе:");
-
-                StringDelimiter.DrawLine();
-                сell.ShowInfo();
-            }
-        }
-
-        public bool TryGetNecessaryDetail(string name, out Detail detail)
-        {
-            foreach (var storageCell in _сells)
-            {
-                if (storageCell.Detail.Name == name)
-                {
-                    detail = storageCell.Detail;
-
-                    storageCell.IssueDetail();
-
-                    return true;
-                }
-            }
-
-            detail = null;
-
-            return false;
-        }
-    }
-
-    class StorageCell
-    {
-        public StorageCell(Detail detail, int quantity, int costPrice)
-        {
-            Detail = detail;
-            Quantity = quantity;
-            CostPrice = costPrice;
-        }
-
-        public Detail Detail { get; private set; }
-        public int Quantity { get; private set; }
-        public int CostPrice { get; private set; }
-
-        public void ShowInfo()
-        {
-            Console.WriteLine($"{Detail.Name} - {Quantity}.");
-        }
-
-        public void IssueDetail()
-        {
-            if (Quantity > 0)
-                Quantity--;
-        }
-    }
-
-    class Detail
-    {
-        public Detail(string name, int price)
-        {
-            Name = name;
-            Price = price;
-        }
-
-        public string Name { get; private set; }
-        public bool IsBroken { get; private set; }
-        public int Price { get; protected set; }
-
-        public void ShowInfo()
-        {
-            string status = GetStatus();
-
-            Console.WriteLine($"{Name} состояние: {status}");
-        }
-
-        public void Break()
-        {
-            IsBroken = true;
-        }
-
-        private string GetStatus()
-        {
-            string bedState = "Плохое";
-            string goodState = "Хорошое";
-
-            if (IsBroken)
-                return bedState;
-
-            return goodState;
-        }
-    }
-
-    enum CarTitles
-    {
-        BMW,
-        Lada,
-        Tayota,
-        Mercedes,
-        Wolksvagen
     }
 
     static class Randomizer
