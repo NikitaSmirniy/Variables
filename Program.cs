@@ -12,24 +12,26 @@ namespace ConsoleApp1
 
             List<Prison> prisons = prisonsFactory.Create(20);
 
-            DataBase dataBase = new DataBase(prisons);
+            Database dataBase = new Database(prisons);
 
             dataBase.Work();
         }
     }
 
-    class DataBase
+    class Database
     {
+        private const string AmnestiedOffense = "Антиправительственное";
+
         private List<Prison> _prisons;
 
-        public DataBase(List<Prison> prisons)
+        public Database(List<Prison> prisons)
         {
             _prisons = prisons;
         }
 
         public void Work()
         {
-            const string CommandFindPrisons = "1";
+            const string CommandAmnestly = "1";
             const string CommandShowAllPrisons = "2";
             const string CommandClearConsole = "3";
             const string CommandExit = "4";
@@ -42,7 +44,7 @@ namespace ConsoleApp1
 
                 StringDelimiter.DrawLine();
 
-                Console.WriteLine($"Команда {CommandFindPrisons} - найти преступников по данным");
+                Console.WriteLine($"Команда {CommandAmnestly} - провести амнистию");
                 Console.WriteLine($"Команда {CommandShowAllPrisons} - показать данные всех преступников");
                 Console.WriteLine($"Команда {CommandClearConsole} - очистить консоль");
                 Console.WriteLine($"Команда {CommandExit} - выйти");
@@ -53,8 +55,8 @@ namespace ConsoleApp1
 
                 switch (userInput)
                 {
-                    case CommandFindPrisons:
-                        FindPrisons();
+                    case CommandAmnestly:
+                        Amnesty();
                         break;
 
                     case CommandShowAllPrisons:
@@ -78,28 +80,13 @@ namespace ConsoleApp1
             }
         }
 
-        private void FindPrisons()
+        private void Amnesty()
         {
             StringDelimiter.DrawLine();
 
-            Console.WriteLine("Поиск преступника будет происходить по параметрам(рост, вес, национальность)");
+            var filteretPrisons = _prisons.Where(prison => prison.Crime.ToLower() != AmnestiedOffense.ToLower()).Select(prison => prison).ToList();
 
-            Console.Write("Рост: ");
-
-            int.TryParse(Console.ReadLine(), out int height);
-
-            Console.Write("Вес: ");
-
-            int.TryParse(Console.ReadLine(), out int weight);
-
-            Console.Write("Нация: ");
-
-            string nationality = Console.ReadLine();
-
-            var filteretPrisons = _prisons.Where(prison => prison.Height == height && prison.Weight
-            == weight && prison.Nationality.ToLower() == nationality.ToLower() && prison.IsConcluded == false).ToList();
-
-            ShowAllPrisons(filteretPrisons);
+            _prisons = filteretPrisons;
 
             Console.ReadKey();
         }
@@ -109,46 +96,24 @@ namespace ConsoleApp1
             foreach (var prison in _prisons)
                 prison.ShowInfo();
         }
-
-        private void ShowAllPrisons(List<Prison> prisons)
-        {
-            foreach (var prison in prisons)
-                prison.ShowInfo();
-        }
     }
 
     class Prison
     {
-        public Prison(string name, bool isServingTime, int height, int weight, string nationality)
+        public Prison(string name, string сrime)
         {
             Name = name;
-            IsConcluded = isServingTime;
-            Height = height;
-            Weight = weight;
-            Nationality = nationality;
+            Crime = сrime;
         }
 
         public string Name { get; }
-        public bool IsConcluded { get; }
-        public int Height { get; }
-        public int Weight { get; }
-        public string Nationality { get; }
+        public string Crime { get; }
 
         public void ShowInfo()
         {
             StringDelimiter.DrawLine();
 
-            string isConcludedText = GetConcludedText();
-
-            Console.WriteLine($"{isConcludedText}\nИмя: {Name}\nРост: {Height}\nВес: {Weight}\nНация: {Nationality}");
-        }
-
-        private string GetConcludedText()
-        {
-            string concludedText = "Заключен";
-            string unconcludedText = "Не заключен";
-
-            return IsConcluded == true ? concludedText : unconcludedText;
+            Console.WriteLine($"\nИмя: {Name}\nПреступление: {Crime}");
         }
     }
 
@@ -159,38 +124,19 @@ namespace ConsoleApp1
             List<Prison> newPrisons = new List<Prison>();
 
             NameStorage nameStorage = new NameStorage();
-            NationalyStorage nationalyStorage = new NationalyStorage();
-
-            int minHeight = 150;
-            int maxHeight = 210;
-
-            int minWeight = 40;
-            int maxWeight = 170;
+            CrimeStorage crimeStorage = new CrimeStorage();
 
             for (int i = 0; i < count; i++)
             {
-                newPrisons.Add(new Prison(GetRandomText(nameStorage.Generate()), GetRandomBoolean(),
-                GetRandomValue(minHeight, maxHeight), GetRandomValue(minWeight, maxWeight), GetRandomText(nationalyStorage.Generate())));
+                newPrisons.Add(new Prison(GetRandomText(nameStorage.Generate()), GetRandomText(crimeStorage.Generate())));
             }
 
             return newPrisons;
         }
 
-        private bool GetRandomBoolean()
-        {
-            bool[] booleanArray = { true, false };
-
-            return booleanArray[Randomizer.GenerateRandomValue(booleanArray.Length)];
-        }
-
         private string GetRandomText(List<string> text)
         {
             return text[Randomizer.GenerateRandomValue(text.Count)];
-        }
-
-        private int GetRandomValue(int minValue, int maxValue)
-        {
-            return Randomizer.GenerateRandomValue(minValue, maxValue + 1);
         }
     }
 
@@ -213,21 +159,21 @@ namespace ConsoleApp1
         }
     }
 
-    class NationalyStorage
+    class CrimeStorage
     {
-        private List<string> _nationaly = new List<string>
+        private List<string> _сrimes = new List<string>
         {
-            "Russian",
-            "German",
-            "Japanese",
-            "Chinese",
-            "American",
-            "Italian"
+            "Антиправительственное",
+            "Продажа котиков",
+            "Мошенничество",
+            "Убийство",
+            "Грабёж",
+            "Изнас."
         };
 
         public List<string> Generate()
         {
-            return new List<string>(_nationaly);
+            return new List<string>(_сrimes);
         }
     }
 
