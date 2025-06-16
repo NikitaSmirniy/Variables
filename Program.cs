@@ -10,7 +10,7 @@ namespace ConsoleApp1
         {
             PrisonsFactory prisonsFactory = new PrisonsFactory();
 
-            List<Prison> prisons = prisonsFactory.Create(20);
+            List<Patient> prisons = prisonsFactory.Create(20);
 
             Database dataBase = new Database(prisons);
 
@@ -20,21 +20,21 @@ namespace ConsoleApp1
 
     class Database
     {
-        private const string AmnestiedOffense = "Антиправительственное";
+        private List<Patient> _patients;
 
-        private List<Prison> _prisons;
-
-        public Database(List<Prison> prisons)
+        public Database(List<Patient> patients)
         {
-            _prisons = prisons;
+            _patients = patients;
         }
 
         public void Work()
         {
-            const string CommandAmnestly = "1";
-            const string CommandShowAllPrisons = "2";
-            const string CommandClearConsole = "3";
-            const string CommandExit = "4";
+            const string CommandNameSorting = "1";
+            const string CommandAgeSorting = "2";
+            const string CommandFindAllPationsByDisease = "3";
+            const string CommandShowAllPatients = "4";
+            const string CommandClearConsole = "5";
+            const string CommandExit = "6";
 
             bool isOpen = true;
 
@@ -44,8 +44,10 @@ namespace ConsoleApp1
 
                 StringDelimiter.DrawLine();
 
-                Console.WriteLine($"Команда {CommandAmnestly} - провести амнистию");
-                Console.WriteLine($"Команда {CommandShowAllPrisons} - показать данные всех преступников");
+                Console.WriteLine($"Команда {CommandNameSorting} - отсортировать пациентов по имени");
+                Console.WriteLine($"Команда {CommandAgeSorting} - отсортировать пациентов по возрасту");
+                Console.WriteLine($"Команда {CommandFindAllPationsByDisease} - найти пациентов по болезни");
+                Console.WriteLine($"Команда {CommandShowAllPatients} - показать данные всех пациентов");
                 Console.WriteLine($"Команда {CommandClearConsole} - очистить консоль");
                 Console.WriteLine($"Команда {CommandExit} - выйти");
 
@@ -55,12 +57,20 @@ namespace ConsoleApp1
 
                 switch (userInput)
                 {
-                    case CommandAmnestly:
-                        Amnesty();
+                    case CommandNameSorting:
+                        SortingPatientsByName();
                         break;
 
-                    case CommandShowAllPrisons:
-                        ShowAllPrisons();
+                    case CommandAgeSorting:
+                        SortingPatientsByAge();
+                        break;
+
+                    case CommandFindAllPationsByDisease:
+                        FindPatientsByDisease();
+                        break;
+
+                    case CommandShowAllPatients:
+                        ShowAllPatient();
                         break;
 
                     case CommandClearConsole:
@@ -80,55 +90,93 @@ namespace ConsoleApp1
             }
         }
 
-        private void Amnesty()
+        private void SortingPatientsByName()
         {
             StringDelimiter.DrawLine();
 
-            var filteretPrisons = _prisons.Where(prison => prison.Crime.ToLower() != AmnestiedOffense.ToLower()).Select(prison => prison).ToList();
+            var filteretPrisons = _patients.OrderBy(patient => patient.Name).ToList();
 
-            _prisons = filteretPrisons;
+            _patients = filteretPrisons;
 
             Console.ReadKey();
         }
 
-        private void ShowAllPrisons()
+        private void SortingPatientsByAge()
         {
-            foreach (var prison in _prisons)
-                prison.ShowInfo();
+            StringDelimiter.DrawLine();
+
+            var filteretPrisons = _patients.OrderBy(patient => patient.Age).ToList();
+
+            _patients = filteretPrisons;
+
+            Console.ReadKey();
+        }
+
+        private void FindPatientsByDisease()
+        {
+            StringDelimiter.DrawLine();
+
+            Console.Write("Введите болезнь пациента: ");
+
+            string userInput = Console.ReadLine();
+
+            var filteretPrisons = _patients.Where(patient => patient.Disease.ToLower() ==  userInput.ToLower())
+                .Select(patient => patient).ToList();
+
+            ShowAllPatient(filteretPrisons);
+
+            Console.ReadKey();
+        }
+
+        private void ShowAllPatient()
+        {
+            foreach (var patient in _patients)
+                patient.ShowInfo();
+        }
+
+        private void ShowAllPatient(List<Patient> patients)
+        {
+            foreach (var patient in patients)
+                patient.ShowInfo();
         }
     }
 
-    class Prison
+    class Patient
     {
-        public Prison(string name, string сrime)
+        public Patient(string name, int age,string disease)
         {
             Name = name;
-            Crime = сrime;
+            Age = age;
+            Disease = disease;
         }
 
         public string Name { get; }
-        public string Crime { get; }
+        public int Age { get; }
+        public string Disease { get; }
 
         public void ShowInfo()
         {
             StringDelimiter.DrawLine();
 
-            Console.WriteLine($"\nИмя: {Name}\nПреступление: {Crime}");
+            Console.WriteLine($"\nИмя: {Name}\nВозраст: {Age} лет\nБолезнь: {Disease}");
         }
     }
 
     class PrisonsFactory
     {
-        public List<Prison> Create(int count)
+        public List<Patient> Create(int count)
         {
-            List<Prison> newPrisons = new List<Prison>();
+            List<Patient> newPrisons = new List<Patient>();
 
             NameStorage nameStorage = new NameStorage();
-            CrimeStorage crimeStorage = new CrimeStorage();
+            DiseaseStorage diseaseStorage = new DiseaseStorage();
+
+            int minRandomAge = 18;
+            int maxRandomAge = 99;
 
             for (int i = 0; i < count; i++)
             {
-                newPrisons.Add(new Prison(GetRandomText(nameStorage.Generate()), GetRandomText(crimeStorage.Generate())));
+                newPrisons.Add(new Patient(GetRandomText(nameStorage.Generate()), GetRandomValue(minRandomAge, maxRandomAge), GetRandomText(diseaseStorage.Generate())));
             }
 
             return newPrisons;
@@ -137,6 +185,11 @@ namespace ConsoleApp1
         private string GetRandomText(List<string> text)
         {
             return text[Randomizer.GenerateRandomValue(text.Count)];
+        }
+
+        private int GetRandomValue(int minValue, int maxValue)
+        {
+            return Randomizer.GenerateRandomValue(minValue, maxValue + 1);
         }
     }
 
@@ -159,21 +212,21 @@ namespace ConsoleApp1
         }
     }
 
-    class CrimeStorage
+    class DiseaseStorage
     {
-        private List<string> _сrimes = new List<string>
+        private List<string> _diseases = new List<string>
         {
-            "Антиправительственное",
-            "Продажа котиков",
-            "Мошенничество",
-            "Убийство",
-            "Грабёж",
-            "Изнас."
+            "Лешай",
+            "Ожёги",
+            "Спид",
+            "Вич",
+            "Кровотечение",
+            "Контузия"
         };
 
         public List<string> Generate()
         {
-            return new List<string>(_сrimes);
+            return new List<string>(_diseases);
         }
     }
 
