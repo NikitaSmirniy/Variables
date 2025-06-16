@@ -8,9 +8,9 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            PrisonsFactory prisonsFactory = new PrisonsFactory();
+            PlaersFactory prisonsFactory = new PlaersFactory();
 
-            List<Patient> prisons = prisonsFactory.Create(20);
+            List<Player> prisons = prisonsFactory.Create(20);
 
             Database dataBase = new Database(prisons);
 
@@ -20,21 +20,22 @@ namespace ConsoleApp1
 
     class Database
     {
-        private List<Patient> _patients;
+        private List<Player> _players;
 
-        public Database(List<Patient> patients)
+        public Database(List<Player> players)
         {
-            _patients = patients;
+            _players = players;
         }
 
         public void Work()
         {
-            const string CommandNameSorting = "1";
-            const string CommandAgeSorting = "2";
-            const string CommandFindAllPationsByDisease = "3";
-            const string CommandShowAllPatients = "4";
-            const string CommandClearConsole = "5";
-            const string CommandExit = "6";
+            const string CommandTopByLevel = "1";
+            const string CommandTopByForce = "2";
+            const string CommandShowAllPlayers = "3";
+            const string CommandClearConsole = "4";
+            const string CommandExit = "5";
+
+            int topVelocity = 3;
 
             bool isOpen = true;
 
@@ -44,10 +45,9 @@ namespace ConsoleApp1
 
                 StringDelimiter.DrawLine();
 
-                Console.WriteLine($"Команда {CommandNameSorting} - отсортировать пациентов по имени");
-                Console.WriteLine($"Команда {CommandAgeSorting} - отсортировать пациентов по возрасту");
-                Console.WriteLine($"Команда {CommandFindAllPationsByDisease} - найти пациентов по болезни");
-                Console.WriteLine($"Команда {CommandShowAllPatients} - показать данные всех пациентов");
+                Console.WriteLine($"Команда {CommandTopByLevel} - показать топ 3 лучших игроков по уровню");
+                Console.WriteLine($"Команда {CommandTopByForce} - показать топ 3 лучших игроков по силе");
+                Console.WriteLine($"Команда {CommandShowAllPlayers} - показать данные всех игроков");
                 Console.WriteLine($"Команда {CommandClearConsole} - очистить консоль");
                 Console.WriteLine($"Команда {CommandExit} - выйти");
 
@@ -57,20 +57,16 @@ namespace ConsoleApp1
 
                 switch (userInput)
                 {
-                    case CommandNameSorting:
-                        SortingPatientsByName();
+                    case CommandTopByLevel:
+                        FindTopPlayersByLevel(topVelocity);
                         break;
 
-                    case CommandAgeSorting:
-                        SortingPatientsByAge();
+                    case CommandTopByForce:
+                        FindTopPlayersByForce(topVelocity);
                         break;
 
-                    case CommandFindAllPationsByDisease:
-                        FindPatientsByDisease();
-                        break;
-
-                    case CommandShowAllPatients:
-                        ShowAllPatient();
+                    case CommandShowAllPlayers:
+                        ShowAllPlayers();
                         break;
 
                     case CommandClearConsole:
@@ -90,96 +86,98 @@ namespace ConsoleApp1
             }
         }
 
-        private void SortingPatientsByName()
+        private void FindTopPlayersByLevel(int topPlayersCount)
         {
             StringDelimiter.DrawLine();
 
-            var filteretPrisons = _patients.OrderBy(patient => patient.Name).ToList();
+            var filteretPlayers = _players.OrderByDescending(player => player.Level).ToList();
 
-            _patients = filteretPrisons;
+            int typedTop = 0;
+
+            var topPlayers = filteretPlayers.TakeWhile(player => typedTop++ < topPlayersCount).ToList();
+
+            ShowTop(topPlayers);
 
             Console.ReadKey();
         }
 
-        private void SortingPatientsByAge()
+        private void FindTopPlayersByForce(int topPlayersCount)
         {
             StringDelimiter.DrawLine();
 
-            var filteretPrisons = _patients.OrderBy(patient => patient.Age).ToList();
+            var filteretPlayers = _players.OrderByDescending(player => player.Force).ToList();
 
-            _patients = filteretPrisons;
+            int topCount = 0;
+
+            var topPlayers = filteretPlayers.TakeWhile(player => topCount++ < topPlayersCount).ToList();
+
+            ShowTop(topPlayers);
 
             Console.ReadKey();
         }
 
-        private void FindPatientsByDisease()
+        private void ShowAllPlayers()
         {
-            StringDelimiter.DrawLine();
-
-            Console.Write("Введите болезнь пациента: ");
-
-            string userInput = Console.ReadLine();
-
-            var filteretPrisons = _patients.Where(patient => patient.Disease.ToLower() ==  userInput.ToLower())
-                .Select(patient => patient).ToList();
-
-            ShowAllPatient(filteretPrisons);
-
-            Console.ReadKey();
+            foreach (var player in _players)
+                player.ShowInfo();
         }
 
-        private void ShowAllPatient()
+        private void ShowTop(List<Player> players)
         {
-            foreach (var patient in _patients)
-                patient.ShowInfo();
-        }
+            for (int i = 0; i < players.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. Место");
 
-        private void ShowAllPatient(List<Patient> patients)
-        {
-            foreach (var patient in patients)
-                patient.ShowInfo();
+                players[i].ShowInfo();
+            }
         }
     }
 
-    class Patient
+    class Player
     {
-        public Patient(string name, int age,string disease)
+        public Player(string name, int level, int force)
         {
             Name = name;
-            Age = age;
-            Disease = disease;
+            Level = level;
+            Force = force;
         }
 
         public string Name { get; }
-        public int Age { get; }
-        public string Disease { get; }
+        public int Level { get; }
+        public int Force { get; }
 
         public void ShowInfo()
         {
             StringDelimiter.DrawLine();
 
-            Console.WriteLine($"\nИмя: {Name}\nВозраст: {Age} лет\nБолезнь: {Disease}");
+            Console.WriteLine($"\nИмя: {Name}\nУровень: {Level} lvl\nСила: {Force}");
         }
     }
 
-    class PrisonsFactory
+    class PlaersFactory
     {
-        public List<Patient> Create(int count)
+        public List<Player> Create(int count)
         {
-            List<Patient> newPrisons = new List<Patient>();
+            List<Player> newPlayers = new List<Player>();
 
             NameStorage nameStorage = new NameStorage();
-            DiseaseStorage diseaseStorage = new DiseaseStorage();
 
-            int minRandomAge = 18;
-            int maxRandomAge = 99;
+            int minRandomLevel = 1;
+            int maxRandomLevel = 99;
+
+            int minRandomForce = 1;
+            int maxRandomForce = 49;
 
             for (int i = 0; i < count; i++)
             {
-                newPrisons.Add(new Patient(GetRandomText(nameStorage.Generate()), GetRandomValue(minRandomAge, maxRandomAge), GetRandomText(diseaseStorage.Generate())));
+                string randomName = GetRandomText(nameStorage.Generate());
+                int randomLevel = GetRandomValue(minRandomLevel, maxRandomLevel);
+                int randomForce = GetRandomValue(minRandomForce, maxRandomForce);
+
+                newPlayers.Add(new Player(randomName, randomLevel, randomForce * randomLevel));
             }
 
-            return newPrisons;
+            return newPlayers;
         }
 
         private string GetRandomText(List<string> text)
@@ -209,24 +207,6 @@ namespace ConsoleApp1
         public List<string> Generate()
         {
             return new List<string>(_names);
-        }
-    }
-
-    class DiseaseStorage
-    {
-        private List<string> _diseases = new List<string>
-        {
-            "Лешай",
-            "Ожёги",
-            "Спид",
-            "Вич",
-            "Кровотечение",
-            "Контузия"
-        };
-
-        public List<string> Generate()
-        {
-            return new List<string>(_diseases);
         }
     }
 
