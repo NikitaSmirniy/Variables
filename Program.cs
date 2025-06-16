@@ -180,12 +180,12 @@ namespace ConsoleApp1
         {
             bool[] booleanArray = { true, false };
 
-            return booleanArray[Randomizer.GenerateRandomValue(0, booleanArray.Length)];
+            return booleanArray[Randomizer.GenerateRandomValue(booleanArray.Length)];
         }
 
         private string GetRandomText(List<string> text)
         {
-            return text[Randomizer.GenerateRandomValue(0, text.Count)];
+            return text[Randomizer.GenerateRandomValue(text.Count)];
         }
 
         private int GetRandomValue(int minValue, int maxValue)
@@ -238,6 +238,11 @@ namespace ConsoleApp1
         public static int GenerateRandomValue(int minRandomValue, int maxRandomValue)
         {
             return s_random.Next(minRandomValue, maxRandomValue);
+        }
+
+        public static int GenerateRandomValue(int maxRandomValue)
+        {
+            return s_random.Next(maxRandomValue);
         }
     }
 
