@@ -96,8 +96,8 @@ namespace ConsoleApp1
 
             string nationality = Console.ReadLine();
 
-            var filteretPrisons = _prisons.FindAll(prison => prison.Height == height && prison.Weight
-            == weight && prison.Nationality.ToLower() == nationality.ToLower() && prison.IsConcluded == false);
+            var filteretPrisons = _prisons.Where(prison => prison.Height == height && prison.Weight
+            == weight && prison.Nationality.ToLower() == nationality.ToLower() && prison.IsConcluded == false).ToList();
 
             ShowAllPrisons(filteretPrisons);
 
@@ -180,7 +180,7 @@ namespace ConsoleApp1
         {
             bool[] booleanArray = { true, false };
 
-            return booleanArray[Randomizer.GenerateRandomValue(0, 1 + 1)];
+            return booleanArray[Randomizer.GenerateRandomValue(0, booleanArray.Length)];
         }
 
         private string GetRandomText(List<string> text)
