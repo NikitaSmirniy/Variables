@@ -8,13 +8,13 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            PlaersFactory prisonsFactory = new PlaersFactory();
+            PlaersFactory plaersFactory = new PlaersFactory();
 
-            List<Player> prisons = prisonsFactory.Create(20);
+            List<Player> players = plaersFactory.Create(20);
 
-            Database dataBase = new Database(prisons);
+            Database database = new Database(players);
 
-            dataBase.Work();
+            database.Work();
         }
     }
 
@@ -35,7 +35,7 @@ namespace ConsoleApp1
             const string CommandClearConsole = "4";
             const string CommandExit = "5";
 
-            int topVelocity = 3;
+            int topCapacity = 3;
 
             bool isOpen = true;
 
@@ -45,8 +45,8 @@ namespace ConsoleApp1
 
                 StringDelimiter.DrawLine();
 
-                Console.WriteLine($"Команда {CommandTopByLevel} - показать топ 3 лучших игроков по уровню");
-                Console.WriteLine($"Команда {CommandTopByForce} - показать топ 3 лучших игроков по силе");
+                Console.WriteLine($"Команда {CommandTopByLevel} - показать топ {topCapacity} лучших игроков по уровню");
+                Console.WriteLine($"Команда {CommandTopByForce} - показать топ {topCapacity} лучших игроков по силе");
                 Console.WriteLine($"Команда {CommandShowAllPlayers} - показать данные всех игроков");
                 Console.WriteLine($"Команда {CommandClearConsole} - очистить консоль");
                 Console.WriteLine($"Команда {CommandExit} - выйти");
@@ -58,11 +58,11 @@ namespace ConsoleApp1
                 switch (userInput)
                 {
                     case CommandTopByLevel:
-                        FindTopPlayersByLevel(topVelocity);
+                        FindTopPlayersByLevel(topCapacity);
                         break;
 
                     case CommandTopByForce:
-                        FindTopPlayersByForce(topVelocity);
+                        FindTopPlayersByForce(topCapacity);
                         break;
 
                     case CommandShowAllPlayers:
@@ -90,11 +90,9 @@ namespace ConsoleApp1
         {
             StringDelimiter.DrawLine();
 
-            var filteretPlayers = _players.OrderByDescending(player => player.Level).ToList();
+            var filteretPlayers = _players.OrderByDescending(player => player.Level);
 
-            int typedTop = 0;
-
-            var topPlayers = filteretPlayers.TakeWhile(player => typedTop++ < topPlayersCount).ToList();
+            var topPlayers = filteretPlayers.Take(topPlayersCount).ToList();
 
             ShowTop(topPlayers);
 
@@ -105,11 +103,9 @@ namespace ConsoleApp1
         {
             StringDelimiter.DrawLine();
 
-            var filteretPlayers = _players.OrderByDescending(player => player.Force).ToList();
+            var filteretPlayers = _players.OrderByDescending(player => player.Force);
 
-            int topCount = 0;
-
-            var topPlayers = filteretPlayers.TakeWhile(player => topCount++ < topPlayersCount).ToList();
+            var topPlayers = filteretPlayers.Take(topPlayersCount).ToList();
 
             ShowTop(topPlayers);
 
