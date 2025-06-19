@@ -8,11 +8,11 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            PlaersFactory plaersFactory = new PlaersFactory();
+            BeensFactory beensFactory = new BeensFactory();
 
-            List<Player> players = plaersFactory.Create(20);
+            List<Beens> beens = beensFactory.Create(20);
 
-            Database database = new Database(players);
+            Database database = new Database(beens);
 
             database.Work();
         }
@@ -20,22 +20,21 @@ namespace ConsoleApp1
 
     class Database
     {
-        private List<Player> _players;
+        private List<Beens> _beens;
 
-        public Database(List<Player> players)
+        private int _todayDate = 2025;
+
+        public Database(List<Beens> beens)
         {
-            _players = players;
+            _beens = beens;
         }
 
         public void Work()
         {
-            const string CommandTopByLevel = "1";
-            const string CommandTopByForce = "2";
-            const string CommandShowAllPlayers = "3";
-            const string CommandClearConsole = "4";
-            const string CommandExit = "5";
-
-            int topCapacity = 3;
+            const string CommandShowAllOverdueBeens = "1";
+            const string CommandShowAllBeens = "2";
+            const string CommandClearConsole = "3";
+            const string CommandExit = "4";
 
             bool isOpen = true;
 
@@ -45,9 +44,8 @@ namespace ConsoleApp1
 
                 StringDelimiter.DrawLine();
 
-                Console.WriteLine($"Команда {CommandTopByLevel} - показать топ {topCapacity} лучших игроков по уровню");
-                Console.WriteLine($"Команда {CommandTopByForce} - показать топ {topCapacity} лучших игроков по силе");
-                Console.WriteLine($"Команда {CommandShowAllPlayers} - показать данные всех игроков");
+                Console.WriteLine($"Команда {CommandShowAllOverdueBeens} - показать все просроченные консервы");
+                Console.WriteLine($"Команда {CommandShowAllBeens} - показать все консервы");
                 Console.WriteLine($"Команда {CommandClearConsole} - очистить консоль");
                 Console.WriteLine($"Команда {CommandExit} - выйти");
 
@@ -57,16 +55,12 @@ namespace ConsoleApp1
 
                 switch (userInput)
                 {
-                    case CommandTopByLevel:
-                        FindTopPlayersByLevel(topCapacity);
+                    case CommandShowAllOverdueBeens:
+                        ShowAllOverdueBeens();
                         break;
 
-                    case CommandTopByForce:
-                        FindTopPlayersByForce(topCapacity);
-                        break;
-
-                    case CommandShowAllPlayers:
-                        ShowAllPlayers();
+                    case CommandShowAllBeens:
+                        ShowAllBeens();
                         break;
 
                     case CommandClearConsole:
@@ -86,94 +80,72 @@ namespace ConsoleApp1
             }
         }
 
-        private void FindTopPlayersByLevel(int topPlayersCount)
+        private void ShowAllOverdueBeens()
         {
-            StringDelimiter.DrawLine();
+            var overdueBeens = _beens.Where(beens => beens.ProductionDate + beens.BestBeforeDate < _todayDate)
+                .Select(beens => beens).ToList();
 
-            var filteretPlayers = _players.OrderByDescending(player => player.Level);
-
-            var topPlayers = filteretPlayers.Take(topPlayersCount).ToList();
-
-            ShowTop(topPlayers);
-
-            Console.ReadKey();
+            ShowAllBeens(overdueBeens);
         }
 
-        private void FindTopPlayersByForce(int topPlayersCount)
+        private void ShowAllBeens()
         {
-            StringDelimiter.DrawLine();
-
-            var filteretPlayers = _players.OrderByDescending(player => player.Force);
-
-            var topPlayers = filteretPlayers.Take(topPlayersCount).ToList();
-
-            ShowTop(topPlayers);
-
-            Console.ReadKey();
+            foreach (var been in _beens)
+                been.ShowInfo();
         }
 
-        private void ShowAllPlayers()
+        private void ShowAllBeens(List<Beens> beens)
         {
-            foreach (var player in _players)
-                player.ShowInfo();
-        }
-
-        private void ShowTop(List<Player> players)
-        {
-            for (int i = 0; i < players.Count; i++)
-            {
-                Console.WriteLine($"{i + 1}. Место");
-
-                players[i].ShowInfo();
-            }
+            foreach (var been in beens)
+                been.ShowInfo();
         }
     }
 
-    class Player
+    class Beens
     {
-        public Player(string name, int level, int force)
+        public Beens(string name, int productionDate, int bestBeforeDate)
         {
             Name = name;
-            Level = level;
-            Force = force;
+            ProductionDate = productionDate;
+            BestBeforeDate = bestBeforeDate;
         }
 
         public string Name { get; }
-        public int Level { get; }
-        public int Force { get; }
+        public int ProductionDate { get; }
+        public int BestBeforeDate { get; }
 
         public void ShowInfo()
         {
             StringDelimiter.DrawLine();
 
-            Console.WriteLine($"\nИмя: {Name}\nУровень: {Level} lvl\nСила: {Force}");
+            Console.WriteLine($"\nИмя: {Name}\nДата производства: {ProductionDate}\nСрок годности: {BestBeforeDate}");
         }
     }
 
-    class PlaersFactory
+    class BeensFactory
     {
-        public List<Player> Create(int count)
+        public List<Beens> Create(int count)
         {
-            List<Player> newPlayers = new List<Player>();
+            List<Beens> newBeens = new List<Beens>();
 
             NameStorage nameStorage = new NameStorage();
 
-            int minRandomLevel = 1;
-            int maxRandomLevel = 99;
+            int minRandomProductionDate = 2019;
+            int maxRandomProductionDate = 2025;
 
-            int minRandomForce = 1;
-            int maxRandomForce = 49;
+            int minRandomBestBeforeDate = 2;
+            int maxRandomBestBeforeDate = 6;
 
             for (int i = 0; i < count; i++)
             {
                 string randomName = GetRandomText(nameStorage.Generate());
-                int randomLevel = GetRandomValue(minRandomLevel, maxRandomLevel);
-                int randomForce = GetRandomValue(minRandomForce, maxRandomForce);
+                int randomProductionDate = GetRandomValue(minRandomProductionDate, maxRandomProductionDate);
+                int randomBestBeforeDate = GetRandomValue(minRandomBestBeforeDate, maxRandomBestBeforeDate);
 
-                newPlayers.Add(new Player(randomName, randomLevel, randomForce * randomLevel));
+                newBeens.Add(new Beens(randomName, randomProductionDate, randomBestBeforeDate));
             }
 
-            return newPlayers;
+            return newBeens;
         }
 
         private string GetRandomText(List<string> text)
@@ -191,13 +163,10 @@ namespace ConsoleApp1
     {
         private List<string> _names = new List<string>
         {
-            "Jon",
-            "Billy",
-            "Xerox",
-            "Constantine",
-            "Vladimir",
-            "Alex",
-            "Freddy"
+            "Beenes",
+            "Billy Beens",
+            "Sweety Beens",
+            "Red Beens"
         };
 
         public List<string> Generate()
