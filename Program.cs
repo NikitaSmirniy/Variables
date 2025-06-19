@@ -8,11 +8,11 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            BeensFactory beensFactory = new BeensFactory();
+            SoldiersFactory soldiersFactory = new SoldiersFactory();
 
-            List<Beens> beens = beensFactory.Create(20);
+            List<Soldier> soldiers = soldiersFactory.Create(10);
 
-            Database database = new Database(beens);
+            Database database = new Database(soldiers);
 
             database.Work();
         }
@@ -20,19 +20,17 @@ namespace ConsoleApp1
 
     class Database
     {
-        private List<Beens> _beens;
+        private List<Soldier> _soldiers;
 
-        private int _todayDate = 2025;
-
-        public Database(List<Beens> beens)
+        public Database(List<Soldier> soldiers)
         {
-            _beens = beens;
+            _soldiers = soldiers;
         }
 
         public void Work()
         {
-            const string CommandShowAllOverdueBeens = "1";
-            const string CommandShowAllBeens = "2";
+            const string CommandFindSoldiers = "1";
+            const string CommandShowAllSoldiers = "2";
             const string CommandClearConsole = "3";
             const string CommandExit = "4";
 
@@ -44,8 +42,8 @@ namespace ConsoleApp1
 
                 StringDelimiter.DrawLine();
 
-                Console.WriteLine($"Команда {CommandShowAllOverdueBeens} - показать все просроченные консервы");
-                Console.WriteLine($"Команда {CommandShowAllBeens} - показать все консервы");
+                Console.WriteLine($"Команда {CommandFindSoldiers} - найти солдат в базе");
+                Console.WriteLine($"Команда {CommandShowAllSoldiers} - показать всех солдат из базы");
                 Console.WriteLine($"Команда {CommandClearConsole} - очистить консоль");
                 Console.WriteLine($"Команда {CommandExit} - выйти");
 
@@ -55,12 +53,12 @@ namespace ConsoleApp1
 
                 switch (userInput)
                 {
-                    case CommandShowAllOverdueBeens:
-                        ShowAllOverdueBeens();
+                    case CommandFindSoldiers:
+                        FindSoldiers();
                         break;
 
-                    case CommandShowAllBeens:
-                        ShowAllBeens();
+                    case CommandShowAllSoldiers:
+                        ShowAllSoldiers();
                         break;
 
                     case CommandClearConsole:
@@ -80,72 +78,81 @@ namespace ConsoleApp1
             }
         }
 
-        private void ShowAllOverdueBeens()
+        private void FindSoldiers()
         {
-            var overdueBeens = _beens.Where(beens => beens.ProductionDate + beens.BestBeforeDate < _todayDate)
-                .Select(beens => beens).ToList();
+            StringDelimiter.DrawLine();
 
-            ShowAllBeens(overdueBeens);
+            Console.Write("Впишите имя солдата для поиска: ");
+
+            string userInput = Console.ReadLine();
+
+            var filteredSoldiers = _soldiers.Where(soldier => soldier.Name.ToLower() == userInput.ToLower()).Select(soldier => soldier).ToList();
+
+            ShowAllSoldiers(filteredSoldiers);
         }
 
-        private void ShowAllBeens()
+        private void ShowAllSoldiers()
         {
-            foreach (var been in _beens)
-                been.ShowInfo();
+            foreach (var soldier in _soldiers)
+                soldier.ShowInfo();
         }
 
-        private void ShowAllBeens(List<Beens> beens)
+        private void ShowAllSoldiers(List<Soldier> soldiers)
         {
-            foreach (var been in beens)
-                been.ShowInfo();
+            foreach (var soldier in soldiers)
+                soldier.ShowInfo();
         }
     }
 
-    class Beens
+    class Soldier
     {
-        public Beens(string name, int productionDate, int bestBeforeDate)
+        public Soldier(string name, string armament, int rank, int serviceLife)
         {
             Name = name;
-            ProductionDate = productionDate;
-            BestBeforeDate = bestBeforeDate;
+            Armament = armament;
+            Rank = rank;
+            ServiceLife = serviceLife;
         }
 
         public string Name { get; }
-        public int ProductionDate { get; }
-        public int BestBeforeDate { get; }
+        public string Armament { get; }
+        public int Rank { get; }
+        public int ServiceLife { get; }
 
         public void ShowInfo()
         {
             StringDelimiter.DrawLine();
 
-            Console.WriteLine($"\nИмя: {Name}\nДата производства: {ProductionDate}\nСрок годности: {BestBeforeDate}");
+            Console.WriteLine($"\nИмя: {Name}\nВооружение: {Armament}\nЗвание: {Rank}\nСрок службы: {ServiceLife} (месяцев)");
         }
     }
 
-    class BeensFactory
+    class SoldiersFactory
     {
-        public List<Beens> Create(int count)
+        public List<Soldier> Create(int count)
         {
-            List<Beens> newBeens = new List<Beens>();
+            List<Soldier> newSoldiers = new List<Soldier>();
 
             NameStorage nameStorage = new NameStorage();
+            ArmamentStorage armamentStorage = new ArmamentStorage();
 
-            int minRandomProductionDate = 2019;
-            int maxRandomProductionDate = 2025;
+            int minRandomRank = 1;
+            int maxRandomRank = 6;
 
-            int minRandomBestBeforeDate = 2;
-            int maxRandomBestBeforeDate = 6;
+            int minRandomServiceLife = 6;
+            int maxRandomServiceLife = 24;
 
             for (int i = 0; i < count; i++)
             {
                 string randomName = GetRandomText(nameStorage.Generate());
-                int randomProductionDate = GetRandomValue(minRandomProductionDate, maxRandomProductionDate);
-                int randomBestBeforeDate = GetRandomValue(minRandomBestBeforeDate, maxRandomBestBeforeDate);
+                string randomArmament = GetRandomText(armamentStorage.Generate());
+                int randomServiceLife = GetRandomValue(minRandomServiceLife, maxRandomServiceLife);
+                int randomRank = GetRandomValue(minRandomRank, maxRandomRank);
 
-                newBeens.Add(new Beens(randomName, randomProductionDate, randomBestBeforeDate));
+                newSoldiers.Add(new Soldier(randomName, randomArmament, randomRank, randomServiceLife));
             }
 
-            return newBeens;
+            return newSoldiers;
         }
 
         private string GetRandomText(List<string> text)
@@ -163,15 +170,33 @@ namespace ConsoleApp1
     {
         private List<string> _names = new List<string>
         {
-            "Beenes",
-            "Billy Beens",
-            "Sweety Beens",
-            "Red Beens"
+            "Jon",
+            "Billy",
+            "Xerox",
+            "Constantine",
+            "Vladimir",
+            "Alex",
+            "Freddy"
         };
 
         public List<string> Generate()
         {
             return new List<string>(_names);
+        }
+    }
+
+    class ArmamentStorage
+    {
+        private List<string> _armaments = new List<string>
+        {
+            "m4",
+            "ak74",
+            "AVP"
+        };
+
+        public List<string> Generate()
+        {
+            return new List<string>(_armaments);
         }
     }
 
