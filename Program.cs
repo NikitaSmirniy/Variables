@@ -54,7 +54,7 @@ namespace ConsoleApp1
                 switch (userInput)
                 {
                     case CommandFindSoldiers:
-                        FindSoldiers();
+                        ShowAllSoldiers(FindSoldiers());
                         break;
 
                     case CommandShowAllSoldiers:
@@ -78,13 +78,11 @@ namespace ConsoleApp1
             }
         }
 
-        private void FindSoldiers()
+        private IEnumerable<dynamic> FindSoldiers()
         {
             StringDelimiter.DrawLine();
 
-            var filteredSoldiers = from Soldier soldier in _soldiers select new { name = soldier.Name, rank = soldier.Rank};
-
-            ShowAllSoldiers(filteredSoldiers.ToList());
+            return _soldiers.Select(soldier => new { name = soldier.Name, rank = soldier.Rank });
         }
 
         private void ShowAllSoldiers()
@@ -93,10 +91,10 @@ namespace ConsoleApp1
                 soldier.ShowInfo();
         }
 
-        private void ShowAllSoldiers(List<IEnumerable> soldiers)
+        private void ShowAllSoldiers(IEnumerable<dynamic> soldiers)
         {
-            foreach (var soldier in soldiers.ToList())
-                Console.WriteLine($"Имя: {soldier.name}\nЗвание: {soldier.rank}");
+            foreach (var soldier in soldiers)
+                Console.WriteLine($"Имя: {soldier.name} | Звание: {soldier.rank}");
         }
     }
 
