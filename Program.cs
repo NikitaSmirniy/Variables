@@ -82,13 +82,9 @@ namespace ConsoleApp1
         {
             StringDelimiter.DrawLine();
 
-            Console.Write("Впишите имя солдата для поиска: ");
+            var filteredSoldiers = from Soldier soldier in _soldiers select new { name = soldier.Name, rank = soldier.Rank};
 
-            string userInput = Console.ReadLine();
-
-            var filteredSoldiers = _soldiers.Where(soldier => soldier.Name.ToLower() == userInput.ToLower()).Select(soldier => soldier).ToList();
-
-            ShowAllSoldiers(filteredSoldiers);
+            ShowAllSoldiers(filteredSoldiers.ToList());
         }
 
         private void ShowAllSoldiers()
@@ -97,10 +93,10 @@ namespace ConsoleApp1
                 soldier.ShowInfo();
         }
 
-        private void ShowAllSoldiers(List<Soldier> soldiers)
+        private void ShowAllSoldiers(List<IEnumerable> soldiers)
         {
-            foreach (var soldier in soldiers)
-                soldier.ShowInfo();
+            foreach (var soldier in soldiers.ToList())
+                Console.WriteLine($"Имя: {soldier.name}\nЗвание: {soldier.rank}");
         }
     }
 
