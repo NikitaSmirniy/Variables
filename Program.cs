@@ -10,9 +10,10 @@ namespace ConsoleApp1
         {
             SoldiersFactory soldiersFactory = new SoldiersFactory();
 
-            List<Soldier> soldiers = soldiersFactory.Create(10);
+            List<Soldier> soldiers1 = soldiersFactory.Create(10);
+            List<Soldier> soldiers2 = soldiersFactory.Create(10);
 
-            Database database = new Database(soldiers);
+            Database database = new Database(soldiers1, soldiers2);
 
             database.Work();
         }
@@ -20,19 +21,22 @@ namespace ConsoleApp1
 
     class Database
     {
-        private List<Soldier> _soldiers;
+        private List<Soldier> _soldiers1;
+        private List<Soldier> _soldiers2;
 
-        public Database(List<Soldier> soldiers)
+        public Database(List<Soldier> soldiers1, List<Soldier> soldiers2)
         {
-            _soldiers = soldiers;
+            _soldiers1 = soldiers1;
+            _soldiers2 = soldiers2;
         }
 
         public void Work()
         {
-            const string CommandFindSoldiers = "1";
-            const string CommandShowAllSoldiers = "2";
-            const string CommandClearConsole = "3";
-            const string CommandExit = "4";
+            const string CommandTranslateSoldiers = "1";
+            const string CommandShowAllSoldiers1 = "2";
+            const string CommandShowAllSoldiers2 = "3";
+            const string CommandClearConsole = "4";
+            const string CommandExit = "5";
 
             bool isOpen = true;
 
@@ -42,8 +46,9 @@ namespace ConsoleApp1
 
                 StringDelimiter.DrawLine();
 
-                Console.WriteLine($"Команда {CommandFindSoldiers} - найти солдат в базе");
-                Console.WriteLine($"Команда {CommandShowAllSoldiers} - показать всех солдат из базы");
+                Console.WriteLine($"Команда {CommandTranslateSoldiers} - перевести солдат из 1 во 2 группу");
+                Console.WriteLine($"Команда {CommandShowAllSoldiers1} - показать всех солдат из 1 команды");
+                Console.WriteLine($"Команда {CommandShowAllSoldiers2} - показать всех солдат из 2 команды");
                 Console.WriteLine($"Команда {CommandClearConsole} - очистить консоль");
                 Console.WriteLine($"Команда {CommandExit} - выйти");
 
@@ -53,12 +58,16 @@ namespace ConsoleApp1
 
                 switch (userInput)
                 {
-                    case CommandFindSoldiers:
-                        ShowAllSoldiers(FindSoldiers());
+                    case CommandTranslateSoldiers:
+                        TranslateSoldiers();
                         break;
 
-                    case CommandShowAllSoldiers:
-                        ShowAllSoldiers();
+                    case CommandShowAllSoldiers1:
+                        ShowAllSoldiers(_soldiers1);
+                        break;
+
+                    case CommandShowAllSoldiers2:
+                        ShowAllSoldiers(_soldiers2);
                         break;
 
                     case CommandClearConsole:
@@ -78,23 +87,25 @@ namespace ConsoleApp1
             }
         }
 
-        private IEnumerable<dynamic> FindSoldiers()
+        private void TranslateSoldiers()
         {
-            StringDelimiter.DrawLine();
+            const string FilteredSymbol = "б";
 
-            return _soldiers.Select(soldier => new { name = soldier.Name, rank = soldier.Rank });
+            var filtered1 = _soldiers1.Where(soldier => soldier.Name.ToLower().StartsWith(FilteredSymbol))
+                .Select(soldier => soldier);
+
+            var filtered2 = _soldiers1.Where(soldier => !soldier.Name.ToLower().StartsWith(FilteredSymbol))
+                .Select(soldier => soldier).ToList();
+
+            _soldiers1 = filtered2;
+
+            _soldiers2 = _soldiers2.Union(filtered1).ToList();
         }
 
-        private void ShowAllSoldiers()
-        {
-            foreach (var soldier in _soldiers)
-                soldier.ShowInfo();
-        }
-
-        private void ShowAllSoldiers(IEnumerable<dynamic> soldiers)
+        private void ShowAllSoldiers(List<Soldier> soldiers)
         {
             foreach (var soldier in soldiers)
-                Console.WriteLine($"Имя: {soldier.name} | Звание: {soldier.rank}");
+                soldier.ShowInfo();
         }
     }
 
@@ -164,10 +175,10 @@ namespace ConsoleApp1
     {
         private List<string> _names = new List<string>
         {
-            "Jon",
-            "Billy",
+            "Бабиджон",
+            "Билли",
             "Xerox",
-            "Constantine",
+            "Бебра",
             "Vladimir",
             "Alex",
             "Freddy"
