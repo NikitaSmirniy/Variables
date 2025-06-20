@@ -10,8 +10,8 @@ namespace ConsoleApp1
         {
             SoldiersFactory soldiersFactory = new SoldiersFactory();
 
-            List<Soldier> soldiers1 = soldiersFactory.Create(10);
-            List<Soldier> soldiers2 = soldiersFactory.Create(10);
+            List<Soldier> soldiers1 = soldiersFactory.Create(3);
+            List<Soldier> soldiers2 = soldiersFactory.Create(3);
 
             Database database = new Database(soldiers1, soldiers2);
 
@@ -91,13 +91,9 @@ namespace ConsoleApp1
         {
             const string FilteredSymbol = "б";
 
-            var filtered1 = _soldiers1.Where(soldier => soldier.Name.ToLower().StartsWith(FilteredSymbol))
-                .Select(soldier => soldier);
+            var filtered1 = _soldiers1.Where(soldier => soldier.Name.ToLower().StartsWith(FilteredSymbol));
 
-            var filtered2 = _soldiers1.Where(soldier => !soldier.Name.ToLower().StartsWith(FilteredSymbol))
-                .Select(soldier => soldier).ToList();
-
-            _soldiers1 = filtered2;
+            _soldiers1 = _soldiers1.Except(filtered1).ToList();
 
             _soldiers2 = _soldiers2.Union(filtered1).ToList();
         }
