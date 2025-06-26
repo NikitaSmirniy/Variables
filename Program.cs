@@ -8,14 +8,7 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            SoldiersFactory soldiersFactory = new SoldiersFactory();
-
-            List<Soldier> soldiers1 = soldiersFactory.Create(3);
-            List<Soldier> soldiers2 = soldiersFactory.Create(3);
-
-            Database database = new Database(soldiers1, soldiers2);
-
-            database.Work();
+            
         }
     }
 
@@ -36,7 +29,7 @@ namespace ConsoleApp1
             const string CommandShowAllSoldiers1 = "2";
             const string CommandShowAllSoldiers2 = "3";
             const string CommandClearConsole = "4";
-            const string CommandExit = "5";
+            const string CommandExit = "7";
 
             bool isOpen = true;
 
