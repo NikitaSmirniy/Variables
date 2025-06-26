@@ -14,8 +14,6 @@ namespace ConsoleApp1
 
     class Database
     {
-        private List<Soldier> _soldiers1;
-        private List<Soldier> _soldiers2;
 
         public Database(List<Soldier> soldiers1, List<Soldier> soldiers2)
         {
