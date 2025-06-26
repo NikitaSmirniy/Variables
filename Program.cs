@@ -36,7 +36,7 @@ namespace ConsoleApp1
             const string CommandShowAllSoldiers1 = "2";
             const string CommandShowAllSoldiers2 = "3";
             const string CommandClearConsole = "4";
-            const string CommandExit = "5";
+            const string CommandExit = "7";
 
             bool isOpen = true;
 
