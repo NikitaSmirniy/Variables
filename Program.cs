@@ -4,214 +4,157 @@ using System.Collections.Generic;
 
 namespace ConsoleApp1
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
-            
+            Good iPhone12 = new Good("IPhone 12");
+            Good iPhone11 = new Good("IPhone 11");
+
+            Warehouse warehouse = new Warehouse();
+
+            Shop shop = new Shop(warehouse);
+
+            warehouse.Delive(iPhone12, 10);
+            warehouse.Delive(iPhone11, 1);
+
+            warehouse.ShowGoods();
+
+            Cart cart = shop.CreateCart();
+            cart.Add(iPhone12, 4);
+            cart.Add(iPhone11, 3);
+
+            cart.ShowGoods();
+
+            Console.WriteLine(cart.Order().Paylink);
+
+            cart.Add(iPhone12, 9);
+
+            Console.ReadLine();
         }
     }
 
-    class Database
+    public struct Order
     {
-
-        public Database(List<Soldier> soldiers1, List<Soldier> soldiers2)
+        public Order(string paylink)
         {
-            _soldiers1 = soldiers1;
-            _soldiers2 = soldiers2;
+            Paylink = paylink;
         }
 
-        public void Work()
+        public string Paylink { get; private set; }
+    }
+
+    public class Cart
+    {
+        private readonly IWarehouse _warehouse;
+        private readonly Dictionary<Good, int> _goods = new Dictionary<Good, int>();
+
+        public Cart(IWarehouse warehouse)
         {
-            const string CommandTranslateSoldiers = "1";
-            const string CommandShowAllSoldiers1 = "2";
-            const string CommandShowAllSoldiers2 = "3";
-            const string CommandClearConsole = "4";
-            const string CommandExit = "7";
+            _warehouse = warehouse;
+        }
 
-            bool isOpen = true;
-
-            while (isOpen)
+        public void Add(Good good, int count)
+        {
+            if (_warehouse.Contains(good, count))
             {
-                Console.WriteLine("ГЛАВНОЕ МЕНЮ");
-
-                StringDelimiter.DrawLine();
-
-                Console.WriteLine($"Команда {CommandTranslateSoldiers} - перевести солдат из 1 во 2 группу");
-                Console.WriteLine($"Команда {CommandShowAllSoldiers1} - показать всех солдат из 1 команды");
-                Console.WriteLine($"Команда {CommandShowAllSoldiers2} - показать всех солдат из 2 команды");
-                Console.WriteLine($"Команда {CommandClearConsole} - очистить консоль");
-                Console.WriteLine($"Команда {CommandExit} - выйти");
-
-                Console.Write("Введите команду: ");
-
-                string userInput = Console.ReadLine();
-
-                switch (userInput)
-                {
-                    case CommandTranslateSoldiers:
-                        TranslateSoldiers();
-                        break;
-
-                    case CommandShowAllSoldiers1:
-                        ShowAllSoldiers(_soldiers1);
-                        break;
-
-                    case CommandShowAllSoldiers2:
-                        ShowAllSoldiers(_soldiers2);
-                        break;
-
-                    case CommandClearConsole:
-                        Console.Clear();
-                        break;
-
-                    case CommandExit:
-                        isOpen = false;
-                        break;
-
-                    default:
-                        Console.WriteLine("Введена неверная команда");
-                        break;
-                }
-
-                Console.ReadKey();
+                _goods.Add(good, count);
+                _warehouse.WriteOffGood(good, count);
             }
         }
 
-        private void TranslateSoldiers()
+        public void ShowGoods()
         {
-            const string FilteredSymbol = "б";
-
-            var filtered1 = _soldiers1.Where(soldier => soldier.Name.ToLower().StartsWith(FilteredSymbol));
-
-            _soldiers1 = _soldiers1.Except(filtered1).ToList();
-
-            _soldiers2 = _soldiers2.Union(filtered1).ToList();
+            foreach (KeyValuePair<Good, int> good in _goods)
+            {
+                Console.WriteLine($"{good.Key.Name}: {good.Value}");
+            }
         }
 
-        private void ShowAllSoldiers(List<Soldier> soldiers)
+        public Order Order()
         {
-            foreach (var soldier in soldiers)
-                soldier.ShowInfo();
+            int paylink = 0;
+
+            foreach (KeyValuePair<Good, int> good in _goods)
+                paylink += good.Value;
+
+            return new Order($"Paylink: {paylink}");
         }
     }
 
-    class Soldier
+    public class Shop
     {
-        public Soldier(string name, string armament, int rank, int serviceLife)
+        private readonly Warehouse _warehouse;
+
+        public Shop(Warehouse warehouse)
+        {
+            _warehouse = warehouse;
+        }
+
+        public Cart CreateCart()
+        {
+            return new Cart(_warehouse);
+        }
+    }
+
+    public class Warehouse : IWarehouse
+    {
+        private Dictionary<Good, int> _goods = new Dictionary<Good, int>();
+
+        public void Delive(Good good, int count)
+        {
+            if (good == null)
+                throw new ArgumentNullException(nameof(good));
+
+            if (count <= 0)
+                throw new ArgumentOutOfRangeException(nameof(count));
+
+            _goods.Add(good, count);
+        }
+
+        public bool Contains(Good good, int count)
+        {
+            if (_goods.ContainsKey(good) == false)
+                throw new ArgumentNullException(nameof(good));
+
+            if (_goods.Count < count)
+                throw new ArgumentOutOfRangeException(nameof(count));
+
+            return true;
+        }
+
+        public void WriteOffGood(Good good, int count)
+        {
+            int goodCountInKey = _goods[good];
+
+            if (goodCountInKey >= count)
+                _goods[good] -= count;
+            else
+                _goods.Remove(good);
+        }
+
+        public void ShowGoods()
+        {
+            foreach (KeyValuePair<Good, int> good in _goods)
+            {
+                Console.WriteLine($"{good.Key.Name}: {good.Value}");
+            }
+        }
+    }
+
+    public interface IWarehouse
+    {
+        bool Contains(Good good, int count);
+        void WriteOffGood(Good good, int count);
+    }
+
+    public class Good
+    {
+        public string Name { get; private set; }
+
+        public Good(string name)
         {
             Name = name;
-            Armament = armament;
-            Rank = rank;
-            ServiceLife = serviceLife;
-        }
-
-        public string Name { get; }
-        public string Armament { get; }
-        public int Rank { get; }
-        public int ServiceLife { get; }
-
-        public void ShowInfo()
-        {
-            StringDelimiter.DrawLine();
-
-            Console.WriteLine($"\nИмя: {Name}\nВооружение: {Armament}\nЗвание: {Rank}\nСрок службы: {ServiceLife} (месяцев)");
-        }
-    }
-
-    class SoldiersFactory
-    {
-        public List<Soldier> Create(int count)
-        {
-            List<Soldier> newSoldiers = new List<Soldier>();
-
-            NameStorage nameStorage = new NameStorage();
-            ArmamentStorage armamentStorage = new ArmamentStorage();
-
-            int minRandomRank = 1;
-            int maxRandomRank = 6;
-
-            int minRandomServiceLife = 6;
-            int maxRandomServiceLife = 24;
-
-            for (int i = 0; i < count; i++)
-            {
-                string randomName = GetRandomText(nameStorage.Generate());
-                string randomArmament = GetRandomText(armamentStorage.Generate());
-                int randomServiceLife = GetRandomValue(minRandomServiceLife, maxRandomServiceLife);
-                int randomRank = GetRandomValue(minRandomRank, maxRandomRank);
-
-                newSoldiers.Add(new Soldier(randomName, randomArmament, randomRank, randomServiceLife));
-            }
-
-            return newSoldiers;
-        }
-
-        private string GetRandomText(List<string> text)
-        {
-            return text[Randomizer.GenerateRandomValue(text.Count)];
-        }
-
-        private int GetRandomValue(int minValue, int maxValue)
-        {
-            return Randomizer.GenerateRandomValue(minValue, maxValue + 1);
-        }
-    }
-
-    class NameStorage
-    {
-        private List<string> _names = new List<string>
-        {
-            "Бабиджон",
-            "Билли",
-            "Xerox",
-            "Бебра",
-            "Vladimir",
-            "Alex",
-            "Freddy"
-        };
-
-        public List<string> Generate()
-        {
-            return new List<string>(_names);
-        }
-    }
-
-    class ArmamentStorage
-    {
-        private List<string> _armaments = new List<string>
-        {
-            "m4",
-            "ak74",
-            "AVP"
-        };
-
-        public List<string> Generate()
-        {
-            return new List<string>(_armaments);
-        }
-    }
-
-    static class Randomizer
-    {
-        private static Random s_random = new Random();
-
-        public static int GenerateRandomValue(int minRandomValue, int maxRandomValue)
-        {
-            return s_random.Next(minRandomValue, maxRandomValue);
-        }
-
-        public static int GenerateRandomValue(int maxRandomValue)
-        {
-            return s_random.Next(maxRandomValue);
-        }
-    }
-
-    static class StringDelimiter
-    {
-        public static void DrawLine(int lineRange = 20)
-        {
-            Console.WriteLine(new string('-', lineRange));
         }
     }
 }
